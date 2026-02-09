@@ -1,0 +1,46 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+@import "tailwindcss";
+
+.inter{
+    font-family: inter;
+}
+
+.sidebar-item {
+  position: relative;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.active-item {
+  background: white;
+  border-radius: 32px 0 0 32px;
+}
+
+.active-item::before {
+  content: "";
+  position: absolute;
+  top: -28px;
+  right: -16px;
+  width: 40px;
+  height: 40px;
+  background: white;
+  border-bottom-right-radius: 50px;
+}
+
+.active-item::after {
+  content: "";
+  position: absolute;
+  bottom: -28px;
+  right: -16px;
+  width: 40px;
+  height: 40px;
+  background: white;
+  border-top-right-radius: 50px;
+}
+
+.nav-grad{
+  background: linear-gradient(267.48deg, #2D3C86 1.04%, #2D3C86 51.53%, #343E73 99.32%);
+
+}
