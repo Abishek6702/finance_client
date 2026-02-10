@@ -8,7 +8,7 @@ const NotificationModal = ({ userId, open, onClose }) => {
     <div className="fixed inset-0 z-50 flex items-start justify-end bg-black/30 ">
       <div className="absolute right-28 mt-22.5 w-4 h-4 bg-white rotate-45 shadow-sm "></div>
 
-      <div className="lg:w-[25%] h-[80vh] mt-24 md:mr-20 rounded-lg shadow-2xl bg-white overflow-hidden animate-fade-in z-10 ">
+      <div className="lg:w-[25%] w-[80%] m-auto h-[80vh] mt-24 md:mr-20 rounded-lg shadow-2xl bg-white overflow-hidden animate-fade-in z-10 ">
         <div className="flex items-center justify-between p-4  border-b-2 border-gray-300 w-[90%] m-auto">
           <h2 className="text-xl font-semibold">Notification</h2>
           <button
