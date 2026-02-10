@@ -21,7 +21,7 @@ function isTokenValid() {
 
 const ProtectedRoute = ({ children }) => {
   if (!isTokenValid()) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/login" replace />;
   }
   return <>{children}</>;
 };

@@ -45,8 +45,8 @@ const AdminDashboard = () => {
       <Navbar />
 
       {/* MAIN CONTENT */}
-      <main className="flex-1 overflow-y-auto bg-gray-100 rounded-xl">
-        <div className="p-6 md:p-8">
+      <main className="flex-1">
+        <div className="mt-10">
           <Routes>
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="fees_management" element={<Fees />} />
