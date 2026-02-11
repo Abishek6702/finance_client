@@ -29,6 +29,7 @@ const studentNames = [
   "Divya Mishra",
   "Yash Oberoi",
 ];
+const studentTypes = ["Hostel", "Dayscholar", "Transport"];
 
 const feeData = Array.from({ length: 25 }, (_, index) => {
   const totalFees = 25000;
@@ -52,6 +53,7 @@ const feeData = Array.from({ length: 25 }, (_, index) => {
     overdue,
     status,
     lastPayment: paid > 0 ? "10-01-2026" : "--",
+    type: studentTypes[index % 3]
   };
 });
 
@@ -61,6 +63,7 @@ const Fees = () => {
   const [year, setYear] = useState("");
   const [department, setDepartment] = useState("");
   const [status, setStatus] = useState("");
+  const [type, setType] = useState([]);
 
   const filteredData = useMemo(() => {
     return feeData.filter((s) => {
@@ -70,10 +73,19 @@ const Fees = () => {
           s.rollNo.includes(search)) &&
         (!year || s.year === year) &&
         (!department || s.department === department) &&
-        (!status || s.status === status)
+        (!status || s.status === status)&&
+        (type.length === 0 || type.includes(s.type)) 
       );
     });
-  }, [search, year, department, status]);
+  }, [search, year, department, status, type]);
+
+   const handleClearFilters = () => {
+  setSearch("");
+  setYear("");
+  setDepartment("");
+  setStatus("");
+  setType([]);
+};
 
   const exportCSV = () => {
     if (!filteredData.length) return;
@@ -93,7 +105,7 @@ const Fees = () => {
   };
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col  max-h-[calc(100vh-160px)]">
       <h1 className="font-inter font-semibold text-xl mb-4">
         Fees Management / Academic Year{" "}
         <span className="text-[#0B56A4] font-bold">(2025 - 2026)</span>
@@ -108,7 +120,10 @@ const Fees = () => {
         onDepartmentChange={setDepartment}
         status={status}
         onStatusChange={setStatus}
+        type={type}
+        onTypeChange={setType}
         onExport={exportCSV}
+        onClearFilters={handleClearFilters}  
       />
 
       <FeeManagementTable data={filteredData} />

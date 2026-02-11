@@ -7,9 +7,24 @@ const SLIDE_DURATION = 3000;
 
 export default function OrbitCarousel() {
   const slides = [
-    { image: carouselimage1 },
-    { image: react },
-    { image: logo },
+    {
+      image: carouselimage1,
+      title: "Bills Payments Options",
+      description:
+        "Analyzing previous trends ensures that businesses always make the right decision...",
+    },
+    {
+      image: carouselimage1,
+      title: "Fast React Integration",
+      description:
+        "Build powerful UI components quickly using reusable architecture...",
+    },
+    {
+      image: carouselimage1,
+      title: "Secure Transactions",
+      description:
+        "We ensure every payment is encrypted and processed safely...",
+    },
   ];
 
   const [current, setCurrent] = useState(0);
@@ -80,12 +95,11 @@ export default function OrbitCarousel() {
 
       {/* Caption */}
       <div className="text-center px-10">
-        <h1 className="text-white text-3xl font-semibold inter">
-          Bills Payments Options
+        <h1 className="text-white text-3xl font-semibold inter transition-all duration-500">
+          {slides[current].title}
         </h1>
-        <p className="text-white/80 mt-2 inter">
-          Analyzing previous trends ensures that businesses always make the right
-          decision. And as the scale of the decision and its impact magnifies...
+        <p className="text-white/80 mt-2 inter transition-all duration-500">
+          {slides[current].description}
         </p>
       </div>
 

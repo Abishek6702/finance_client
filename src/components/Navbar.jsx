@@ -2,14 +2,20 @@ import { useNavigate, useLocation } from "react-router-dom";
 import toast from "react-hot-toast";
 
 import {
-  Home,
-  CircleDollarSign,
-  BellDot,
-  User,
+  // LayoutDashboard ,
+  // CircleDollarSign,
+  // BellDot,
+  // User,
   Power,
   Menu,
 } from "lucide-react";
 import logo from "../assets/favlogo.svg";
+import Dashboard from '../assets/dashboard.svg';
+import Rupee from '../assets/rupee.svg';
+import Setting from '../assets/setting.svg';
+import Dashboardfill from '../assets/dashboardfill.svg';
+import Rupeefill from '../assets/rupeefill.svg';
+import Settingfill from '../assets/settingfill.svg';
 import NotificationBell from "./Notification";
 import { useState } from "react";
 
@@ -21,9 +27,9 @@ const Navbar = () => {
   const activeTab = location.pathname.split("/")[2];
 
   const menuItems = [
-    { id: "dashboard", label: "Dashboard", icon: Home },
-    { id: "fees_management", label: "Fees Management", icon: CircleDollarSign },
-    { id: "fee_demand", label: "Manage Fee Demand", icon: CircleDollarSign },
+    { id: "dashboard", label: "Dashboard", icon: Dashboardfill, iconFill :Dashboard},
+    { id: "fees_management", label: "Fees Management", icon: Rupee, iconFill :Rupeefill},
+    { id: "fee_demand", label: "Manage Fee Demand", icon: Settingfill, iconFill :Setting},
   ];
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -32,7 +38,7 @@ const Navbar = () => {
   };
 
   return (
-    <header className="h-20 bg-[#0B56A4] p-5 px-7 rounded-xl ">
+    <header className="h-20 bg-[#25343F] p-5 px-7 rounded-xl ">
       <nav className="flex w-full items-center justify-between">
         {/* 🔵 Logo */}
         <div className="flex items-center gap-3">
@@ -44,7 +50,7 @@ const Navbar = () => {
 
         {/* 🟦 Navigation */}
         <div className="lg:flex gap-2 hidden ">
-          {menuItems.map(({ id, label, icon: Icon }) => {
+          {menuItems.map(({ id, label, icon, iconFill }) => {
             const isActive = activeTab === id;
 
             return (
@@ -54,11 +60,11 @@ const Navbar = () => {
                 className={`flex items-center gap-2 px-5 py-2 rounded-full font-medium transition cursor-pointer
                   ${
                     isActive
-                      ? "bg-white text-[#0B56A4]"
+                      ? "bg-white text-[#25343F]"
                       : "text-white hover:bg-white/10"
                   }`}
               >
-                <Icon size={18} />
+                <img src={isActive?icon:iconFill} alt="icons" className="h-4 w-4"/>
                 {label}
               </button>
             );
