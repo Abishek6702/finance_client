@@ -40,7 +40,7 @@ const studentTypes = ["Hostel", "Dayscholar", "Transport"];
 const BASE_YEAR = 2025;
 
 const generateMobile = (index) => {
-  return `9${String(800000000 + index).padStart(9, "0")}`;
+  return `9${String(800000000 + index).padStart(9, "1")}`;
 };
 
 const generateEmail = (name) => {

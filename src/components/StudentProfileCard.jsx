@@ -30,7 +30,7 @@ export default function StudentProfileCard({ student }) {
   return (
     <div className="w-[22%]  rounded-3xl p-6 border border-[#d9d9d9] bg-white ">
       {/* Student Image */}
-      <div className="w-[50%] m-auto rounded-3xl overflow-hidden mb-4 border border-[#d9d9d9]">
+      <div className=" m-auto rounded-3xl overflow-hidden mb-4 border border-[#d9d9d9]">
         <img
           src={student.profileImage || Favlogo}
           alt="student"

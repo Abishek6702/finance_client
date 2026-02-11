@@ -1,30 +1,42 @@
-export default function StudentFinancePanel({ student }) {
+import React, { useState } from "react";
+
+import  IndividualDCB  from "./IndividualDCB";
+import FeesReceipt from "./FeesReceipt";
+
+export const StudentFinancePanel = ({ student }) => {
+  const [activeTab, setActiveTab] = useState("dcb"); // ✅ default first active
+
   return (
-    <div className="w-[78%] bg-white rounded-2xl shadow p-6">
-      <h2 className="text-xl font-semibold mb-6">
-        Finance Details
-      </h2>
+    <div className=" w-full">
+      
+      {/* Tabs */}
+      <div className="flex gap-3 mb-6">
+        <button
+          onClick={() => setActiveTab("dcb")}
+          className={`px-5 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer ${
+            activeTab === "dcb"
+              ? "bg-[#0B56A4] text-white"
+              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+          }`}
+        >
+          Individual DCB
+        </button>
 
-      <div className="grid grid-cols-3 gap-6">
-        <div className="bg-gray-100 rounded-xl p-4">
-          <p className="text-sm text-gray-500">Total Fees</p>
-          <p className="text-lg font-semibold">₹{student.totalFees}</p>
-        </div>
-
-        <div className="bg-green-50 rounded-xl p-4">
-          <p className="text-sm text-gray-500">Paid</p>
-          <p className="text-lg font-semibold text-green-600">
-            ₹{student.paid}
-          </p>
-        </div>
-
-        <div className="bg-red-50 rounded-xl p-4">
-          <p className="text-sm text-gray-500">Overdue</p>
-          <p className="text-lg font-semibold text-red-600">
-            ₹{student.overdue}
-          </p>
-        </div>
+        <button
+          onClick={() => setActiveTab("receipt")}
+          className={`px-5 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer ${
+            activeTab === "receipt"
+              ? "bg-[#0B56A4] text-white"
+              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+          }`}
+        >
+          Fees Receipt
+        </button>
       </div>
+
+      {/* Render Component Based on Active Tab */}
+      {activeTab === "dcb" && <IndividualDCB student={student} />}
+      {activeTab === "receipt" && <FeesReceipt student={student} />}
     </div>
   );
-}
+};
