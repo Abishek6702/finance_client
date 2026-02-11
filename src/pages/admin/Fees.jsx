@@ -35,6 +35,18 @@ const yearMap = {
   3: "3rd Year",
   4: "4th Year",
 };
+const classes = [
+  "CSE-A", "CSE-B", "CSE-C",
+  "CCE", "IT",
+  "AIDS-A", "AIDS-B", "AIDS-C",
+  "AIML",
+  "EEE",
+  "MECH",
+  "ECE-A", "ECE-B", "ECE-C",
+  "CSBS"
+];
+
+const communities = ["OC", "BC", "BCM", "MBC", "SCA", "SC", "ST"];  
 const studentTypes = ["Hostel", "Dayscholar", "Transport"];
 
 const BASE_YEAR = 2025;
@@ -68,6 +80,8 @@ const feeData = Array.from({ length: 25 }, (_, index) => {
     name: studentNames[index],
     year: yearMap[yearNumber],
     rollNo: `7228201150${100 + index}`,
+    class: classes[index % classes.length],
+    community: communities[index % communities.length],
     department: index % 2 === 0 ? "CSE" : "ECE",
     totalFees,
     concession: index % 3 === 0 ? 5000 : 0,
