@@ -14,7 +14,7 @@ const AdminDashboard = () => {
 
       {/* MAIN CONTENT */}
       <main className="flex-1">
-        <div className="mt-4">
+        <div className="mt-2">
           <Routes>
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="/fees_management" element={<Fees />} />

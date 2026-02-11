@@ -38,7 +38,7 @@ const Navbar = () => {
   };
 
   return (
-    <header className="h-20 bg-[#25343F] p-5 px-7 rounded-xl ">
+    <header className="h-20 bg-[#25343F] p-5 px-7 rounded-xl sticky t-0 z-50">
       <nav className="flex w-full items-center justify-between">
         {/* 🔵 Logo */}
         <div className="flex items-center gap-3">

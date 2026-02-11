@@ -1,15 +1,19 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowUpRight } from "lucide-react";
-import Favlogo from "../assets/favlogo.svg";
+import Dayscholar from '../assets/dayscholar.svg';
+import Hostel from '../assets/hostel.svg';
+import Transport from '../assets/transport.svg';
 
 export default function FeeTable({ data }) {
   const navigate = useNavigate();
 
   const handleNavigate = (student) => {
-    navigate(`/admin/fees_management/${student.id}`);
-    state:{student}
+    navigate(`/admin/fees_management/${student.id}`, {
+      state: { student },
+    });
   };
+
 
   const getStatusStyles = (status) => {
     const normalized = status.toLowerCase();
@@ -26,9 +30,16 @@ export default function FeeTable({ data }) {
     return "bg-gray-100 text-gray-700";
   };
 
+  const getTypeImage = (type) => {
+    if (type === "Hostel") return Hostel;
+    if (type === "Dayscholar") return Dayscholar;
+    if (type === "Transport") return Transport;
+    return null;
+  };
+
   return (
     <div className="w-full bg-white rounded-2xl shadow">
-      <div className="h-125 overflow-y-auto rounded-2xl">
+      <div className=" max-h-[calc(100vh-260px)] overflow-auto  rounded-2xl">
         <table className="w-full table-fixed border-collapse">
           <colgroup>
             <col className="w-45" />
@@ -70,9 +81,9 @@ export default function FeeTable({ data }) {
                 <td className="p-3">
                   <div className="flex gap-3 items-center">
                     <img
-                      src={Favlogo}
-                      alt="Student"
-                      className="w-10 h-10"
+                      src={student.profileImage}
+                      alt={student.name}
+                      className="w-10 h-10 rounded-full object-cover"
                     />
                     <div>
                       <div className="font-medium">{student.name}</div>
@@ -108,13 +119,19 @@ export default function FeeTable({ data }) {
                   </span>
                 </td>
 
-                <td className="p-3">{student.type}</td>
+                <td className="p-3">
+                  <img
+                    src={getTypeImage(student.type)}
+                    alt={student.type}
+                    className="w-8 h-8 object-contain"
+                  />
+                </td>
 
                 {/* Navigate on click */}
                 <td className="p-3">
                   <button
                     onClick={() => handleNavigate(student)}
-                    className="bg-[#0B56A4] rounded-full p-2 text-white hover:scale-105 transition"
+                    className="bg-[#0B56A4] rounded-full p-2 text-white cursor-pointer"
                   >
                     <ArrowUpRight className="w-6 h-6" />
                   </button>

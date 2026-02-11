@@ -29,6 +29,12 @@ const studentNames = [
   "Divya Mishra",
   "Yash Oberoi",
 ];
+const yearMap = {
+  1: "1st Year",
+  2: "2nd Year",
+  3: "3rd Year",
+  4: "4th Year",
+};
 const studentTypes = ["Hostel", "Dayscholar", "Transport"];
 
 const feeData = Array.from({ length: 25 }, (_, index) => {
@@ -41,10 +47,13 @@ const feeData = Array.from({ length: 25 }, (_, index) => {
   if (paid === totalFees) status = "Paid";
   if (paid === 0) status = "Overdue";
 
+  const type = studentTypes[index % 3];
+  const yearNumber = (index % 4) + 1;
+
   return {
     id: index + 1,
     name: studentNames[index],
-    year: `${(index % 4) + 1} Year`,
+    year: yearMap[yearNumber],
     rollNo: `7228201150${100 + index}`,
     department: index % 2 === 0 ? "CSE" : "ECE",
     totalFees,
@@ -52,8 +61,11 @@ const feeData = Array.from({ length: 25 }, (_, index) => {
     paid,
     overdue,
     status,
-    lastPayment: paid > 0 ? "10-01-2026" : "--",
-    type: studentTypes[index % 3]
+    type: studentTypes[index % 3],
+    profileImage:
+      index % 2 === 0
+        ? `https://randomuser.me/api/portraits/men/${index}.jpg`
+        : `https://randomuser.me/api/portraits/women/${index}.jpg`,
   };
 });
 
@@ -105,7 +117,7 @@ const Fees = () => {
   };
 
   return (
-    <div className="flex flex-col  max-h-[calc(100vh-160px)]">
+    <div className="flex flex-col  max-h-[calc(100vh-140px)]">
       <h1 className="font-inter font-semibold text-xl mb-4">
         Fees Management / Academic Year{" "}
         <span className="text-[#0B56A4] font-bold">(2025 - 2026)</span>
