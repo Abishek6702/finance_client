@@ -6,8 +6,9 @@ import Favlogo from "../assets/favlogo.svg";
 export default function FeeTable({ data }) {
   const navigate = useNavigate();
 
-  const handleNavigate = (id) => {
-    navigate(`/admin/fees_management/${id}`);
+  const handleNavigate = (student) => {
+    navigate(`/admin/fees_management/${student.id}`);
+    state:{student}
   };
 
   const getStatusStyles = (status) => {
@@ -30,7 +31,7 @@ export default function FeeTable({ data }) {
       <div className="h-125 overflow-y-auto rounded-2xl">
         <table className="w-full table-fixed border-collapse">
           <colgroup>
-            <col className="w-65" />
+            <col className="w-45" />
             <col className="w-45" />
             <col className="w-30" />
             <col className="w-30" />
@@ -112,7 +113,7 @@ export default function FeeTable({ data }) {
                 {/* Navigate on click */}
                 <td className="p-3">
                   <button
-                    onClick={() => handleNavigate(student.id)}
+                    onClick={() => handleNavigate(student)}
                     className="bg-[#0B56A4] rounded-full p-2 text-white hover:scale-105 transition"
                   >
                     <ArrowUpRight className="w-6 h-6" />
