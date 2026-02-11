@@ -12,14 +12,14 @@ export default function StudentProfileCard({ student }) {
     <div className="py-4 border-b last:border-b-0 border-[#d9d9d9]">
       <div className="flex items-start gap-4">
         {/* Icon Box */}
-        <div className="w-12 h-12 rounded-lg bg-gray-50 border border-[#d9d9d9] flex items-center justify-center">
+        <div className="w-10 h-10 rounded-lg bg-gray-50 border border-[#d9d9d9] flex items-center justify-center">
           <Icon size={20} className="text-gray-700" />
         </div>
 
         {/* Text */}
         <div>
-          <p className="text-gray-500 text-[14px]">{label}</p>
-          <p className="text-[16px] font-semibold text-gray-700">
+          <p className="text-gray-500 text-[12px]">{label}</p>
+          <p className="text-[14px] font-semibold text-gray-700">
             {value}
           </p>
         </div>
@@ -30,7 +30,7 @@ export default function StudentProfileCard({ student }) {
   return (
     <div className="w-[22%]  rounded-3xl p-6 border border-[#d9d9d9] bg-white ">
       {/* Student Image */}
-      <div className="w-full h-50 rounded-3xl overflow-hidden mb-4 border border-[#d9d9d9]">
+      <div className="w-[50%] m-auto rounded-3xl overflow-hidden mb-4 border border-[#d9d9d9]">
         <img
           src={student.profileImage || Favlogo}
           alt="student"
