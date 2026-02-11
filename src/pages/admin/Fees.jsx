@@ -37,6 +37,16 @@ const yearMap = {
 };
 const studentTypes = ["Hostel", "Dayscholar", "Transport"];
 
+const BASE_YEAR = 2025;
+
+const generateMobile = (index) => {
+  return `9${String(800000000 + index).padStart(9, "0")}`;
+};
+
+const generateEmail = (name) => {
+  return `${name.toLowerCase().replace(/\s+/g, "")}@gmail.com`;
+};
+
 const feeData = Array.from({ length: 25 }, (_, index) => {
   const totalFees = 25000;
   const paidOptions = [25000, 15000, 10000, 5000, 0];
@@ -50,6 +60,9 @@ const feeData = Array.from({ length: 25 }, (_, index) => {
   const type = studentTypes[index % 3];
   const yearNumber = (index % 4) + 1;
 
+  const startYear = BASE_YEAR - (yearNumber - 1);
+  const endYear = startYear + 4;
+
   return {
     id: index + 1,
     name: studentNames[index],
@@ -61,11 +74,14 @@ const feeData = Array.from({ length: 25 }, (_, index) => {
     paid,
     overdue,
     status,
-    type: studentTypes[index % 3],
+    type,
     profileImage:
       index % 2 === 0
         ? `https://randomuser.me/api/portraits/men/${index}.jpg`
         : `https://randomuser.me/api/portraits/women/${index}.jpg`,
+    mobile: generateMobile(index),
+    email: generateEmail(studentNames[index]),
+    batch: `${startYear} - ${endYear}`,
   };
 });
 
