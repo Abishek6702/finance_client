@@ -1,4 +1,4 @@
-import Favlogo from "../../../assets/favlogo.svg";
+import Favlogo from "../assets/favlogo.svg";
 import {
   User,
   Phone,
