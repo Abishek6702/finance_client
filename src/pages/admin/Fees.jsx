@@ -59,6 +59,25 @@ const generateEmail = (name) => {
   return `${name.toLowerCase().replace(/\s+/g, "")}@gmail.com`;
 };
 
+// const individualDcb = Array.from ({length:2}, (_, index)=>{
+//   let status = "Partial";
+//   if (paid === totalFees) status = "Paid";
+//   if (paid === 0) status = "Overdue";
+//   return{
+//     academicyear:"2025 - 2026",
+//     class : "cse-a",
+//     community : communities[index % communities.length],
+//     demand : "500000",
+//     consession : "50000",
+//     paid : "250000",
+//     fine : "500",
+//     overdue : "2000",
+//     type : "transport",
+//     status,
+//     total : "500000"  
+//   }
+// })
+
 const feeData = Array.from({ length: 25 }, (_, index) => {
   const totalFees = 25000;
   const paidOptions = [25000, 15000, 10000, 5000, 0];

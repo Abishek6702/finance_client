@@ -5,6 +5,8 @@ import Dashboard from "../pages/admin/Dashboard";
 import Fees from "./admin/Fees.jsx";
 import FeeDemand from "./admin/FeeDemand.jsx"
 import StudentDetails from "./admin/StudentDetails.jsx";
+import Reports from '../pages/admin/Reports.jsx';
+import ReportsStudentDetails from '../pages/admin/ReportsStudentDetails.jsx';
 
 const AdminDashboard = () => {
   return (
@@ -20,6 +22,8 @@ const AdminDashboard = () => {
             <Route path="/fees_management" element={<Fees />} />
             <Route path="/fees_management/:id" element={<StudentDetails />} />
             <Route path="Fee_demand" element={<FeeDemand />} />
+            <Route path="reports" element={<Reports/>}/>
+            <Route path="/reports/:id" element={<ReportsStudentDetails/>}/>
             <Route path="*" element={<Navigate to="dashboard" replace />} />
           </Routes>
         </div>
