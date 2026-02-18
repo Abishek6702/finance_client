@@ -16,6 +16,7 @@ import Setting from '../assets/setting.svg';
 import Dashboardfill from '../assets/dashboardfill.svg';
 import Rupeefill from '../assets/rupeefill.svg';
 import Settingfill from '../assets/settingfill.svg';
+import Reports from '../assets/reports.svg';
 import NotificationBell from "./Notification";
 import { useState } from "react";
 
@@ -31,6 +32,7 @@ const Navbar = () => {
     {  id : "payment",label:"Payment",icon:Rupee , iconFill : Rupeefill},
     { id: "fees_management", label: "Fees Management", icon: Rupee, iconFill :Rupeefill},
     { id: "fee_demand", label: "Manage Fee Demand", icon: Settingfill, iconFill :Setting},
+    { id: "reports", label: "Reports", icon: Reports, iconFill :Setting},
   ];
   const handleLogout = () => {
     localStorage.removeItem("token");
