@@ -29,6 +29,7 @@ const Navbar = () => {
 
   const menuItems = [
     { id: "dashboard", label: "Dashboard", icon: Dashboardfill, iconFill :Dashboard},
+    {  id : "payment",label:"Payment",icon:Rupee , iconFill : Rupeefill},
     { id: "fees_management", label: "Fees Management", icon: Rupee, iconFill :Rupeefill},
     { id: "fee_demand", label: "Manage Fee Demand", icon: Settingfill, iconFill :Setting},
     { id: "reports", label: "Reports", icon: Reports, iconFill :Setting},
