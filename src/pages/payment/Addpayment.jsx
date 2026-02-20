@@ -64,20 +64,41 @@ const AddPayment = () => {
         </div>
 
         {/* Right Section */}
-        <div className="w-2/3 bg-white border border-gray-100 rounded-2xl flex flex-col items-center justify-center p-12 text-center shadow-sm relative">
+        <div className="w-2/3 bg-white border border-gray-100 rounded-2xl flex flex-col p-8 shadow-sm relative">
           {selectedStudent ? (
-            <div className="flex flex-col items-center animate-in fade-in duration-300">
-               <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-4">
-                  <div className="w-3 h-3 bg-[#0B56A4] rounded-full animate-bounce" />
-               </div>
-               <h3 className="text-lg font-medium text-gray-800">Preparing Payment Details</h3>
-               <p className="text-sm text-gray-500 mt-1">Fetching fee history for {selectedStudent.name}...</p>
+            <div className="w-full max-w-md">
+
+              <div className="flex justify-center items-center gap-4 rounded-xl p-6">
+                <img 
+                  src={selectedStudent.img}
+                  alt={selectedStudent.name}
+                  className="w-20 h-20 rounded-xl object-cover"
+                />
+                <div className='flex justify-between  gap-4'>
+                  <p className="text-gray-500 uppercase tracking-wide">
+                    {selectedStudent.id}
+                  </p>
+
+                  <h2 className="text-xl text-gray-800">
+                    {selectedStudent.name}
+                  </h2>
+
+                  <p className="text-sm text-gray-600 mt-1">
+                    {selectedStudent.year} / {selectedStudent.dept}
+                  </p>
+                </div>
+              </div>
+
             </div>
           ) : (
-            <div className="max-w-sm">
+            <div className="max-w-sm mx-auto mt-20 text-center">
               <img src={EmptyImage} alt="Select student" className="w-52 mb-8 mx-auto opacity-80" />
-              <h2 className="text-xl font-semibold text-gray-800 mb-3">Select Student to proceed the Payment</h2>
-              <p className="text-gray-500 text-sm leading-relaxed">Choose a student from the list to view balance.</p>
+              <h2 className="text-xl font-semibold text-gray-800 mb-3">
+                Select Student to proceed the Payment
+              </h2>
+              <p className="text-gray-500 text-sm leading-relaxed">
+                Choose a student from the list to view balance.
+              </p>
             </div>
           )}
         </div>

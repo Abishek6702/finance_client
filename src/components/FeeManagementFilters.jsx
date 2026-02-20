@@ -59,7 +59,7 @@ export default function FeeFilters({
           "MECH",
           "CYS",
         ]}
-        className="w-45"
+        className="w-40"
       />
 
       {/* Payment Status */}
@@ -92,7 +92,7 @@ export default function FeeFilters({
         onClick={onExport}
         className="ml-auto bg-[#0B56A4] text-white px-5 py-2 rounded-lg flex items-center gap-2 inter"
       >
-        <Download size={18} /> Export Data
+        <Download size={18} /> Export
       </button>
     </div>
   );
