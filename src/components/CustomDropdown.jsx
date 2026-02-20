@@ -23,7 +23,7 @@ const CustomDropdown = ({
         }}
         className="flex items-center justify-between w-full px-4 py-2 bg-white border border-[#d9d9d9] rounded-lg text-gray-600 cursor-pointer hover:border-gray-400 focus:outline-none transition-all"
       >
-        <span className={`truncate ${isSelected ? "text-black font-medium" : ""}`}>
+        <span className={`truncate ${isSelected ? "text-black " : ""}`}>
           {isSelected ? value : label}
         </span>
         <ChevronDown 
