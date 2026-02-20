@@ -4,10 +4,10 @@ const StudentCard = ({ student, onClick, isSelected }) => {
       onClick={onClick}
       className={`
         flex items-center gap-4 p-3 mb-3 rounded-lg cursor-pointer transition-all
-        border
+        border border-gray-300
         ${isSelected 
-          ? "bg-gray-100 shadow-sm" 
-          : "border-gray-300 hover:bg-gray-100"}
+          ? "bg-gray-100 " 
+          : " hover:bg-gray-100"}
       `}
     >
       <img 

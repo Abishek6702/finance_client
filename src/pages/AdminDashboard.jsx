@@ -7,6 +7,9 @@ import FeeDemand from "./admin/FeeDemand.jsx"
 import StudentDetails from "./admin/StudentDetails.jsx";
 import Payment from "./payment/Payment.jsx";
 import AddPayment from "./payment/Addpayment.jsx";
+import Reports from '../pages/admin/Reports.jsx';
+import ReportsStudentDetails from '../pages/admin/ReportsStudentDetails.jsx';
+
 const AdminDashboard = () => {
   return (
     <div className="w-full h-screen bg-[#FBFBFB] p-4 flex flex-col gap-4">
@@ -23,6 +26,8 @@ const AdminDashboard = () => {
             <Route path="/fees_management" element={<Fees />} />
             <Route path="/fees_management/:id" element={<StudentDetails />} />
             <Route path="Fee_demand" element={<FeeDemand />} />
+            <Route path="reports" element={<Reports/>}/>
+            <Route path="/reports/:id" element={<ReportsStudentDetails/>}/>
             <Route path="*" element={<Navigate to="dashboard" replace />} />
           </Routes>
         </div>
