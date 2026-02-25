@@ -92,7 +92,7 @@ export default function FeeFilters({
         onClick={onExport}
         className="ml-auto bg-[#0B56A4] text-white px-5 py-2 rounded-lg flex items-center gap-2 inter"
       >
-        <Download size={18} /> Export
+        <Download size={18} /> Export (12)
       </button>
     </div>
   );

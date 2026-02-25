@@ -1,5 +1,5 @@
 import React from "react";
-import { Search } from "lucide-react";
+import { Filter, ListFilter, Search } from "lucide-react";
 import CustomSelect from "./CustomSelect";
 import { Download } from 'lucide-react';
 
@@ -17,6 +17,7 @@ export default function ReportsDetailsFilter({
   year,
   onYearChange,
   onExport,
+  selectedRows,
   onClearFilters,
 }) {
   return (
@@ -69,20 +70,20 @@ export default function ReportsDetailsFilter({
           className="border border-[#D9D9D9] rounded-lg px-3 py-2 bg-white"
         />
 
-        {/* Academic Year */}
+        {/* Academic Year
         <CustomSelect
           placeholder="All Years"
           value={year}
           onChange={onYearChange}
           options={["2024-2025", "2025-2026", "2026-2027"]}
-        />
+        /> */}
 
         {/* Clear Button */}
         <button
           onClick={onClearFilters}
-          className="border border-gray-300 px-4 py-2 rounded-lg bg-white hover:bg-gray-100"
+          className="border cursor-pointer border-gray-300 flex items-center gap-1 px-4 py-2 rounded-lg bg-white hover:bg-gray-100"
         >
-          Clear
+          Clear <ListFilter className="w-4 h-4"/>
         </button>
       </div>
 
@@ -92,7 +93,7 @@ export default function ReportsDetailsFilter({
         className="bg-[#1F5AA6] text-white px-5 py-2 rounded-lg flex items-center gap-2 cursor-pointer"
         >
         <Download size={18} />
-        <span>Export Data</span>
+        <span>Export ({selectedRows.length})</span>
     </button>
     </div>
   );

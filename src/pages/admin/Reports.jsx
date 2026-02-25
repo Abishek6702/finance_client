@@ -40,7 +40,7 @@
 //             <button>Date Wise Fee Report</button>
 //         </div>
 //         <div>
-//             <ReportsFilter 
+//             <ReportsFilter
 //                 search={search}
 //                 onSearchChange={setSearch}
 //                 year={year}
@@ -60,11 +60,6 @@
 //     </div>
 //   )
 // }
-
-
-
-
-
 
 import React, { useMemo, useState } from "react";
 import ReportsFilter from "../../components/ReportsFilter";
@@ -104,7 +99,7 @@ export default function Reports() {
   };
 
   return (
-    <div>
+    <div className=" ">
       {/* 🔹 Toggle Buttons */}
       <div className="flex gap-3 mb-4">
         <button
@@ -121,9 +116,7 @@ export default function Reports() {
         <button
           onClick={() => setActiveTab("datewise")}
           className={`px-4 py-2 rounded-lg ${
-            activeTab === "datewise"
-              ? "bg-[#1F5AA6] text-white"
-              : "bg-gray-200"
+            activeTab === "datewise" ? "bg-[#1F5AA6] text-white" : "bg-gray-200"
           }`}
         >
           Date Wise Fee Report
@@ -147,12 +140,11 @@ export default function Reports() {
             onClearFilters={handleClearFilter}
           />
 
-          {filterData.map((user) => (
-            <ReportsStudentDetailCard
-              key={user.id}
-              user={user}
-            />
-          ))}
+          <div className="grid grid-cols-4">
+            {filterData.map((user) => (
+              <ReportsStudentDetailCard key={user.id} user={user} />
+            ))}
+          </div>
         </>
       )}
 

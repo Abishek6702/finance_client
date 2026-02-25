@@ -59,13 +59,13 @@ export default function ReportsFilter({search,
             className="w-45"
         />
 
-        <CustomSelect
+        {/* <CustomSelect
             placeholder="Section"
             value={section}
             onChange={onSectionChange}
             options={["CCE", "AIDS-A", "AIDS-B", "AIDS-C", "AIML", "CSE-A", "CSE-B", "CSE-C", "CSBE", "ECE-A", "ECE-B", "ECE-C", "EEE", "MECH"]}
             className="w-52"
-        />
+        /> */}
 
         <button
             onClick={onClearFilters}
@@ -77,7 +77,7 @@ export default function ReportsFilter({search,
         </div>
         <div>
             <CustomSelect
-            placeholder="Section"
+            placeholder="Academic year"
             value={academicyear}
             onChange={onAcademicYearChange}
             options={["2018-2019","2019-2020","2020-2021", "2021-2022","2022-2023","2023-2024","2024-2025","2025-2026",]}

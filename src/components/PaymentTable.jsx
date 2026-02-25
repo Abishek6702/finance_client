@@ -44,7 +44,7 @@ const PaymentTable = () => {
     <div className="flex flex-col gap-5">
       
       {/* Header Section */}
-      <div className="flex items-center justify-between gap-4 mb-2">
+      <div className="flex items-center justify-between gap-4">
         <PaymentMFilter 
           filters={filters} 
           setFilters={setFilters} 
@@ -53,21 +53,21 @@ const PaymentTable = () => {
         />
 
         <button 
-          className="flex items-center px-4 py-[10px] bg-[#0B56A4] text-white rounded-lg font-semibold hover:bg-[#084482] transition-colors shadow-sm whitespace-nowrap cursor-pointer"
+          className="flex items-center gap-2 px-4 py-[10px] bg-[#0B56A4] text-white rounded-lg font-semibold hover:bg-[#084482] transition-colors shadow-sm whitespace-nowrap cursor-pointer"
           onClick={() => navigate('/admin/payment/newpayment')}
         >
-          <Plus className="w-4 h-4 mr-2" /> New Payment
+          <Plus className="w-5 h-5" /> New Payment
         </button>
       </div>
 
       {/* Table Wrapper */}
-      <div className="w-full bg-white rounded-2xl shadow ">
+      <div className="w-full bg-white rounded-2xl shadow  ">
         
         {/* Horizontal Scroll */}
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto ">
           
           {/* Vertical Scroll */}
-          <div className="max-h-[calc(100vh-250px)] overflow-y-auto custom-scrollbar relative">
+          <div className="max-h-[calc(100vh-230px)] overflow-y-auto custom-scrollbar relative  rounded-xl">
             
             <table className="border-collapse w-full table-fixed">
               <colgroup>

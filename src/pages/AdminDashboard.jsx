@@ -9,6 +9,7 @@ import Payment from "./payment/Payment.jsx";
 import AddPayment from "./payment/Addpayment.jsx";
 import Reports from '../pages/admin/Reports.jsx';
 import ReportsStudentDetails from '../pages/admin/ReportsStudentDetails.jsx';
+import Recall_Receipts from "./admin/Recall_Receipts.jsx";
 
 const AdminDashboard = () => {
   return (
@@ -17,8 +18,8 @@ const AdminDashboard = () => {
       <Navbar />
 
       {/* MAIN CONTENT */}
-      <main className="flex-1">
-        <div className="mt-2">
+      <main className="flex-1 ">
+        <div className=" ">
           <Routes>
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="payment" element={<Payment/>} />
@@ -28,6 +29,8 @@ const AdminDashboard = () => {
             <Route path="Fee_demand" element={<FeeDemand />} />
             <Route path="reports" element={<Reports/>}/>
             <Route path="/reports/:id" element={<ReportsStudentDetails/>}/>
+            <Route path="recall_receipts" element={<Recall_Receipts/>}/>
+
             <Route path="*" element={<Navigate to="dashboard" replace />} />
           </Routes>
         </div>

@@ -21,10 +21,10 @@ const PaymentFilter = ({ filters, setFilters, searchTerm, setSearchTerm }) => {
   const deptOptions = ['CSE', 'MECH', 'ECE', 'CCE', 'EEE', 'IT', 'AIDS', 'AIML', 'CSE(CYB)'];
 
   return (
-    <div className="flex flex-wrap items-center gap-4 mb-6">
+    <div className="flex flex-wrap items-center gap-4 mb-4">
 
       {/* Search Box */}
-      <div className="relative w-100 bg-white">
+      <div className="relative w-110 bg-white">
         <input 
           type="text" 
           placeholder="Search Student and Roll number and Receipt number" 

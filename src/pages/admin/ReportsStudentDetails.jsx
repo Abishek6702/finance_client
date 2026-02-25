@@ -1,8 +1,8 @@
 import React, { useMemo, useState } from "react";
-import { useLocation,useNavigate } from "react-router-dom";
+import { Link, useLocation,useNavigate } from "react-router-dom";
 import * as XLSX from "xlsx";
 import ReportsDetailsFilter from "../../components/ReportsDetailsFilter";
-import { Download } from 'lucide-react';
+import { ChevronRight, Download } from 'lucide-react';
 import DateWiseFeeReport from '../../components/DateWiseFeeReport';
 
 export default function ReportsStudentDetails() {
@@ -106,12 +106,18 @@ export default function ReportsStudentDetails() {
 
 
 
-        <h2 className="text-lg mb-4 text-gray-600">
-            Individual Fees Report {" > "}
-            <span className="text-[#1F5AA6] font-medium">
-            {student.name} ({student.rollNo})
-            </span>
-        </h2>
+            <nav className="flex items-center  space-x-1.5  text-xl mb-3 ">
+        <Link
+          to="/admin/reports"
+          className="text-black  hover:text-gray-700 transition"
+        >
+          Fees Details
+        </Link>
+
+       <ChevronRight size={24} className="" />
+
+        <span className="text-[#0b56a4] font-semibold">{student.name} ({student.rollNo})</span>
+      </nav>
       <ReportsDetailsFilter
         search={search}
         onSearchChange={setSearch}
@@ -124,6 +130,7 @@ export default function ReportsStudentDetails() {
         date={date}
         onDateChange={setDate}
         year={year}
+        selectedRows={selectedRows}
         onYearChange={setYear}
         onClearFilters={() => {
             setSearch("");
@@ -137,7 +144,7 @@ export default function ReportsStudentDetails() {
       />
 
       <div className="bg-white rounded-xl border border-[#D9D9D9]">
-        <table className="w-full text-left">
+        <table className="w-full text-center">
           <thead className="bg-gray-100">
             <tr>
               <th className="p-4">
@@ -156,7 +163,7 @@ export default function ReportsStudentDetails() {
               <th>Fine</th>
               <th>Balance</th>
               <th>Payment Date</th>
-              <th>Payment Mode</th>
+              <th className="text-center">Payment Mode</th>
               <th></th>
             </tr>
           </thead>
@@ -181,7 +188,7 @@ export default function ReportsStudentDetails() {
                   <td>{fee.fine}</td>
                   <td className="text-red-500 font-medium">{fee.balance}</td>
                   <td>{fee.paymentDate}</td>
-                  <td>{fee.paymentMode}</td>
+                  <td className="text-center">{fee.paymentMode}</td>
                   <td>
                     <button
                         onClick={() => handleSingleExport(fee)}

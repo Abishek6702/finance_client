@@ -10,14 +10,28 @@ import {
   Menu,
 } from "lucide-react";
 import logo from "../assets/favlogo.svg";
-import Dashboard from '../assets/dashboard.svg';
-import Rupee from '../assets/rupee.svg';
-import Setting from '../assets/setting.svg';
-import Dashboardfill from '../assets/dashboardfill.svg';
-import Rupeefill from '../assets/rupeefill.svg';
-import Settingfill from '../assets/settingfill.svg';
-import Reports from '../assets/reports.svg';
 import NotificationBell from "./Notification";
+
+//  nav icon imports
+import Dashboard from "../assets/icons/dashb.svg";
+import Dashboardfill from "../assets/icons/dashw.svg";
+
+import Payment from "../assets/icons/payb.svg";
+import Paymentfill from "../assets/icons/payw.svg";
+
+import fees from "../assets/icons/feeb.svg";
+import feesfill from "../assets/icons/feew.svg";
+
+import demand from "../assets/icons/manageb.svg";
+import demandfill from "../assets/icons/managew.svg";
+
+import recall from "../assets/icons/recallb.svg";
+import recallfill from "../assets/icons/recallw.svg";
+
+import report from "../assets/icons/reportb.svg";
+import reportfill from "../assets/icons/reportw.svg";
+
+
 import { useState } from "react";
 
 const Navbar = () => {
@@ -28,11 +42,12 @@ const Navbar = () => {
   const activeTab = location.pathname.split("/")[2];
 
   const menuItems = [
-    { id: "dashboard", label: "Dashboard", icon: Dashboardfill, iconFill :Dashboard},
-    {  id : "payment",label:"Payment",icon:Rupee , iconFill : Rupeefill},
-    { id: "fees_management", label: "Fees Management", icon: Rupee, iconFill :Rupeefill},
-    { id: "fee_demand", label: "Manage Fee Demand", icon: Settingfill, iconFill :Setting},
-    { id: "reports", label: "Reports", icon: Reports, iconFill :Setting},
+    { id: "dashboard", label: "Dashboard", icon: Dashboard, iconFill :  Dashboardfill },
+    {  id : "payment",label:"Payment",icon:Payment , iconFill : Paymentfill},
+    { id: "fees_management", label: "Fees Details", icon: fees, iconFill :feesfill},
+    { id: "fee_demand", label: "Manage Fee Demands", icon: demand, iconFill :demandfill},
+    { id: "reports", label: "Reports", icon: report, iconFill :reportfill},
+    {id:"recall_receipts", label:"Recall Receipts", icon: recall, iconFill :recallfill}
   ];
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -41,7 +56,7 @@ const Navbar = () => {
   };
 
   return (
-    <header className="h-20 bg-[#25343F] p-5 px-7 rounded-xl sticky t-0 z-50">
+    <header className="h-20 bg-[#25343F] p-5 px-7 rounded-xl sticky top-4 z-50">
       <nav className="flex w-full items-center justify-between">
         {/* 🔵 Logo */}
         <div className="flex items-center gap-3">

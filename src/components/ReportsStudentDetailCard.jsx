@@ -9,21 +9,23 @@ export default function ReportsStudentDetailCard({user}) {
         state:{user}
     })}
   return (
-    <div className='inline-flex items-center gap-5 border-[#D9D9D9] border rounded-2xl p-3 mx-2 my-2'>
-        <div>
-            <img className='rounded-xl' src={user.profileImage} alt='user image'/>
+    <div className='inline-flex items-center justify-between gap-5 border border-gray-300 rounded-2xl p-2 mx-2 my-2'>
+        <div className="flex gap-4 w-full">
+        <div className=''>
+            <img className='rounded-xl w-24 ' src={user.profileImage} alt='user image'/>
         </div>
-        <div>
-            <p className='inter'>{user.rollNo}</p>
-            <p className='inter'>{user.name}</p>
-            <div className='flex items-center gap-1'>
-                <p className='inter'>{user.year} /</p>
-                <p className='inter'>{user.section}</p>
+        <div className=' w-full'>
+            <p className='font-semibold text-md'>{user.rollNo}</p>
+            <p className='text-md w-40 truncate'>{user.name}</p>
+            <div className='flex items-center gap-1 text-sm'>
+                <p className=''>{user.year} /</p>
+                <p className=''>{user.section}</p>
             </div>
         </div>
-        <div>
+        </div>
+        <div className=''>
             <button onClick={handleStudentDetails} className="bg-[#0B56A4] rounded-full p-2 text-white cursor-pointer">
-                <ArrowUpRight className="w-6 h-6" />
+                <ArrowUpRight className="w-5 h-5" />
             </button>
         </div>
     </div>
