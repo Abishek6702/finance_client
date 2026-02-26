@@ -1,7 +1,10 @@
 import React from "react";
 import { ArrowUpRight } from "lucide-react";
+import Dayscholar from "../assets/dayscholar.svg";
+import Hostel from "../assets/hostel.svg";
+import Transport from "../assets/transport1.svg";
 
-const IndividualDCB = () => {
+const IndividualDCB = (student) => {
   const data = [
     {
       year: "2024 - 2025",
@@ -28,6 +31,7 @@ const IndividualDCB = () => {
       total: 50000,
     },
   ];
+console.log("student type:",student.student.type)
 
   const getStatusStyle = (status) => {
     if (status === "Paid") return "bg-green-100 text-green-600";
@@ -56,6 +60,28 @@ const IndividualDCB = () => {
   const overallStatus = data.every((row) => row.type === "Paid")
     ? "Paid"
     : "Partial";
+
+  const getStudentImages = (student) => {
+    console.log("test1L:",student.st)
+      // If hostler → show only hostel
+      if (student.student.ishostler) {
+        return [Hostel];
+      }
+  
+      const images = [];
+  
+      // If day scholar → show day scholar
+      if (student.student.isdayscholer) {
+        images.push(Dayscholar);
+      }
+  
+      // If transport → show transport
+      if (student.student.iscollegetransport) {
+        images.push(Transport);
+      }
+  
+      return images;
+    };
   return (
     <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden ">
       {/* Table */}
@@ -109,7 +135,18 @@ const IndividualDCB = () => {
                 <td className="px-4 py-3 text-red-500 font-medium">
                   ₹{row.overdue.toLocaleString()}
                 </td>
-                <td className="px-4 py-3">{row.type}</td>
+                <td className="p-3">
+                  <div className="flex gap-2">
+                    {getStudentImages(student).map((img, index) => (
+                      <img
+                        key={index}
+                        src={img}
+                        alt="student-type"
+                        className="w-6 h-6 object-contain"
+                      />
+                    ))}
+                  </div>
+                </td>
 
                 {/* Status Badge */}
                 <td className="px-4 py-3">

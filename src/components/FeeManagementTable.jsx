@@ -1,9 +1,9 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowUpRight } from "lucide-react";
-import Dayscholar from '../assets/dayscholar.svg';
-import Hostel from '../assets/hostel.svg';
-import Transport from '../assets/transport.svg';
+import Dayscholar from "../assets/dayscholar.svg";
+import Hostel from "../assets/hostel.svg";
+import Transport from "../assets/transport1.svg";
 
 export default function FeeTable({ data }) {
   const navigate = useNavigate();
@@ -13,7 +13,6 @@ export default function FeeTable({ data }) {
       state: { student },
     });
   };
-
 
   const getStatusStyles = (status) => {
     const normalized = status.toLowerCase();
@@ -30,11 +29,25 @@ export default function FeeTable({ data }) {
     return "bg-gray-100 text-gray-700";
   };
 
-  const getTypeImage = (type) => {
-    if (type === "Hostel") return Hostel;
-    if (type === "Dayscholar") return Dayscholar;
-    if (type === "Transport") return Transport;
-    return null;
+  const getStudentImages = (student) => {
+    // If hostler → show only hostel
+    if (student.ishostler) {
+      return [Hostel];
+    }
+
+    const images = [];
+
+    // If day scholar → show day scholar
+    if (student.isdayscholer) {
+      images.push(Dayscholar);
+    }
+
+    // If transport → show transport
+    if (student.iscollegetransport) {
+      images.push(Transport);
+    }
+
+    return images;
   };
 
   return (
@@ -104,15 +117,13 @@ export default function FeeTable({ data }) {
                   ₹{student.paid}
                 </td>
 
-                <td className="p-3 text-red-500">
-                  ₹{student.overdue}
-                </td>
+                <td className="p-3 text-red-500">₹{student.overdue}</td>
 
                 {/* Dynamic Status */}
                 <td className="p-3">
                   <span
                     className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusStyles(
-                      student.status
+                      student.status,
                     )}`}
                   >
                     {student.status}
@@ -120,11 +131,16 @@ export default function FeeTable({ data }) {
                 </td>
 
                 <td className="p-3">
-                  <img
-                    src={getTypeImage(student.type)}
-                    alt={student.type}
-                    className="w-8 h-8 object-contain"
-                  />
+                  <div className="flex gap-2">
+                    {getStudentImages(student).map((img, index) => (
+                      <img
+                        key={index}
+                        src={img}
+                        alt="student-type"
+                        className="w-6 h-6 object-contain"
+                      />
+                    ))}
+                  </div>
                 </td>
 
                 {/* Navigate on click */}

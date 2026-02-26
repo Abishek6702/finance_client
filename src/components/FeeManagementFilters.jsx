@@ -67,7 +67,7 @@ export default function FeeFilters({
         placeholder="Payment Status"
         value={status}
         onChange={onStatusChange}
-        options={["Pending", "Paid"]}
+        options={[,"Partial","Paid","Overdue","Pending", ]}
         className="w-50"
       />
 

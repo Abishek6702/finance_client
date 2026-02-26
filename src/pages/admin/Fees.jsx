@@ -88,7 +88,28 @@ const feeData = Array.from({ length: 25 }, (_, index) => {
   if (paid === totalFees) status = "Paid";
   if (paid === 0) status = "Overdue";
 
-  const type = studentTypes[index % 3];
+  const typeIndex = index % 3;
+
+  let type = "";
+  let ishostler = false;
+  let isdayscholer = false;
+  let iscollegetransport = false;
+  
+  if (typeIndex === 0) {
+    type = "Hostel";
+    ishostler = true;
+  }
+  
+  if (typeIndex === 1) {
+    type = "Dayscholar";
+    isdayscholer = true;
+  }
+  
+  if (typeIndex === 2) {
+    type = "Transport";
+    isdayscholer=true
+    iscollegetransport = true;
+  }
   const yearNumber = (index % 4) + 1;
 
   const startYear = BASE_YEAR - (yearNumber - 1);
@@ -107,7 +128,12 @@ const feeData = Array.from({ length: 25 }, (_, index) => {
     paid,
     overdue,
     status,
-    type,
+  
+    type, // ✅ keep this
+    ishostler, // ✅ new
+    isdayscholer, // ✅ new
+    iscollegetransport, // ✅ new
+  
     profileImage:
       index % 2 === 0
         ? `https://randomuser.me/api/portraits/men/${index}.jpg`
