@@ -30,7 +30,7 @@ const PaymentFilter = ({ filters, setFilters, searchTerm, setSearchTerm }) => {
           placeholder="Search Student and Roll number and Receipt number" 
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full px-4 py-[10px] pr-10 rounded-lg border border-[#d9d9d9] bg-white text-sm focus:border-gray-400 outline-none transition-all placeholder:text-gray-400"
+          className="w-full px-4 py-2.5 pr-10 rounded-lg border border-[#d9d9d9] bg-white text-sm focus:border-gray-400 outline-none transition-all placeholder:text-gray-400"
         />
         <div className="absolute right-3 top-1/2 -translate-y-1/2 bg-white pl-1">
           <Search className="w-4 h-4 text-gray-400" />

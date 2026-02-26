@@ -4,13 +4,14 @@ import toast, { Toaster } from "react-hot-toast";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import AdminDashboard from "./pages/AdminDashboard";
-import ProtectedRoute from "./utils/ProtectedRoutes"
+import ProtectedRoute from "./utils/ProtectedRoutes";
+import SuperAdminDashboard from "./pages/SuperAdminDashboard";
 
 function App() {
   return (
     <>
       <Toaster
-        position="top-center"
+        position="top-right"
         toastOptions={{
           duration: 4000,
           style: {
@@ -21,7 +22,7 @@ function App() {
           },
         }}
       />
-      
+
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
@@ -33,10 +34,18 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        <Route
+          path="/Superadmin/*"
+          element={
+            <ProtectedRoute>
+              <SuperAdminDashboard />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </>
   );
 }
 
 export default App;
-

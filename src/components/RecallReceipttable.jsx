@@ -1,21 +1,24 @@
 import React, { useState, useMemo } from "react";
-import { RotateCcw, Plus, Search } from "lucide-react";
+import { RotateCcw, Plus, Search, MoveUpRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import PaymentMFilter from "./PaymentMFilter";
-import RecallDrawer from "./RecallDrawer";
-
-const PaymentTable = () => {
+import RecallFilter from "./RecallFilter.jsx";
+import RecallDetail from "./RecallDetail.jsx";
+const RecallReceipttable = () => {
   const navigate = useNavigate();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedPayment, setSelectedPayment] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [filters, setFilters] = useState({
-    year: "Year",
-    dept: "Department",
-    mode: "Mode",
-    feeHead: "Fee Head",
-  });
+  const defaultFilters = {
+    academicYear: "",
+    year: "",
+    dept: "",
+    status: "",
+    fromDate: "",
+    toDate: "",
+  };
+
+  const [filters, setFilters] = useState(defaultFilters);
 
   const [payments] = useState([
     {
@@ -32,6 +35,14 @@ const PaymentTable = () => {
       receipt: "10123255",
       avatar: "https://i.pravatar.cc/150?u=1",
       isrecallrequested: false,
+      raisedOn: "2026-02-10",
+      Status: "Approved",
+      Reasonforrecall:
+        "Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.",
+      ApprovedOn: "2026-02-15",
+      RejectedOn: "2026-02-15",
+      Rejectreason:"It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout",
+
     },
     {
       id: 2,
@@ -47,6 +58,14 @@ const PaymentTable = () => {
       receipt: "10123255",
       avatar: "https://i.pravatar.cc/150?u=2",
       isrecallrequested: true,
+      raisedOn: "2026-02-10",
+      Reasonforrecall:
+        "Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.",
+      ApprovedOn: "2026-02-15",
+      RejectedOn: "2026-02-15",
+      Status: "Pending",
+      Rejectreason:"It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout",
+
     },
     {
       id: 3,
@@ -62,6 +81,14 @@ const PaymentTable = () => {
       receipt: "10123255",
       avatar: "https://i.pravatar.cc/150?u=3",
       isrecallrequested: false,
+      raisedOn: "2026-02-10",
+      Reasonforrecall:
+        "Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.",
+      ApprovedOn: "2026-02-15",
+      RejectedOn: "2026-02-15",
+      Status: "Rejected",
+      Rejectreason:"It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout",
+
     },
     {
       id: 4,
@@ -77,6 +104,14 @@ const PaymentTable = () => {
       receipt: "10123255",
       avatar: "https://i.pravatar.cc/150?u=4",
       isrecallrequested: true,
+      raisedOn: "2026-02-10",
+      Reasonforrecall:
+        "Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.",
+      ApprovedOn: "2026-02-15",
+      RejectedOn: "2026-02-15",
+      Status: "Pending",
+      Rejectreason:"It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout",
+
     },
     {
       id: 5,
@@ -92,6 +127,14 @@ const PaymentTable = () => {
       receipt: "10123255",
       avatar: "https://i.pravatar.cc/150?u=5",
       isrecallrequested: false,
+      raisedOn: "2026-02-10",
+      Reasonforrecall:
+        "Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.",
+      ApprovedOn: "2026-02-15",
+      RejectedOn: "2026-02-15",
+      Status: "Pending",
+      Rejectreason:"It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout",
+
     },
     {
       id: 6,
@@ -107,6 +150,13 @@ const PaymentTable = () => {
       receipt: "10123255",
       avatar: "https://i.pravatar.cc/150?u=3",
       isrecallrequested: false,
+      raisedOn: "2026-02-10",
+      Reasonforrecall:
+        "Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.",
+      ApprovedOn: "2026-02-15",
+      RejectedOn: "2026-02-15",
+      Status: "Approved",
+      Rejectreason:"It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout",
     },
     {
       id: 7,
@@ -122,6 +172,14 @@ const PaymentTable = () => {
       receipt: "10123255",
       avatar: "https://i.pravatar.cc/150?u=4",
       isrecallrequested: false,
+      raisedOn: "2026-02-10",
+      Reasonforrecall:
+        "Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.",
+      ApprovedOn: "2026-02-15",
+      RejectedOn: "2026-02-15",
+      Status: "Rejected",
+      Rejectreason:
+        "It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout",
     },
     {
       id: 8,
@@ -137,6 +195,14 @@ const PaymentTable = () => {
       receipt: "10123255",
       avatar: "https://i.pravatar.cc/150?u=5",
       isrecallrequested: false,
+      raisedOn: "2026-02-10",
+      Reasonforrecall:
+        "Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.",
+      ApprovedOn: "2026-02-15",
+      RejectedOn: "2026-02-15",
+      Status: "Pending",
+      Rejectreason:
+        "It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout",
     },
   ]);
 
@@ -146,20 +212,29 @@ const PaymentTable = () => {
         item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.roll.toLowerCase().includes(searchTerm.toLowerCase());
 
-      const matchesYear =
-        filters.year === "Year" || item.sub.includes(filters.year);
-      const matchesDept =
-        filters.dept === "Department" || item.sub.includes(filters.dept);
-      const matchesMode = filters.mode === "Mode" || item.mode === filters.mode;
-      const matchesHead =
-        filters.feeHead === "Fee Head" || item.head === filters.feeHead;
+      const matchesYear = !filters.year || item.sub.includes(filters.year);
 
+      const matchesDept = !filters.dept || item.sub.includes(filters.dept);
+
+      const matchesStatus = !filters.status || item.Status === filters.status;
+      const matchesDate = (() => {
+        if (!filters.fromDate && !filters.toDate) return true;
+
+        const itemDate = new Date(item.raisedOn);
+
+        if (filters.fromDate && itemDate < new Date(filters.fromDate))
+          return false;
+
+        if (filters.toDate && itemDate > new Date(filters.toDate)) return false;
+
+        return true;
+      })();
       return (
         matchesSearch &&
         matchesYear &&
         matchesDept &&
-        matchesMode &&
-        matchesHead
+        matchesStatus &&
+        matchesDate
       );
     });
   }, [searchTerm, filters, payments]);
@@ -169,23 +244,29 @@ const PaymentTable = () => {
     setSelectedPayment(item);
   };
 
+  const getStatusStyles = (status) => {
+    if (!status) return "bg-gray-100 text-gray-600";
+
+    const normalized = status.toLowerCase();
+
+    if (normalized === "approved") return "bg-[#F3FCF7] text-[#44CF7D]";
+
+    if (normalized === "rejected") return "bg-[#FCEAEE] text-[#ED6C83]";
+
+    if (normalized === "pending") return "bg-[#FFF6EA] text-[#FFA02D]";
+
+    return "bg-gray-100 text-gray-600";
+  };
   return (
     <div className="flex flex-col gap-5">
       {/* Header Section */}
       <div className="flex items-center justify-between gap-4">
-        <PaymentMFilter
+        <RecallFilter
           filters={filters}
           setFilters={setFilters}
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
         />
-
-        <button
-          className="flex items-center gap-2 px-4 py-2.5 bg-[#0B56A4] text-white rounded-lg font-semibold hover:bg-[#084482] transition-colors shadow-sm whitespace-nowrap cursor-pointer"
-          onClick={() => navigate("/admin/payment/newpayment")}
-        >
-          <Plus className="w-5 h-5" /> New Payment
-        </button>
       </div>
 
       {/* Table Wrapper */}
@@ -215,15 +296,18 @@ const PaymentTable = () => {
 
                   {[
                     "Roll Number",
-                    "Sem Period",
                     "Fee Head",
                     "Amount",
-                    "Date",
+                    "Raised On",
                     "Payment Mode",
                     "Bank",
                     "Receipt Number",
+                    "Status",
                   ].map((header) => (
-                    <th key={header} className="p-3 text-center font-semibold">
+                    <th
+                      key={header}
+                      className="p-3 text-center font-semibold whitespace-nowrap"
+                    >
                       {header}
                     </th>
                   ))}
@@ -254,27 +338,28 @@ const PaymentTable = () => {
                     </td>
 
                     <td className="p-3 text-center">{item.roll}</td>
-                    <td className="p-3 text-center">{item.semPeriod}</td>
                     <td className="p-3 text-center">{item.head}</td>
                     <td className="p-3 text-center">{item.amount}</td>
-                    <td className="p-3 text-center">{item.date}</td>
+                    <td className="p-3 text-center">{item.raisedOn}</td>
                     <td className="p-3 text-center">{item.mode}</td>
                     <td className="p-3 text-center">{item.bank}</td>
                     <td className="p-3 text-center">{item.receipt}</td>
+                    <td className="p-3 text-center">
+                      <span
+                        className={`px-4 py-1.5 rounded-md text-sm font-medium ${getStatusStyles(
+                          item.Status,
+                        )}`}
+                      >
+                        {item.Status}
+                      </span>
+                    </td>
 
                     <td className="sticky right-0 bg-white p-3 text-right z-20 shadow-[-10px_0_15px_-10px_rgba(0,0,0,0.1)]">
                       <button
-                        disabled={item.isrecallrequested}
-                        onClick={() =>
-                          !item.isrecallrequested && RecallOpen(item)
-                        }
-                        className={`p-2 rounded-full transition-all ${
-                          item.isrecallrequested
-                            ? "bg-[#0B56A4]/50 text-white cursor-not-allowed"
-                            : "bg-[#0B56A4] text-white hover:bg-[#084482] cursor-pointer"
-                        }`}
+                        onClick={() => RecallOpen(item)}
+                        className={`p-2 rounded-full transition-all ${"bg-[#0B56A4] text-white hover:bg-[#084482] cursor-pointer"}`}
                       >
-                        <RotateCcw size={14} />
+                        <MoveUpRight size={14} />
                       </button>
                     </td>
                   </tr>
@@ -293,7 +378,7 @@ const PaymentTable = () => {
       </div>
       {isModalOpen && (
         <>
-          <RecallDrawer
+          <RecallDetail
             isOpen={isModalOpen}
             onClose={() => setIsModalOpen(false)}
             payment={selectedPayment}
@@ -304,4 +389,4 @@ const PaymentTable = () => {
   );
 };
 
-export default PaymentTable;
+export default RecallReceipttable;
