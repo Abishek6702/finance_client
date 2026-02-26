@@ -1,46 +1,54 @@
 import React, { useMemo, useState } from "react";
-import { Link, useLocation,useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import * as XLSX from "xlsx";
 import ReportsDetailsFilter from "../../components/ReportsDetailsFilter";
+import DateWiseFeeReport from "../../components/DateWiseFeeReport";
 import { ChevronRight, Download } from 'lucide-react';
-import DateWiseFeeReport from '../../components/DateWiseFeeReport';
 
 export default function ReportsStudentDetails() {
   const { state } = useLocation();
   const navigate = useNavigate();
 
+  // Retrieve student data from navigation state
   const student = state?.user;
 
+  // Local states for filtering student-specific fees
   const [search, setSearch] = useState("");
   const [sem, setSem] = useState("");
   const [feesHead, setFeesHead] = useState("");
   const [paymentMode, setPaymentMode] = useState("");
-  const [date, setDate] = useState("");
-  const [year, setYear] = useState("");
+  const [dateRange, setDateRange] = useState({ start: "", end: "" });
   const [selectedRows, setSelectedRows] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
-  const [activeTab, setActiveTab] = useState("individual");
 
-
+  // Filter Logic for the table
   const filteredFees = useMemo(() => {
     if (!student?.fees) return [];
 
     return student.fees.filter((fee) => {
+      let matchesDate = true;
+      if (dateRange.start) {
+        if (dateRange.end) {
+          matchesDate = fee.paymentDate >= dateRange.start && fee.paymentDate <= dateRange.end;
+        } else {
+          matchesDate = fee.paymentDate === dateRange.start;
+        }
+      }
+
       return (
-        (!search || fee.receiptNo.includes(search)) &&
+        (!search || fee.receiptNo.toLowerCase().includes(search.toLowerCase())) &&
         (!sem || fee.sem === sem) &&
         (!feesHead || fee.feesHead === feesHead) &&
         (!paymentMode || fee.paymentMode === paymentMode) &&
-        (!date || fee.paymentDate === date)
+        matchesDate
       );
     });
-  }, [student, search, sem, feesHead, paymentMode, date]);
+  }, [student, search, sem, feesHead, paymentMode, dateRange]);
 
+  // Selection Handlers
   const handleRowSelect = (receiptNo) => {
     setSelectedRows((prev) =>
-      prev.includes(receiptNo)
-        ? prev.filter((id) => id !== receiptNo)
-        : [...prev, receiptNo]
+      prev.includes(receiptNo) ? prev.filter((id) => id !== receiptNo) : [...prev, receiptNo]
     );
   };
 
@@ -53,71 +61,63 @@ export default function ReportsStudentDetails() {
     setSelectAll(!selectAll);
   };
 
+  // Export Logic
   const handleExport = () => {
-    const dataToExport = filteredFees.filter((fee) =>
-      selectedRows.includes(fee.receiptNo)
-    );
-
-    if (dataToExport.length === 0) {
-      alert("Please select at least one row");
-      return;
-    }
+    const dataToExport = filteredFees.filter((fee) => selectedRows.includes(fee.receiptNo));
+    if (dataToExport.length === 0) return alert("Please select at least one row");
 
     const worksheet = XLSX.utils.json_to_sheet(dataToExport);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Fees Report");
-
-    XLSX.writeFile(workbook, "Fees_Report.xlsx");
+    XLSX.writeFile(workbook, `${student.name}_Fees_Report.xlsx`);
   };
 
   const handleSingleExport = (fee) => {
-  const worksheet = XLSX.utils.json_to_sheet([fee]);
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, "Receipt");
-
-  XLSX.writeFile(workbook, `Receipt_${fee.receiptNo}.xlsx`);
-};
+    const worksheet = XLSX.utils.json_to_sheet([fee]);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Receipt");
+    XLSX.writeFile(workbook, `Receipt_${fee.receiptNo}.xlsx`);
+  };
 
   if (!student) {
-    return <p className="p-6">No student selected</p>;
+    return (
+      <div className="p-10 text-center">
+        <p className="text-gray-500 mb-4">No student data found.</p>
+        <button onClick={() => navigate("/admin/reports")} className="text-[#1F5AA6] font-medium underline">
+          Back to Reports
+        </button>
+      </div>
+    );
   }
 
   return (
-    <>
-        <div className="flex gap-3 mb-4">
-            <button
-                onClick={() => navigate("/admin/reports")}
-                className="px-4 py-2 rounded-lg bg-[#1F5AA6] text-white"
-            >
-                Individual Fees Report
-            </button>
-
-            <button
-                onClick={() => setActiveTab("datewise")}
-                className={`px-4 py-2 rounded-lg ${
-                activeTab === "datewise"
-                    ? "bg-[#1F5AA6] text-white"
-                    : "bg-gray-200"
-                }`}
-            >
-                Date Wise Fee Report
-            </button>
-            </div>
-
-
-
-            <nav className="flex items-center  space-x-1.5  text-xl mb-3 ">
-        <Link
-          to="/admin/reports"
-          className="text-black  hover:text-gray-700 transition"
+    <div className="p-1">
+      {/* 🔹 Navigation Tabs - Now redirects to main page with specific Tab state */}
+      <div className="flex gap-3 mb-6">
+        <button
+          onClick={() => navigate("/admin/reports", { state: { activeTab: "individual" } })}
+          className="px-5 py-2.5 rounded-lg font-medium bg-[#1F5AA6] text-white shadow-md cursor-pointer transition-all"
         >
+          Individual Fees Report
+        </button>
+
+        <button
+          onClick={() => navigate("/admin/reports", { state: { activeTab: "datewise" } })}
+          className="px-5 py-2.5 rounded-lg font-medium bg-gray-200 text-gray-600 hover:bg-gray-300 cursor-pointer transition-all"
+        >
+          Date Wise Fee Report
+        </button>
+      </div>
+
+      {/* 🔹 Breadcrumb */}
+      <nav className="flex items-center space-x-1.5 text-xl mb-4">
+        <Link to="/admin/reports" className="">
           Fees Details
         </Link>
-
-       <ChevronRight size={24} className="" />
-
+        <ChevronRight size={20} className="text-gray-400" />
         <span className="text-[#0b56a4] font-semibold">{student.name} ({student.rollNo})</span>
       </nav>
+
       <ReportsDetailsFilter
         search={search}
         onSearchChange={setSearch}
@@ -127,32 +127,25 @@ export default function ReportsStudentDetails() {
         onFeesHeadChange={setFeesHead}
         paymentMode={paymentMode}
         onPaymentModeChange={setPaymentMode}
-        date={date}
-        onDateChange={setDate}
-        year={year}
-        selectedRows={selectedRows}
-        onYearChange={setYear}
+        dateRange={dateRange}
+        onDateRangeChange={setDateRange}
         onClearFilters={() => {
-            setSearch("");
-            setSem("");
-            setFeesHead("");
-            setPaymentMode("");
-            setDate("");
-            setYear("");
+          setSearch("");
+          setSem("");
+          setFeesHead("");
+          setPaymentMode("");
+          setDateRange({ start: "", end: "" });
         }}
         onExport={handleExport}
       />
 
-      <div className="bg-white rounded-xl border border-[#D9D9D9]">
+      {/* 🔹 Fees Table */}
+              <div className="bg-white rounded-xl border border-[#D9D9D9]">
         <table className="w-full text-center">
           <thead className="bg-gray-100">
             <tr>
               <th className="p-4">
-                <input
-                  type="checkbox"
-                  checked={selectAll}
-                  onChange={handleSelectAll}
-                />
+                <input type="checkbox" checked={selectAll} onChange={handleSelectAll} />
               </th>
               <th>Receipt No</th>
               <th>Fees Head</th>
@@ -191,17 +184,17 @@ export default function ReportsStudentDetails() {
                   <td className="text-center">{fee.paymentMode}</td>
                   <td>
                     <button
-                        onClick={() => handleSingleExport(fee)}
-                        className="bg-[#0B56A4] text-white p-2 rounded-3xl text-sm cursor-pointer"
+                      onClick={() => handleSingleExport(fee)}
+                      className="bg-[#0B56A4] text-white p-2 rounded-3xl text-sm cursor-pointer"
                     >
-                        <Download/>
+                      <Download size={16} />
                     </button>
-                    </td>
+                  </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="11" className="text-center p-6 text-gray-500">
+                <td colSpan="12" className="text-center p-6 text-gray-500">
                   No records found
                 </td>
               </tr>
@@ -209,6 +202,6 @@ export default function ReportsStudentDetails() {
           </tbody>
         </table>
       </div>
-    </>
+    </div>
   );
 }

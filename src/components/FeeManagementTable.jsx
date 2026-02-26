@@ -69,7 +69,7 @@ export default function FeeManagementTable({ data, selectedIds, setSelectedIds }
                     type="checkbox"
                     checked={data.length > 0 && selectedIds.length === data.length}
                     onChange={toggleSelectAll}
-                    className="w-4 h-4"
+                    className="p-4"
                   />
                 </div>
               </th>
@@ -103,7 +103,7 @@ export default function FeeManagementTable({ data, selectedIds, setSelectedIds }
                       type="checkbox"
                       checked={selectedIds.includes(student.id)}
                       onChange={() => toggleSelect(student.id)}
-                      className="w-4 h-4"
+                      className="p-4"
                     />
                   </div>
                 </td>
@@ -118,7 +118,7 @@ export default function FeeManagementTable({ data, selectedIds, setSelectedIds }
                     <div className="text-left">
                       <div className="font-medium">{student.name}</div>
                       <div className="text-sm text-gray-500">
-                        {student.year}
+                        {student.year} / {student.department}
                       </div>
                     </div>
                   </div>

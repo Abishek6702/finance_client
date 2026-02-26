@@ -47,7 +47,7 @@ export default function DateWiseFeeReport() {
         {/* Body */}
         <tbody className="">
           {tableData.map((item) => (
-            <tr key={item.id} className=" hover:bg-gray-50">
+            <tr key={item.id} className="">
               
               {/* Student Details */}
               <td className="p-4 flex items-center gap-3">

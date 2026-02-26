@@ -1,11 +1,21 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react"; 
+import { useLocation } from "react-router-dom"; 
 import ReportsFilter from "../../components/ReportsFilter";
 import ReportsStudentDetailCard from "../../components/ReportsStudentDetailCard";
 import DateWiseFeeReport from "../../components/DateWiseFeeReport";
 import StudentDetails from "../../data";
 
 export default function Reports() {
-  const [activeTab, setActiveTab] = useState("individual");
+  const location = useLocation();
+
+  // 🔹 FIX: derive the active tab directly from location state or default to individual
+  // This removes the need for useEffect and prevents cascading renders
+  const [activeTab, setActiveTab] = useState(location.state?.activeTab || "individual");
+
+  // If the user clicks a tab button manually, we still want to update the local state
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+  };
 
   const [search, setSearch] = useState("");
   const [year, setYear] = useState("");
@@ -15,7 +25,6 @@ export default function Reports() {
 
   const filterData = useMemo(() => {
     return StudentDetails.filter((s) => {
-      // Case-insensitive search logic
       const searchTerm = search.toLowerCase();
       const studentName = s.name.toLowerCase();
       const studentRoll = s.rollNo.toLowerCase();
@@ -23,7 +32,7 @@ export default function Reports() {
       return (
         (!search ||
           studentName.includes(searchTerm) ||
-          studentRoll.includes(searchTerm)) && // Fix: Now case-insensitive for roll number too
+          studentRoll.includes(searchTerm)) &&
         (!year || s.year === year) &&
         (!department || s.department === department) &&
         (!section || s.section === section) &&
@@ -45,7 +54,7 @@ export default function Reports() {
       {/* 🔹 Toggle Buttons */}
       <div className="flex gap-3 mb-6">
         <button
-          onClick={() => setActiveTab("individual")}
+          onClick={() => handleTabChange("individual")}
           className={`px-5 py-2.5 rounded-lg font-medium transition-all cursor-pointer ${
             activeTab === "individual"
               ? "bg-[#1F5AA6] text-white shadow-md"
@@ -56,7 +65,7 @@ export default function Reports() {
         </button>
 
         <button
-          onClick={() => setActiveTab("datewise")}
+          onClick={() => handleTabChange("datewise")}
           className={`px-5 py-2.5 rounded-lg font-medium transition-all cursor-pointer ${
             activeTab === "datewise" 
               ? "bg-[#1F5AA6] text-white shadow-md" 
@@ -67,7 +76,6 @@ export default function Reports() {
         </button>
       </div>
 
-      {/* 🔹 Conditional Rendering */}
       {activeTab === "individual" && (
         <>
           <ReportsFilter
