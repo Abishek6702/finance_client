@@ -1,14 +1,16 @@
 import React from "react";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, ChevronRight, X } from "lucide-react";
 import Dayscholar from "../assets/dayscholar.svg";
 import Hostel from "../assets/hostel.svg";
 import Transport from "../assets/transport1.svg";
 import { Link } from "react-router-dom";
+import AcademicAccordionRow from "./AcademicAccordionRow"
 
-const IndividualDCB = (student) => {
+const StudentFinanceAcademicPanel = ({student,academicYear}) => {
   const data = [
     {
       year: "2024 - 2025",
+      semester: "Odd",
       class: "CSE - A",
       community: "BC",
       demand: 50000,
@@ -20,7 +22,9 @@ const IndividualDCB = (student) => {
       total: 50000,
     },
     {
-      year: "2025 - 2026",
+      year: "2024 - 2025",
+      semester: "Even",
+
       class: "CSE - A",
       community: "BC",
       demand: 50000,
@@ -32,8 +36,7 @@ const IndividualDCB = (student) => {
       total: 50000,
     },
   ];
-  console.log("student type:", student.student.type);
-
+  const [openIndexes, setOpenIndexes] = React.useState([]);
   const getStatusStyle = (status) => {
     if (status === "Paid") return "bg-green-100 text-green-600";
     if (status === "Partial") return "bg-orange-100 text-orange-600";
@@ -65,26 +68,34 @@ const IndividualDCB = (student) => {
   const getStudentImages = (student) => {
     console.log("test1L:", student.st);
     // If hostler → show only hostel
-    if (student.student.ishostler) {
+    if (student.ishostler) {
       return [Hostel];
     }
 
     const images = [];
 
     // If day scholar → show day scholar
-    if (student.student.isdayscholer) {
+    if (student.isdayscholer) {
       images.push(Dayscholar);
     }
 
     // If transport → show transport
-    if (student.student.iscollegetransport) {
+    if (student.iscollegetransport) {
       images.push(Transport);
     }
 
     return images;
   };
+
+  const toggleRow = (index) => {
+    setOpenIndexes((prev) =>
+      prev.includes(index)
+        ? prev.filter((i) => i !== index) // close it
+        : [...prev, index] // open it
+    );
+  };
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden ">
+    <div className="bg-white w-full rounded-2xl border border-gray-200 overflow-hidden ">
       {/* Table */}
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
@@ -92,9 +103,9 @@ const IndividualDCB = (student) => {
           <thead className="bg-gray-100 text-gray-700">
             <tr>
               {[
+                "",
+                "Semester Type",
                 "Academic Year",
-                "Class",
-                // "Community",
                 "Demand",
                 "Concession",
                 "Paid",
@@ -115,74 +126,75 @@ const IndividualDCB = (student) => {
           {/* Body */}
           <tbody>
             {data.map((row, index) => (
-              <tr
-                key={index}
-                className="border-t border-gray-200 hover:bg-gray-50 transition"
-              >
-                <td className="px-4 py-3">{row.year}</td>
-                <td className="px-4 py-3">{row.class}</td>
-                {/* <td className="px-4 py-3">{row.community}</td> */}
-                <td className="px-4 py-3">₹{row.demand.toLocaleString()}</td>
-                <td className="px-4 py-3">
-                  ₹{row.concession.toLocaleString()}
-                </td>
-
-                <td className="px-4 py-3 text-green-600 font-medium">
-                  ₹{row.paid.toLocaleString()}
-                </td>
-
-                <td className="px-4 py-3">{row.fine}</td>
-
-                <td className="px-4 py-3 text-red-500 font-medium">
-                  ₹{row.overdue.toLocaleString()}
-                </td>
-                <td className="p-3">
-                  <div className="flex gap-2">
-                    {getStudentImages(student).map((img, index) => (
-                      <img
-                        key={index}
-                        src={img}
-                        alt="student-type"
-                        className="w-6 h-6 object-contain"
+              <React.Fragment key={index}>
+                <tr
+                  key={index}
+                  className="border-t border-gray-200 hover:bg-gray-50 transition"
+                >
+                  <td className="px-4 py-3">
+                    <button
+                      onClick={() => toggleRow(index)}
+                      className="bg-[#0b56a4] rounded-full text-white p-1 hover:bg-[#084482] transition cursor-pointer"
+                    >
+                      <ChevronRight
+                        className={`w-4 h-4 transition-transform duration-300 ${
+                          openIndexes.includes(index) ? "rotate-90" : ""
+                        }`}
                       />
-                    ))}
-                  </div>
-                </td>
-
-                {/* Status Badge */}
-                <td className="px-4 py-3">
-                  <span
-                    className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusStyle(
-                      row.type,
-                    )}`}
-                  >
-                    {row.type}
-                  </span>
-                </td>
-
-                <td className="px-4 py-3">₹{row.total.toLocaleString()}</td>
-
-                {/* Action */}
-                <td className="px-4 py-3">
-                  <Link
-                    to={`/admin/fees_management/${student.student?.id}/${row.year}`}
-                    state={{
-                      row: row,
-                      student: student.student,
-                    }}
-                  >
-                    {" "}
-                    <button className="bg-[#0B56A4] p-2 rounded-full text-white hover:scale-105 transition">
-                      <ArrowUpRight size={16} />
                     </button>
-                  </Link>
-                </td>
-              </tr>
+                  </td>
+                  <td className="px-4 py-3">{row.semester} Semester</td>
+
+                  <td className="px-4 py-3">{academicYear?.year}</td>
+                  <td className="px-4 py-3">₹{row.demand.toLocaleString()}</td>
+                  <td className="px-4 py-3">
+                    ₹{row.concession.toLocaleString()}
+                  </td>
+
+                  <td className="px-4 py-3 text-green-600 font-medium">
+                    ₹{row.paid.toLocaleString()}
+                  </td>
+
+                  <td className="px-4 py-3">{row.fine}</td>
+
+                  <td className="px-4 py-3 text-red-500 font-medium">
+                    ₹{row.overdue.toLocaleString()}
+                  </td>
+                  <td className="p-3">
+                    <div className="flex gap-2">
+                      {getStudentImages(student).map((img, index) => (
+                        <img
+                          key={index}
+                          src={img}
+                          alt="student-type"
+                          className="w-6 h-6 object-contain"
+                        />
+                      ))}
+                    </div>
+                  </td>
+
+                  {/* Status Badge */}
+                  <td className="px-4 py-3">
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusStyle(
+                        row.type,
+                      )}`}
+                    >
+                      {row.type}
+                    </span>
+                  </td>
+
+                  <td className="px-4 py-3">₹{row.total.toLocaleString()}</td>
+                </tr>
+                {openIndexes.includes(index) && (
+  <AcademicAccordionRow row={row} />
+)}
+              </React.Fragment>
             ))}
           </tbody>
           <tfoot className=" font-semibold border-t border-gray-200">
             <tr>
-              <td colSpan="2"></td>
+              <td colSpan="3"></td>
 
               <td className="px-4 py-3">₹{totals.demand.toLocaleString()}</td>
 
@@ -224,4 +236,4 @@ const IndividualDCB = (student) => {
   );
 };
 
-export default IndividualDCB;
+export default StudentFinanceAcademicPanel;

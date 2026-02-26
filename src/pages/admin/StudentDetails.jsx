@@ -6,7 +6,7 @@ import { ChevronRight } from "lucide-react";
 export default function StudentDetails() {
   const location = useLocation();
   const student = location.state?.student;
-  console.log(student);
+  console.log("jju",student);
 
   if (!student) {
     return <div className="p-10">No student data found</div>;

@@ -9,7 +9,7 @@ import BatchImg from "../assets/user.svg";
 
 export default function StudentProfileCard({ student }) {
   const Item = ({ icon, label, value }) => (
-    <div className=" p-2 border-b last:border-b-0 border-[#d9d9d9]">
+    <div className=" p-2 border-b last:border-b-0 border-[#d9d9d9] ">
       <div className="flex items-start gap-4">
         {/* Image Box */}
         <div className="w-10 h-10 rounded-lg bg-gray-50 border border-[#d9d9d9] flex items-center justify-center">
