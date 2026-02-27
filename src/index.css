@@ -64,3 +64,6 @@
   background:#25343f;
 
 }
+::-webkit-inner-spin-button{
+  display: none;
+}

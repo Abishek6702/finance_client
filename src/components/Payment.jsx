@@ -1,40 +1,40 @@
-
 import React, { useState } from "react";
 import NewpaymentStatecard from "./NewpaymentStatecard.jsx";
 import NewPaymentFilter from "./NewPaymentFilter.jsx";
 import NewpaymnetTable from "./NewpaymnetTable.jsx";
+import { feeData } from "../data.js";
 
 const Payment = ({ selectedStudent }) => {
-    console.log(selectedStudent);
-    
-    const getCurrentAcademicYear = () => {
-        const today = new Date();
-        const year = today.getFullYear();
-        const month = today.getMonth(); // 0-based (0 = Jan)
-      
-        if (month >= 5) {
-          // June or later
-          return `${year}-${year + 1}`;
-        } else {
-          // Before June
-          return `${year - 1}-${year}`;
-        }
-      };
-    const [filters, setFilters] = useState({
-        academicYear: getCurrentAcademicYear(),
-        semester: "Odd",
-      });
+  console.log(selectedStudent);
+
+  const getCurrentAcademicYear = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = today.getMonth();
   
+    return month >= 5
+      ? `${year}-${year + 1}`
+      : `${year - 1}-${year}`;
+  };
+  
+  const defaultFilters = {
+    academicYear: getCurrentAcademicYear(),
+    semester: "Odd",
+    feeHead: "All",
+  };
+  
+  const [filters, setFilters] = useState(defaultFilters);
   return (
-    <div className="w-full h-full space-y-4">
+    <div className="w-full h-full space-y-4 ">
       {/* <NewpaymentStatecard selectedStudent={selectedStudent} /> */}
+      <NewPaymentFilter
+  filters={filters}
+  setFilters={setFilters}
+  feeData={feeData}
+  defaultFilters={defaultFilters}
+/>
 
-      <NewPaymentFilter filters={filters} setFilters={setFilters} />
-
-      <NewpaymnetTable
-        selectedStudent={selectedStudent}
-        filters={filters}
-      />
+      <NewpaymnetTable selectedStudent={selectedStudent} filters={filters} />
     </div>
   );
 };

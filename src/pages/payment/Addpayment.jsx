@@ -1,16 +1,15 @@
 import React, { useState, useMemo } from "react";
 import { ChevronRight, Search } from "lucide-react";
-import StudentCard from "../../components/StudentCard";
-import PaymentFilter from "../../components/PaymentFilter"; // Import the new component
+import PaymentFilter from "../../components/PaymentFilter";
 import StudentProfile from "../../assets/student.jpg";
 import EmptyImage from "../../assets/StudentWithMobile.jpeg";
-import Payment from '../../components/Payment'
+import Payment from "../../components/Payment";
 import { Link } from "react-router-dom";
 
 const AddPayment = () => {
   const [selectedStudent, setSelectedStudent] = useState(null);
   console.log("selectedStudent", selectedStudent);
-  
+
   const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState({
     academicYear: "2025-2026",
@@ -34,14 +33,14 @@ const AddPayment = () => {
       img: StudentProfile,
     },
     {
-      id: "21CS003",
+      id: "22ECE003",
       name: "Surya chandran",
       year: "1st Year",
       dept: "ECE",
       img: StudentProfile,
     },
     {
-      id: "21CS004",
+      id: "21CC004",
       name: "Saravanan",
       year: "1st Year",
       dept: "CCE",
@@ -63,53 +62,54 @@ const AddPayment = () => {
   }, [searchTerm, filters]);
 
   return (
-    <main className="max-w-[1600px]">
-      <nav className="flex items-center  space-x-1.5  text-xl mb-3">
-        <Link
-          to="/admin/payment"
-          className="text-black  hover:text-gray-700 transition"
-        >
-          Payment Details
-        </Link>
+    <main className="max-w-400">
+      <div className="flex items-center justify-between mb-4">
+        <nav className="flex items-center  space-x-1.5  text-xl">
+          <Link
+            to="/admin/payment"
+            className="text-black  hover:text-gray-700 transition"
+          >
+            Payment Details
+          </Link>
 
-       <ChevronRight size={24} className="" />
+          <ChevronRight size={24} className="" />
 
-        <span className="text-[#0b56a4] font-semibold">New Payment</span>
-      </nav>
+          <span
+            onClick={() => {
+              setSelectedStudent(null);
+              setSearchTerm("");
+            }}
+            className="text-[#0b56a4] font-semibold cursor-pointer"
+          >
+            New Payment
+            
+          </span>
+          {selectedStudent && (
+         <> <ChevronRight size={24} className="" />
 
-      {/* Reusable Filter Component */}
-      <PaymentFilter
-        filters={filters}
-        setFilters={setFilters}
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-      />
+         <span className=" text-[#0b56a4] font-medium">
+         {selectedStudent.name} ({selectedStudent.id}) - {selectedStudent.year} / {selectedStudent.dept} 
+              </span></>
+            )}
+        </nav>
 
-      <div className="flex gap-6 h-[calc(100vh-230px)]">
-        {/* Left Sidebar */}
-        <div className="w-[25%] bg-white border border-gray-100 rounded-2xl p-4 overflow-y-auto shadow-sm">
-          {filteredStudents.length > 0 ? (
-            filteredStudents.map((student) => (
-              <StudentCard
-                key={student.id}
-                student={student}
-                isSelected={selectedStudent?.id === student.id}
-                onClick={() => setSelectedStudent(student)}
-              />
-            ))
-          ) : (
-            <div className="flex flex-col items-center justify-center h-full  text-gray-400 space-y-2">
-              <Search size={32} strokeWidth={1.5} />
-              <p className="text-sm">No students found matching filters.</p>
-            </div>
-          )}
-        </div>
+        {/* Reusable Filter Component */}
+        <PaymentFilter
+          filters={filters}
+          setFilters={setFilters}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          filteredStudents={filteredStudents}
+          setSelectedStudent={setSelectedStudent}
+        />
+      </div>
 
+      <div className="flex gap-6 h-[calc(100vh-200px)]">
         {/* Right Section */}
-        <div className="w-[75%] bg-white border border-gray-100 rounded-2xl flex flex-col p-4 shadow-sm relative">
+        <div className="w-full bg-white border border-gray-100 rounded-2xl flex flex-col p-4 shadow-sm relative">
           {selectedStudent ? (
             <div className="w-full ">
-             <Payment selectedStudent={selectedStudent}/>
+              <Payment selectedStudent={selectedStudent} />
             </div>
           ) : (
             <div className="max-w-sm mx-auto mt-20 text-center">
