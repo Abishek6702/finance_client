@@ -4,10 +4,13 @@ import StudentCard from "../../components/StudentCard";
 import PaymentFilter from "../../components/PaymentFilter"; // Import the new component
 import StudentProfile from "../../assets/student.jpg";
 import EmptyImage from "../../assets/StudentWithMobile.jpeg";
+import Payment from '../../components/Payment'
 import { Link } from "react-router-dom";
 
 const AddPayment = () => {
   const [selectedStudent, setSelectedStudent] = useState(null);
+  console.log("selectedStudent", selectedStudent);
+  
   const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState({
     academicYear: "2025-2026",
@@ -84,7 +87,7 @@ const AddPayment = () => {
 
       <div className="flex gap-6 h-[calc(100vh-250px)]">
         {/* Left Sidebar */}
-        <div className="w-1/3 bg-white border border-gray-100 rounded-2xl p-4 overflow-y-auto shadow-sm">
+        <div className="w-1/4 bg-white border border-gray-100 rounded-2xl p-4 overflow-y-auto shadow-sm">
           {filteredStudents.length > 0 ? (
             filteredStudents.map((student) => (
               <StudentCard
@@ -95,7 +98,7 @@ const AddPayment = () => {
               />
             ))
           ) : (
-            <div className="flex flex-col items-center justify-center h-full text-gray-400 space-y-2">
+            <div className="flex flex-col items-center justify-center h-full  text-gray-400 space-y-2">
               <Search size={32} strokeWidth={1.5} />
               <p className="text-sm">No students found matching filters.</p>
             </div>
@@ -103,29 +106,10 @@ const AddPayment = () => {
         </div>
 
         {/* Right Section */}
-        <div className="w-2/3 bg-white border border-gray-100 rounded-2xl flex flex-col p-8 shadow-sm relative">
+        <div className="w-3/3 bg-white border border-gray-100 rounded-2xl flex flex-col p-8 shadow-sm relative">
           {selectedStudent ? (
             <div className="w-full max-w-md">
-              <div className="flex justify-center items-center gap-4 rounded-xl p-6">
-                <img
-                  src={selectedStudent.img}
-                  alt={selectedStudent.name}
-                  className="w-20 h-20 rounded-xl object-cover"
-                />
-                <div className="flex justify-between  gap-4">
-                  <p className="text-gray-500 uppercase tracking-wide">
-                    {selectedStudent.id}
-                  </p>
-
-                  <h2 className="text-xl text-gray-800">
-                    {selectedStudent.name}
-                  </h2>
-
-                  <p className="text-sm text-gray-600 mt-1">
-                    {selectedStudent.year} / {selectedStudent.dept}
-                  </p>
-                </div>
-              </div>
+             <Payment selectedStudent={selectedStudent}/>
             </div>
           ) : (
             <div className="max-w-sm mx-auto mt-20 text-center">
