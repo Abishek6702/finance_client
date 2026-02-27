@@ -457,4 +457,38 @@ const studentDetails = [
     ]
   },
 ];
-export default studentDetails;
+
+ const academicSample = [
+  {
+    receiptNo: "RCPT001",
+    feesHead: "Tuition Fee",
+    subHead: "Semester Fee",
+    demand: 25000,
+    concession: 2000,
+    paid: 23000,
+    fine: 0,
+    total: 25000,
+    balance: 0,
+    paymentDate: "10-01-2026",
+    paymentMode: "Online",
+    status: "Paid",
+    Overdue: 0
+  },
+  {
+    receiptNo: "RCPT002",
+    feesHead: "Exam Fee",
+    subHead: "University Exam",
+    demand: 5000,
+    concession: 0,
+    paid: 5000,
+    fine: 0,
+    total: 5000,
+    balance: 0,
+    paymentDate: "15-01-2026",
+    paymentMode: "UPI",
+    status: "Partial",
+    Overdue: 0
+  }
+];
+export const StudentDetails = studentDetails;
+export const academicSampleData = academicSample;

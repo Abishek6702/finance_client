@@ -65,7 +65,7 @@ import React, { useMemo, useState } from "react";
 import ReportsFilter from "../../components/ReportsFilter";
 import ReportsStudentDetailCard from "../../components/ReportsStudentDetailCard";
 import DateWiseFeeReport from "../../components/DateWiseFeeReport";
-import StudentDetails from "../../data";
+import {StudentDetails} from "../../data";
 
 export default function Reports() {
   const [activeTab, setActiveTab] = useState("individual"); // 👈 NEW

@@ -1,9 +1,9 @@
 import React from "react";
-import studentDetails from "../data";
+import { StudentDetails, academicSampleData } from "../data";
 
 export default function DateWiseFeeReport() {
   // Flatten student + fee data
-  const tableData = studentDetails.flatMap((student) =>
+  const tableData = StudentDetails.flatMap((student) =>
     student.fees.map((fee) => ({
       id: `${student.id}-${fee.receiptNo}`,
       name: student.name,

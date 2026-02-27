@@ -14,7 +14,7 @@ import Recall_Receipts from "./admin/Recall_Receipts.jsx";
 
 const AdminDashboard = () => {
   return (
-    <div className="w-full h-screen bg-[#FBFBFB] p-4 flex flex-col gap-4">
+    <div className="w-full h-screen bg-[#f8fafc] p-4 flex flex-col gap-4">
       {/* NAVBAR */}
       <Navbar />
 

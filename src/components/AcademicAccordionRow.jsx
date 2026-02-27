@@ -1,25 +1,73 @@
 import React from "react";
+import { Download } from "lucide-react";
+import { academicSampleData } from "../data";
 
-const AcademicAccordionRow = ({ row }) => {
+const AcademicAccordionRow = () => {
+  console.log("AcademicAccordionRow - Row Data:", academicSampleData.details);
+  const getStatusStyles = (status) => {
+    if (!status) return "bg-gray-100 text-gray-600";
+
+    const normalized = status.toLowerCase();
+
+    if (normalized === "paid") return "bg-[#F3FCF7] text-[#44CF7D]";
+
+    if (normalized === "overdue") return "bg-[#FCEAEE] text-[#ED6C83]";
+
+    if (normalized === "partial") return "bg-[#FFF6EA] text-[#FFA02D]";
+
+    return "bg-gray-100 text-gray-600";
+  };
   return (
-    <tr className="bg-gray-50">
+    <tr className="">
       <td colSpan="12" className="px-6 py-4">
-        <div className="p-4 bg-white rounded-lg border border-gray-200 shadow-sm">
-          <div className="grid grid-cols-3 gap-4 text-sm">
-            <div>
-              <p className="text-gray-500">Class</p>
-              <p className="font-medium">{row.class}</p>
-            </div>
+        <div className="bg-white rounded-xl border border-gray-200 overflow-auto">
+          <div className="overflow-x-auto ">
+            <table className="w-full table-fixed text-sm text-center">
+              <thead className="bg-gray-100 text-gray-600">
+                <tr className="h-">
+                  <th className=" whitespace-nowrap">Fees Head</th>
+                  <th className="p-3">Total</th>
 
-            <div>
-              <p className="text-gray-500">Community</p>
-              <p className="font-medium">{row.community}</p>
-            </div>
+                  <th className="p-3">Concession</th>
+                  <th className="">Fine</th>
+                  <th className="">Paid</th>
+                  <th className="">Overdue</th>
+                  <th className="">Status</th>
+                </tr>
+              </thead>
 
-            <div>
-              <p className="text-gray-500">Semester</p>
-              <p className="font-medium">{row.semester}</p>
-            </div>
+              <tbody className="divide-y divide-gray-200">
+                {academicSampleData.length > 0 ? (
+                  academicSampleData.map((fee) => (
+                    <tr key={fee.receiptNo} className="">
+                      <td className="p-3">{fee.feesHead}</td>
+                      <td className="">{fee.total}</td>
+                      <td className="">₹{fee.concession}</td>
+
+                      <td className="">{fee.fine}</td>
+                      <td className=" text-red-500 font-medium">₹{fee.paid}</td>
+                      <td className="">{fee.Overdue}</td>
+
+                      <td className="p-3">
+                        <span
+                          className={`px-3 py-1 rounded text-sm font-medium ${getStatusStyles(
+                            fee.status,
+                          )}`}
+                        >
+                          {fee.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr className="h-20">
+                    <td colSpan="10" className="text-center text-gray-500">
+                      No records found
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
       </td>
