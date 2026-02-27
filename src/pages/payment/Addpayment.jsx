@@ -85,9 +85,9 @@ const AddPayment = () => {
         setSearchTerm={setSearchTerm}
       />
 
-      <div className="flex gap-6 h-[calc(100vh-250px)]">
+      <div className="flex gap-6 h-[calc(100vh-230px)]">
         {/* Left Sidebar */}
-        <div className="w-1/4 bg-white border border-gray-100 rounded-2xl p-4 overflow-y-auto shadow-sm">
+        <div className="w-[25%] bg-white border border-gray-100 rounded-2xl p-4 overflow-y-auto shadow-sm">
           {filteredStudents.length > 0 ? (
             filteredStudents.map((student) => (
               <StudentCard
@@ -106,9 +106,9 @@ const AddPayment = () => {
         </div>
 
         {/* Right Section */}
-        <div className="w-3/3 bg-white border border-gray-100 rounded-2xl flex flex-col p-8 shadow-sm relative">
+        <div className="w-[75%] bg-white border border-gray-100 rounded-2xl flex flex-col p-4 shadow-sm relative">
           {selectedStudent ? (
-            <div className="w-full max-w-md">
+            <div className="w-full ">
              <Payment selectedStudent={selectedStudent}/>
             </div>
           ) : (

@@ -4,7 +4,7 @@ const NewpaymnetTable = ({ selectedStudent, filters }) => {
     console.log(selectedStudent);
     
   return (
-    <div className="w-full border rounded-xl p-4">
+    <div className="w-full border border-gray-200  rounded-xl p-4">
       <h3 className="text-md font-semibold mb-2">
         {filters.academicYear} - {filters.semester} Semester
       </h3>
