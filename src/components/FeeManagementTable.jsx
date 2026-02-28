@@ -37,6 +37,7 @@ export default function FeeManagementTable({ data, selectedIds, setSelectedIds }
   };
 
   const getStudentImages = (student) => {
+    console.log(student);
     // If hostler → show only hostel
     if (student.ishostler) {
       return [Hostel];
@@ -160,12 +161,15 @@ export default function FeeManagementTable({ data, selectedIds, setSelectedIds }
                 </td>
 
                 <td className="p-3">
-                  <div className="flex justify-center items-center">
-                    <img
-                      src={getStudentImages(student.type)}
-                      alt={student.type}
-                      className="w-8 h-8 object-contain"
-                    />
+                  <div className="flex justify-center gap-2 items-center">
+                  {getStudentImages(student).map((img, index) => (
+                      <img
+                        key={index}
+                        src={img}
+                        alt="student-type"
+                        className="w-6 h-6 object-contain"
+                      />
+                    ))}
                   </div>
                 </td>
 
