@@ -14,8 +14,8 @@ export default function ReportsFilter({search,
   onAcademicYearChange,
   onClearFilters,}) {
   return (
-    <div className="flex justify-between items-center">
-        <div className="flex gap-4 mb-4 items-center">
+    <div className="flex justify-between items-center ">
+        <div className="flex gap-4  items-center ">
         {/* Search Input */}
         <div className="relative ">
             <input

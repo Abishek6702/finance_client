@@ -2,17 +2,15 @@ import React, { useMemo, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import * as XLSX from "xlsx";
 import ReportsDetailsFilter from "../../components/ReportsDetailsFilter";
-import DateWiseFeeReport from "../../components/DateWiseFeeReport";
+import CustomSelect from "../../components/CustomSelect"; // Import your CustomSelect
 import { ChevronRight, Download } from 'lucide-react';
 
 export default function ReportsStudentDetails() {
   const { state } = useLocation();
   const navigate = useNavigate();
 
-  // Retrieve student data from navigation state
   const student = state?.user;
 
-  // Local states for filtering student-specific fees
   const [search, setSearch] = useState("");
   const [sem, setSem] = useState("");
   const [feesHead, setFeesHead] = useState("");
@@ -20,8 +18,10 @@ export default function ReportsStudentDetails() {
   const [dateRange, setDateRange] = useState({ start: "", end: "" });
   const [selectedRows, setSelectedRows] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
+  
+  // New State for Academic Year Filter
+  const [academicYear, setAcademicYear] = useState(student?.academicyear || "2025-2026");
 
-  // Filter Logic for the table
   const filteredFees = useMemo(() => {
     if (!student?.fees) return [];
 
@@ -45,7 +45,6 @@ export default function ReportsStudentDetails() {
     });
   }, [student, search, sem, feesHead, paymentMode, dateRange]);
 
-  // Selection Handlers
   const handleRowSelect = (receiptNo) => {
     setSelectedRows((prev) =>
       prev.includes(receiptNo) ? prev.filter((id) => id !== receiptNo) : [...prev, receiptNo]
@@ -61,7 +60,6 @@ export default function ReportsStudentDetails() {
     setSelectAll(!selectAll);
   };
 
-  // Export Logic
   const handleExport = () => {
     const dataToExport = filteredFees.filter((fee) => selectedRows.includes(fee.receiptNo));
     if (dataToExport.length === 0) return alert("Please select at least one row");
@@ -92,7 +90,7 @@ export default function ReportsStudentDetails() {
 
   return (
     <div className="p-1">
-      {/* 🔹 Navigation Tabs - Now redirects to main page with specific Tab state */}
+      {/* 🔹 Navigation Tabs */}
       <div className="flex gap-3 mb-6">
         <button
           onClick={() => navigate("/admin/reports", { state: { activeTab: "individual" } })}
@@ -109,14 +107,27 @@ export default function ReportsStudentDetails() {
         </button>
       </div>
 
-      {/* 🔹 Breadcrumb */}
-      <nav className="flex items-center space-x-1.5 text-xl mb-4">
-        <Link to="/admin/reports" className="">
-          Fees Details
-        </Link>
-        <ChevronRight size={20} className="text-gray-400" />
-        <span className="text-[#0b56a4] font-semibold">{student.name} ({student.rollNo})</span>
-      </nav>
+      {/* 🔹 Breadcrumb + Academic Year Filter Row */}
+      <div className="flex items-center justify-between mb-4">
+        <nav className="flex items-center space-x-1.5 text-xl">
+          <Link to="/admin/reports" className="text-gray-600 hover:text-gray-800 transition-colors">
+            Fees Details
+          </Link>
+          <ChevronRight size={20} className="text-gray-400" />
+          <span className="text-[#0b56a4] font-semibold">
+            {student.name} ({student.rollNo})
+          </span>
+        </nav>
+
+        {/* 🔹 Academic Year Filter Aligned to the Right */}
+        <CustomSelect
+          placeholder="Academic Year"
+          value={academicYear}
+          onChange={setAcademicYear}
+          options={["2024-2025", "2025-2026", "2026-2027"]}
+          className="w-48"
+        />
+      </div>
 
       <ReportsDetailsFilter
         search={search}
@@ -129,6 +140,7 @@ export default function ReportsStudentDetails() {
         onPaymentModeChange={setPaymentMode}
         dateRange={dateRange}
         onDateRangeChange={setDateRange}
+        selectedRows={selectedRows}
         onClearFilters={() => {
           setSearch("");
           setSem("");
@@ -140,14 +152,14 @@ export default function ReportsStudentDetails() {
       />
 
       {/* 🔹 Fees Table */}
-              <div className="bg-white rounded-xl border border-[#D9D9D9]">
+      <div className="bg-white rounded-xl border border-[#D9D9D9] overflow-hidden">
         <table className="w-full text-center">
           <thead className="bg-gray-100">
             <tr>
               <th className="p-4">
-                <input type="checkbox" checked={selectAll} onChange={handleSelectAll} />
+                <input type="checkbox" checked={selectAll} onChange={handleSelectAll} className="cursor-pointer" />
               </th>
-              <th>Receipt No</th>
+              <th className="py-4 px-2">Receipt No</th>
               <th>Fees Head</th>
               <th>Sub Head</th>
               <th>Demand</th>
@@ -161,41 +173,44 @@ export default function ReportsStudentDetails() {
             </tr>
           </thead>
 
-          <tbody>
+          <tbody className="">
             {filteredFees.length > 0 ? (
               filteredFees.map((fee) => (
-                <tr key={fee.receiptNo}>
+                <tr key={fee.receiptNo} className="">
                   <td className="p-4">
                     <input
                       type="checkbox"
                       checked={selectedRows.includes(fee.receiptNo)}
                       onChange={() => handleRowSelect(fee.receiptNo)}
+                      className="cursor-pointer"
                     />
                   </td>
-                  <td>{fee.receiptNo}</td>
+                  <td className="py-4 px-2 ">{fee.receiptNo}</td>
                   <td>{fee.feesHead}</td>
                   <td>{fee.subHead}</td>
                   <td>₹{fee.demand}</td>
                   <td>₹{fee.concession}</td>
-                  <td className="text-green-600 font-medium">₹{fee.paid}</td>
+                  <td className="">₹{fee.paid}</td>
                   <td>{fee.fine}</td>
-                  <td className="text-red-500 font-medium">{fee.balance}</td>
+                  <td className="text-red-500 ">₹{fee.balance}</td>
                   <td>{fee.paymentDate}</td>
-                  <td className="text-center">{fee.paymentMode}</td>
+                  <td className="text-center">
+                    <span className="">{fee.paymentMode}</span>
+                  </td>
                   <td>
                     <button
                       onClick={() => handleSingleExport(fee)}
-                      className="bg-[#0B56A4] text-white p-2 rounded-3xl text-sm cursor-pointer"
+                      className="bg-[#0B56A4] text-white p-2 rounded-full hover:bg-[#084482] transition-colors cursor-pointer"
                     >
-                      <Download size={16} />
+                      <Download size={14} />
                     </button>
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="12" className="text-center p-6 text-gray-500">
-                  No records found
+                <td colSpan="12" className="text-center p-12 text-gray-400">
+                  No records found for the selected filters.
                 </td>
               </tr>
             )}
