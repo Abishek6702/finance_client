@@ -162,7 +162,7 @@ export default function FeeManagementTable({ data, selectedIds, setSelectedIds }
                 <td className="p-3">
                   <div className="flex justify-center items-center">
                     <img
-                      src={getTypeImage(student.type)}
+                      src={getStudentImages(student.type)}
                       alt={student.type}
                       className="w-8 h-8 object-contain"
                     />
