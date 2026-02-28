@@ -2,6 +2,7 @@ import React, { useState, useMemo } from "react";
 import { RotateCcw, Plus, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import PaymentMFilter from "./PaymentMFilter";
+import nodata from "../assets/nodata.svg";
 import RecallDrawer from "./RecallDrawer";
 
 const PaymentTable = () => {
@@ -284,8 +285,8 @@ const PaymentTable = () => {
 
             {filteredData.length === 0 && (
               <div className="py-24 flex flex-col items-center justify-center text-gray-400">
-                <Search size={48} strokeWidth={1} className="mb-4 opacity-20" />
-                <p className="text-sm font-medium">No results found.</p>
+                <img src={nodata} alt="No data" className="w-50 " />
+                              <p className="text-gray-500">No results found.</p>
               </div>
             )}
           </div>

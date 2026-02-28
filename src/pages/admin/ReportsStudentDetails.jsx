@@ -1,9 +1,10 @@
 import React, { useMemo, useState } from "react";
-import { Link, useLocation,useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import * as XLSX from "xlsx";
 import ReportsDetailsFilter from "../../components/ReportsDetailsFilter";
-import { ChevronRight, Download } from 'lucide-react';
-import DateWiseFeeReport from '../../components/DateWiseFeeReport';
+import { ChevronRight, Download } from "lucide-react";
+import DateWiseFeeReport from "../../components/DateWiseFeeReport";
+import nodata from "../../assets/nodata.svg";
 
 export default function ReportsStudentDetails() {
   const { state } = useLocation();
@@ -20,7 +21,6 @@ export default function ReportsStudentDetails() {
   const [selectedRows, setSelectedRows] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
   const [activeTab, setActiveTab] = useState("individual");
-
 
   const filteredFees = useMemo(() => {
     if (!student?.fees) return [];
@@ -40,7 +40,7 @@ export default function ReportsStudentDetails() {
     setSelectedRows((prev) =>
       prev.includes(receiptNo)
         ? prev.filter((id) => id !== receiptNo)
-        : [...prev, receiptNo]
+        : [...prev, receiptNo],
     );
   };
 
@@ -55,7 +55,7 @@ export default function ReportsStudentDetails() {
 
   const handleExport = () => {
     const dataToExport = filteredFees.filter((fee) =>
-      selectedRows.includes(fee.receiptNo)
+      selectedRows.includes(fee.receiptNo),
     );
 
     if (dataToExport.length === 0) {
@@ -71,42 +71,44 @@ export default function ReportsStudentDetails() {
   };
 
   const handleSingleExport = (fee) => {
-  const worksheet = XLSX.utils.json_to_sheet([fee]);
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, "Receipt");
+    const worksheet = XLSX.utils.json_to_sheet([fee]);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Receipt");
 
-  XLSX.writeFile(workbook, `Receipt_${fee.receiptNo}.xlsx`);
-};
+    XLSX.writeFile(workbook, `Receipt_${fee.receiptNo}.xlsx`);
+  };
 
   if (!student) {
-    return <p className="p-6">No student selected</p>;
+    return (
+      <p className="p-6">
+        {" "}
+        <img src={nodata} alt="No data" className="w-50 " />
+        <p className="text-gray-500">No results found.</p>
+      </p>
+    );
   }
 
   return (
     <>
-        <div className="flex gap-3 mb-4">
-            <button
-                onClick={() => navigate("/admin/reports")}
-                className="px-4 py-2 rounded-lg bg-[#1F5AA6] text-white"
-            >
-                Individual Fees Report
-            </button>
+      <div className="flex gap-3 mb-4">
+        <button
+          onClick={() => navigate("/admin/reports")}
+          className="px-4 py-2 rounded-lg bg-[#1F5AA6] text-white"
+        >
+          Individual Fees Report
+        </button>
 
-            <button
-                onClick={() => setActiveTab("datewise")}
-                className={`px-4 py-2 rounded-lg ${
-                activeTab === "datewise"
-                    ? "bg-[#1F5AA6] text-white"
-                    : "bg-gray-200"
-                }`}
-            >
-                Date Wise Fee Report
-            </button>
-            </div>
+        <button
+          onClick={() => setActiveTab("datewise")}
+          className={`px-4 py-2 rounded-lg ${
+            activeTab === "datewise" ? "bg-[#1F5AA6] text-white" : "bg-gray-200"
+          }`}
+        >
+          Date Wise Fee Report
+        </button>
+      </div>
 
-
-
-            <nav className="flex items-center  space-x-1.5  text-xl mb-3 ">
+      <nav className="flex items-center  space-x-1.5  text-xl mb-3 ">
         <Link
           to="/admin/reports"
           className="text-black  hover:text-gray-700 transition"
@@ -114,9 +116,11 @@ export default function ReportsStudentDetails() {
           Fees Details
         </Link>
 
-       <ChevronRight size={24} className="" />
+        <ChevronRight size={24} className="" />
 
-        <span className="text-[#0b56a4] font-semibold">{student.name} ({student.rollNo})</span>
+        <span className="text-[#0b56a4] font-semibold">
+          {student.name} ({student.rollNo})
+        </span>
       </nav>
       <ReportsDetailsFilter
         search={search}
@@ -133,12 +137,12 @@ export default function ReportsStudentDetails() {
         selectedRows={selectedRows}
         onYearChange={setYear}
         onClearFilters={() => {
-            setSearch("");
-            setSem("");
-            setFeesHead("");
-            setPaymentMode("");
-            setDate("");
-            setYear("");
+          setSearch("");
+          setSem("");
+          setFeesHead("");
+          setPaymentMode("");
+          setDate("");
+          setYear("");
         }}
         onExport={handleExport}
       />
@@ -191,18 +195,19 @@ export default function ReportsStudentDetails() {
                   <td className="text-center">{fee.paymentMode}</td>
                   <td>
                     <button
-                        onClick={() => handleSingleExport(fee)}
-                        className="bg-[#0B56A4] text-white p-2 rounded-3xl text-sm cursor-pointer"
+                      onClick={() => handleSingleExport(fee)}
+                      className="bg-[#0B56A4] text-white p-2 rounded-3xl text-sm cursor-pointer"
                     >
-                        <Download/>
+                      <Download />
                     </button>
-                    </td>
+                  </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="11" className="text-center p-6 text-gray-500">
-                  No records found
+                <td colSpan="11" className="text-center p-6  text-gray-500">
+                <img src={nodata} alt="No data" className="w-50 m-auto" />
+                <p className="text-gray-500">No results found.</p>
                 </td>
               </tr>
             )}

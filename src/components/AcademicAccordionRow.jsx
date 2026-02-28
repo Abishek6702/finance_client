@@ -1,6 +1,8 @@
 import React from "react";
 import { Download } from "lucide-react";
 import { academicSampleData } from "../data";
+import nodata from "../assets/nodata.svg";
+
 
 const AcademicAccordionRow = () => {
   console.log("AcademicAccordionRow - Row Data:", academicSampleData.details);
@@ -62,7 +64,8 @@ const AcademicAccordionRow = () => {
                 ) : (
                   <tr className="h-20">
                     <td colSpan="10" className="text-center text-gray-500">
-                      No records found
+                    <img src={nodata} alt="No data" className="w-50 " />
+                <p className="text-gray-500">No results found.</p>
                     </td>
                   </tr>
                 )}

@@ -2,6 +2,8 @@ import { Link, useLocation } from "react-router-dom";
 import StudentProfileCard from "../../components/StudentProfileCard.jsx";
 import { StudentFinancePanel } from "../../components/StudentFinancePanel.jsx";
 import { ChevronRight } from "lucide-react";
+import nodata from "../../assets/nodata.svg";
+
 
 export default function StudentDetails() {
   const location = useLocation();
@@ -9,7 +11,8 @@ export default function StudentDetails() {
   console.log("jju",student);
 
   if (!student) {
-    return <div className="p-10">No student data found</div>;
+    return <div className="p-10">  <img src={nodata} alt="No data" className="w-50 " />
+    <p className="text-gray-500">No results found.</p></div>;
   }
 
   return (

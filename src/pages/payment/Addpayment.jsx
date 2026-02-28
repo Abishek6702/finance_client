@@ -119,10 +119,10 @@ const AddPayment = () => {
                 className="w-52 mb-8 mx-auto opacity-80"
               />
               <h2 className="text-xl font-semibold text-gray-800 mb-3">
-                Select Student to proceed the Payment
+                Search & Select Student to proceed the Payment
               </h2>
               <p className="text-gray-500 text-sm leading-relaxed">
-                Choose a student from the list to view balance.
+                Choose a student from the search to view balance.
               </p>
             </div>
           )}

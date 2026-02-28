@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Search, ListFilter } from "lucide-react";
 import CustomSelect from "./CustomSelect";
+import nodata from "../assets/nodata.svg";
 
 const PaymentFilter = ({
   filters,
@@ -105,7 +106,11 @@ const PaymentFilter = ({
                 </div>
               ))
             ) : (
-              <div className="px-4 py-3 text-gray-400">No students found</div>
+              <div className="px-4 py-3 text-gray-400 ">
+                {" "}
+                <img src={nodata} alt="No data" className="w-50 m-auto" />
+                <p className="text-gray-500  text-center">No results found.</p>
+              </div>
             )}
           </div>
         )}

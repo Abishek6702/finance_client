@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { feeData } from "../data.js";
 import { ArrowUpRight, Search } from "lucide-react";
 import PaymentDrawer from "./PaymentDrawer";
+import nodata from "../assets/nodata.svg";
 
 const NewpaymnetTable = ({ selectedStudent, filters }) => {
   const [enteredAmounts, setEnteredAmounts] = useState({});
@@ -214,9 +215,9 @@ const NewpaymnetTable = ({ selectedStudent, filters }) => {
               totalAmount={totals.enterAmount}
             />
             {filteredData.length === 0 && (
-              <div className="py-24 flex flex-col items-center justify-center text-gray-400">
-                <Search size={48} strokeWidth={1} className="mb-4 opacity-20" />
-                <p className="text-sm font-medium">No results found.</p>
+              <div className="py-6 flex flex-col items-center justify-center text-gray-400">
+                <img src={nodata} alt="No data" className="w-50 " />
+                <p className="text-gray-500">No results found.</p>
               </div>
             )}
           </div>
