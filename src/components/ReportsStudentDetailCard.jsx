@@ -9,12 +9,12 @@ export default function ReportsStudentDetailCard({user}) {
         state:{user}
     })}
   return (
-    <div className='inline-flex items-center justify-between gap-5 border border-gray-300 rounded-2xl p-2 mx-2 my-2'>
+    <div className='inline-flex items-center justify-between gap-5 border bg-white border-gray-300 rounded-2xl p-2 mx-2 my-2'>
         <div className="flex gap-4 w-full">
         <div className=''>
-            <img className='rounded-xl w-24 ' src={user.profileImage} alt='user image'/>
+            <img className='rounded-xl w-34 h-24' src={user.profileImage} alt='user image'/>
         </div>
-        <div className=' w-full'>
+        <div className=' w-full flex flex-col gap-2'>
             <p className='font-semibold text-md'>{user.rollNo}</p>
             <p className='text-md w-40 truncate'>{user.name}</p>
             <div className='flex items-center gap-1 text-sm'>

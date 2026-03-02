@@ -4,6 +4,7 @@ import ReportsFilter from "../../components/ReportsFilter";
 import ReportsStudentDetailCard from "../../components/ReportsStudentDetailCard";
 import DateWiseFeeReport from "../../components/DateWiseFeeReport";
 import {StudentDetails} from "../../data";
+import nodata from '../../assets/nodata.svg';
 
 export default function Reports() {
   const location = useLocation();
@@ -98,13 +99,15 @@ export default function Reports() {
                 <ReportsStudentDetailCard key={user.id} user={user} />
               ))
             ) : (
-              <div className="col-span-full text-center py-10 text-gray-400">
-                No students found matching the criteria.
-              </div>
+                <div className="col-span-full py-24 flex flex-col items-center justify-center text-gray-400">
+                    <img src={nodata} alt="No data" className="w-50 " />
+                  <p className="text-gray-500">No results found.</p>
+                </div>
             )}
           </div>
         </>
       )}
+      
 
       {activeTab === "datewise" && <DateWiseFeeReport />}
     </div>
