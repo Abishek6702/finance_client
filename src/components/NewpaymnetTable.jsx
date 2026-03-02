@@ -94,6 +94,12 @@ const NewpaymnetTable = ({ selectedStudent, filters }) => {
       enteredAmount: Number(enteredAmounts[index] || 0),
     }))
     .filter((item) => item.enteredAmount > 0);
+
+    const handleCloseDrawer = () => {
+      setShowDrawer(false);
+      setEnteredAmounts({});
+      setErrors({});
+    };
   return (
     <div className="w-full border rounded-2xl border-gray-200">
       <div className="w-full bg-white rounded-2xl  ">
@@ -243,7 +249,7 @@ const NewpaymnetTable = ({ selectedStudent, filters }) => {
             </table>
             <PaymentDrawer
               show={showDrawer}
-              onClose={() => setShowDrawer(false)}
+              onClose={handleCloseDrawer}
               selectedStudent={selectedStudent}
               enteredRows={enteredRows}
               totalAmount={totals.enterAmount}
