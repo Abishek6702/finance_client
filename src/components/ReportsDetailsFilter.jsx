@@ -72,13 +72,13 @@ export default function ReportsDetailsFilter({
                   type="date"
                   value={dateRange?.start || ""}
                   onChange={(e) => onDateRangeChange({ ...dateRange, start: e.target.value })}
-                  className="w-full border rounded p-1.5 text-sm outline-none"
+                  className="w-full border border-gray-300 rounded p-1.5 text-sm outline-none"
                 />
                 <input
                   type="date"
                   value={dateRange?.end || ""}
                   onChange={(e) => onDateRangeChange({ ...dateRange, end: e.target.value })}
-                  className="w-full border rounded p-1.5 text-sm outline-none"
+                  className="w-full border border-gray-300 rounded p-1.5 text-sm outline-none"
                 />
               </div>
             </div>

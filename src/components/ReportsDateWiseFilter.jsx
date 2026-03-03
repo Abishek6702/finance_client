@@ -69,7 +69,7 @@ export default function ReportsDateWiseFilter({
                       start: e.target.value,
                     })
                   }
-                  className="w-full border rounded p-2 text-sm outline-none"
+                  className="w-full border border-gray-300 rounded p-2 text-sm outline-none"
                 />
                 <input
                   type="date"
@@ -80,7 +80,7 @@ export default function ReportsDateWiseFilter({
                       end: e.target.value,
                     })
                   }
-                  className="w-full border rounded p-2 text-sm outline-none"
+                  className="w-full border border-gray-300 rounded p-2 text-sm outline-none"
                 />
               </div>
             </div>

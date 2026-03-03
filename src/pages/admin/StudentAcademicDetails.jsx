@@ -2,8 +2,7 @@ import { ChevronRight } from "lucide-react";
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import StudentProfileCard from "../../components/StudentProfileCard.jsx";
-import  StudentFinanceAcademicPanel  from "../../components/StudentFinanceAcademicPanel.jsx";
-
+import StudentFinanceAcademicPanel from "../../components/StudentFinanceAcademicPanel.jsx";
 
 const StudentAcademicDetails = () => {
   const location = useLocation();
@@ -14,6 +13,7 @@ const StudentAcademicDetails = () => {
   console.log("Student:", student);
   return (
     <>
+      <div className="h-[calc(100vh-140px)] overflow-auto  ">
       <nav className="flex items-center  space-x-1.5  text-xl mb-3 ">
         <Link
           to="/admin/fees_management"
@@ -34,14 +34,14 @@ const StudentAcademicDetails = () => {
         </Link>
         <ChevronRight size={24} className="" />
 
-        <span className="text-[#0b56a4] font-semibold">Academic Year ({row.year})</span>
+        <span className="text-[#0b56a4] font-semibold">
+          Academic Year ({row.year})
+        </span>
       </nav>
-      <div className="min-h-[calc(100vh-200px)] flex gap-6 w-full ">
+      <div className="h-[calc(100vh-200px)] flex gap-6 w-full   ">
         <StudentProfileCard student={student} />
-        <StudentFinanceAcademicPanel 
-  student={student}
-  academicYear={row}
-/>
+        <StudentFinanceAcademicPanel student={student} academicYear={row} />
+      </div>
       </div>
     </>
   );
