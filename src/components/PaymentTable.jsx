@@ -1,196 +1,20 @@
-import React, { useState, useMemo } from "react";
-import { RotateCcw, Plus, Search } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import PaymentMFilter from "./PaymentMFilter";
+import React, { useState } from "react";
+import { RotateCcw } from "lucide-react";
 import nodata from "../assets/nodata.svg";
 import RecallDrawer from "./RecallDrawer";
 
-const PaymentTable = () => {
-  const navigate = useNavigate();
-
-  const [searchTerm, setSearchTerm] = useState("");
+const PaymentTable = ({ data }) => {
   const [selectedPayment, setSelectedPayment] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [filters, setFilters] = useState({
-    year: "Year",
-    dept: "Department",
-    mode: "Mode",
-    feeHead: "Fee Head",
-  });
-
-  const [payments] = useState([
-    {
-      id: 1,
-      name: "Aarav Sharma",
-      sub: "1st Year / CSE",
-      roll: "21CS001",
-      semPeriod: "Even Sem",
-      head: "Exam Fees",
-      amount: "₹4000",
-      date: "10/12/2026",
-      mode: "Cash",
-      bank: "Cash",
-      receipt: "10123255",
-      avatar: "https://i.pravatar.cc/150?u=1",
-      isrecallrequested: false,
-    },
-    {
-      id: 2,
-      name: "Surya Chandran",
-      sub: "1st Year / IT",
-      roll: "21ECE011",
-      semPeriod: "Odd Sem",
-      head: "Software Fees",
-      amount: "₹4000",
-      date: "10/12/2026",
-      mode: "UPI",
-      bank: "ICICI",
-      receipt: "10123255",
-      avatar: "https://i.pravatar.cc/150?u=2",
-      isrecallrequested: true,
-    },
-    {
-      id: 3,
-      name: "Surya Chandran",
-      sub: "2nd Year / ECE",
-      roll: "21IT009",
-      semPeriod: "Even Sem",
-      head: "Software Fees",
-      amount: "₹4000",
-      date: "10/12/2026",
-      mode: "UPI",
-      bank: "CUB",
-      receipt: "10123255",
-      avatar: "https://i.pravatar.cc/150?u=3",
-      isrecallrequested: false,
-    },
-    {
-      id: 4,
-      name: "Surya Chandran",
-      sub: "3rd Year / EEE",
-      roll: "21CS011",
-      semPeriod: "Odd Sem",
-      head: "Exam Fees",
-      amount: "₹4000",
-      date: "10/12/2026",
-      mode: "DD",
-      bank: "IOB",
-      receipt: "10123255",
-      avatar: "https://i.pravatar.cc/150?u=4",
-      isrecallrequested: true,
-    },
-    {
-      id: 5,
-      name: "Surya Chandran",
-      sub: "4th Year / MECH",
-      roll: "21MEC061",
-      semPeriod: "Odd Sem",
-      head: "Tution Fees",
-      amount: "₹4000",
-      date: "10/12/2026",
-      mode: "NEFT",
-      bank: "ICICI",
-      receipt: "10123255",
-      avatar: "https://i.pravatar.cc/150?u=5",
-      isrecallrequested: false,
-    },
-    {
-      id: 6,
-      name: "Surya Chandran",
-      sub: "2nd Year / ECE",
-      roll: "21IT009",
-      semPeriod: "Even Sem",
-      head: "Software Fees",
-      amount: "₹4000",
-      date: "10/12/2026",
-      mode: "UPI",
-      bank: "CUB",
-      receipt: "10123255",
-      avatar: "https://i.pravatar.cc/150?u=3",
-      isrecallrequested: false,
-    },
-    {
-      id: 7,
-      name: "Surya Chandran",
-      sub: "3rd Year / EEE",
-      roll: "21CS011",
-      semPeriod: "Odd Sem",
-      head: "Exam Fees",
-      amount: "₹4000",
-      date: "10/12/2026",
-      mode: "DD",
-      bank: "IOB",
-      receipt: "10123255",
-      avatar: "https://i.pravatar.cc/150?u=4",
-      isrecallrequested: false,
-    },
-    {
-      id: 8,
-      name: "Surya Chandran",
-      sub: "4th Year / MECH",
-      roll: "21MEC061",
-      semPeriod: "Odd Sem",
-      head: "Tution Fees",
-      amount: "₹4000",
-      date: "10/12/2026",
-      mode: "NEFT",
-      bank: "ICICI",
-      receipt: "10123255",
-      avatar: "https://i.pravatar.cc/150?u=5",
-      isrecallrequested: false,
-    },
-  ]);
-
-  const filteredData = useMemo(() => {
-    return payments.filter((item) => {
-      const matchesSearch =
-        item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.roll.toLowerCase().includes(searchTerm.toLowerCase());
-
-      const matchesYear =
-        filters.year === "Year" || item.sub.includes(filters.year);
-      const matchesDept =
-        filters.dept === "Department" || item.sub.includes(filters.dept);
-      const matchesMode = filters.mode === "Mode" || item.mode === filters.mode;
-      const matchesHead =
-        filters.feeHead === "Fee Head" || item.head === filters.feeHead;
-
-      return (
-        matchesSearch &&
-        matchesYear &&
-        matchesDept &&
-        matchesMode &&
-        matchesHead
-      );
-    });
-  }, [searchTerm, filters, payments]);
 
   const RecallOpen = (item) => {
-    setIsModalOpen(true);
     setSelectedPayment(item);
+    setIsModalOpen(true);
   };
 
   return (
-    <div className="flex flex-col gap-5">
-      {/* Header Section */}
-      <div className="flex items-center justify-between gap-4">
-        <PaymentMFilter
-          filters={filters}
-          setFilters={setFilters}
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-        />
-
-        <button
-          className="flex items-center gap-2 px-4 py-2.5 bg-[#0B56A4] text-white rounded-lg font-semibold hover:bg-[#084482] transition-colors shadow-sm whitespace-nowrap cursor-pointer"
-          onClick={() => navigate("/admin/payment/newpayment")}
-        >
-          <Plus className="w-5 h-5" /> New Payment
-        </button>
-      </div>
-
-      {/* Table Wrapper */}
-      <div className="w-full bg-white rounded-2xl shadow  ">
+    <div>
+        <div className="w-full bg-white rounded-2xl shadow  ">
         {/* Horizontal Scroll */}
         <div className="overflow-x-auto ">
           {/* Vertical Scroll */}
@@ -234,7 +58,7 @@ const PaymentTable = () => {
               </thead>
 
               <tbody className="bg-white">
-                {filteredData.map((item) => (
+                {data.map((item) => (
                   <tr key={item.id}>
                     <td className="p-3 sticky left-0 bg-white z-20">
                       <div className="flex items-center gap-3">
@@ -283,7 +107,7 @@ const PaymentTable = () => {
               </tbody>
             </table>
 
-            {filteredData.length === 0 && (
+            {data.length === 0 && (
               <div className="py-24 flex flex-col items-center justify-center text-gray-400">
                 <img src={nodata} alt="No data" className="w-50 " />
                               <p className="text-gray-500">No results found.</p>
