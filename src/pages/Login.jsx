@@ -28,15 +28,18 @@ const Login = () => {
 
     try {
       const res = await axios.post(
-        `${import.meta.env.VITE_API_BASE_URL}/api/auth/login`,
+        `${import.meta.env.VITE_API_URL}/api/auth/login`,
         { email, password },
       );
-
-      const { token, role } = res.data;
+      const response = res.data;
+      const {role,token}=response.data;
+      console.log(response.data);
       localStorage.setItem("token", token);
+      console.log("token");
       toast.success("Login successful!");
-
+      console.log("admin loged in success!!")
       if (role.toLowerCase() === "admin") {
+        console.log("admin loged in success!!")
         navigate("/admin");
       } else if (role.toLowerCase() === "superadmin") {
         navigate("/Superadmin");
@@ -44,6 +47,7 @@ const Login = () => {
         navigate("/notfound");
       }
     } catch (err) {
+      console.log("error: ",err.message)
       toast.error(err.response?.data?.message || "Login failed");
     } finally {
       setLoading(false);
@@ -56,7 +60,7 @@ const Login = () => {
     setForgotLoading(true);
     try {
       await axios.post(
-        `${import.meta.env.VITE_API_BASE_URL}/api/auth/forgot-password`,
+        `${import.meta.env.VITE_API_URL}/api/auth/forgot-password`,
         { email },
       );
       toast.success("OTP sent to your email!");
@@ -74,7 +78,7 @@ const Login = () => {
     setResetLoading(true);
     try {
       await axios.post(
-        `${import.meta.env.VITE_API_BASE_URL}/api/auth/reset-password`,
+        `${import.meta.env.VITE_API_URL}/api/auth/reset-password`,
         { email, otp, newPassword },
       );
       toast.success("Password reset successfully! Please login.");
