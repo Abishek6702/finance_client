@@ -73,7 +73,7 @@ const StudentFinanceAcademicPanel = ({ student, academicYear }) => {
       : "Partial";
 
     return (
-      <div className="mb-6">
+      <div className="mb-6 ">
         <div className="overflow-hidden rounded-xl border border-[#d9d9d9]">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -187,7 +187,7 @@ const StudentFinanceAcademicPanel = ({ student, academicYear }) => {
   };
 
   return (
-    <div className=" w-full  overflow-hidden">
+    <div className=" w-full  h-[calc(100vh-190px)]  overflow-auto  ">
       {oddData.length > 0 && renderTable(oddData, "odd")}
       {evenData.length > 0 && renderTable(evenData, "even")}
     </div>

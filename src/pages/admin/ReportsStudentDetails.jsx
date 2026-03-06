@@ -4,6 +4,7 @@ import * as XLSX from "xlsx";
 import ReportsDetailsFilter from "../../components/ReportsDetailsFilter";
 import CustomSelect from "../../components/CustomSelect"; // Import your CustomSelect
 import { ChevronRight, Download } from 'lucide-react';
+import nodata from '../../assets/nodata.svg'
 
 export default function ReportsStudentDetails() {
   const { state } = useLocation();
@@ -208,11 +209,14 @@ export default function ReportsStudentDetails() {
                 </tr>
               ))
             ) : (
-              <tr>
-                <td colSpan="12" className="text-center p-12 text-gray-400">
-                  No records found for the selected filters.
-                </td>
-              </tr>
+                <tr>
+                  <td colSpan="12">
+                    <div className="flex flex-col items-center justify-center py-24 text-gray-400">
+                      <img src={nodata} alt="No data" className="w-40 mb-4" />
+                      <p className="text-gray-500">No results found.</p>
+                    </div>
+                  </td>
+                </tr>
             )}
           </tbody>
         </table>

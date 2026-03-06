@@ -2,6 +2,7 @@ import React, { useState, useMemo } from "react";
 import {StudentDetails} from "../data";
 import ReportsDateWiseFilter from "./ReportsDateWiseFilter";
 import * as XLSX from "xlsx";
+import nodata from '../assets/nodata.svg';
 
 export default function DateWiseFeeReport() {
   const [dateRange, setDateRange] = useState({
@@ -150,7 +151,10 @@ export default function DateWiseFeeReport() {
             ) : (
               <tr>
                 <td colSpan="9" className="text-center py-20 text-gray-400">
-                  No records found for the selected filters.
+                  <div className="py-24 flex flex-col items-center justify-center text-gray-400">
+                      <img src={nodata} alt="No data" className="w-50 " />
+                    <p className="text-gray-500">No results found.</p>
+                  </div>
                 </td>
               </tr>
             )}

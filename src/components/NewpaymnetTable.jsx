@@ -7,6 +7,7 @@ import nodata from "../assets/nodata.svg";
 const NewpaymnetTable = ({ selectedStudent, filters }) => {
   const [enteredAmounts, setEnteredAmounts] = useState({});
   const [showDrawer, setShowDrawer] = useState(false);
+  const [errors, setErrors] = useState({});
   console.log("l", filters);
   console.log(selectedStudent);
   const getStatusStyles = (status) => {
@@ -43,11 +44,27 @@ const NewpaymnetTable = ({ selectedStudent, filters }) => {
       (filters.feeHead === "All" || item.feeHead === filters.feeHead)
     );
   });
-  const handleAmountChange = (index, value) => {
+  const handleAmountChange = (index, value, pendingAmount) => {
+    const numericValue = Number(value);
+
+    // Always update input value
     setEnteredAmounts((prev) => ({
       ...prev,
       [index]: value,
     }));
+
+    // Then validate
+    if (numericValue > pendingAmount) {
+      setErrors((prev) => ({
+        ...prev,
+        [index]: `Amount cannot exceed ₹${pendingAmount}`,
+      }));
+    } else {
+      setErrors((prev) => ({
+        ...prev,
+        [index]: "",
+      }));
+    }
   };
 
   const totals = filteredData.reduce(
@@ -77,6 +94,12 @@ const NewpaymnetTable = ({ selectedStudent, filters }) => {
       enteredAmount: Number(enteredAmounts[index] || 0),
     }))
     .filter((item) => item.enteredAmount > 0);
+
+    const handleCloseDrawer = () => {
+      setShowDrawer(false);
+      setEnteredAmounts({});
+      setErrors({});
+    };
   return (
     <div className="w-full border rounded-2xl border-gray-200">
       <div className="w-full bg-white rounded-2xl  ">
@@ -147,16 +170,33 @@ const NewpaymnetTable = ({ selectedStudent, filters }) => {
                       </span>
                     </td>
                     <td className="p-3 text-center">
-                      <input
-                        type="number"
-                        min="0"
-                        value={enteredAmounts[index] || ""}
-                        onChange={(e) =>
-                          handleAmountChange(index, e.target.value)
-                        }
-                        placeholder="Enter Amount"
-                        className="w-32 px-3 py-1.5 border border-gray-300 rounded-lg text-center focus:outline-none "
-                      />
+                      <div className="flex flex-col items-center">
+                        <input
+                          type="number"
+                          min="0"
+                          disabled={item.status?.toLowerCase() === "paid"}
+                          value={enteredAmounts[index] || ""}
+                          onChange={(e) =>
+                            handleAmountChange(index, e.target.value, item.pending)
+                          }
+                          placeholder="Enter Amount"
+                          className={`w-32 px-3 py-1.5 border rounded-lg text-center focus:outline-none
+                            ${
+                              item.status?.toLowerCase() === "paid"
+                                ? "bg-gray-100 cursor-not-allowed"
+                                : errors[index]
+                                ? "border-red-400"
+                                : "border-gray-300"
+                            }
+                          `}
+                        />
+
+                        {errors[index] && (
+                          <span className="text-xs text-red-500 mt-1">
+                            {errors[index]}
+                          </span>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -209,7 +249,7 @@ const NewpaymnetTable = ({ selectedStudent, filters }) => {
             </table>
             <PaymentDrawer
               show={showDrawer}
-              onClose={() => setShowDrawer(false)}
+              onClose={handleCloseDrawer}
               selectedStudent={selectedStudent}
               enteredRows={enteredRows}
               totalAmount={totals.enterAmount}

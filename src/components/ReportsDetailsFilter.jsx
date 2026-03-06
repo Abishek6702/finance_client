@@ -55,7 +55,7 @@ export default function ReportsDetailsFilter({
         <div className="relative" ref={popoverRef}>
           <div
             onClick={() => setIsOpen(!isOpen)}
-            className="border border-[#D9D9D9] rounded-lg px-3 py-2 bg-white flex items-center gap-2 cursor-pointer min-w-[150px]"
+            className="border border-gray-300 rounded-lg px-3 py-2 bg-white flex items-center gap-2 cursor-pointer min-w-[150px]"
           >
             <Calendar size={16} className="text-gray-500" />
             <span className="text-sm">{getDateLabel()}</span>
@@ -72,13 +72,13 @@ export default function ReportsDetailsFilter({
                   type="date"
                   value={dateRange?.start || ""}
                   onChange={(e) => onDateRangeChange({ ...dateRange, start: e.target.value })}
-                  className="w-full border rounded p-1.5 text-sm outline-none"
+                  className="w-full border border-gray-300 rounded p-1.5 text-sm outline-none"
                 />
                 <input
                   type="date"
                   value={dateRange?.end || ""}
                   onChange={(e) => onDateRangeChange({ ...dateRange, end: e.target.value })}
-                  className="w-full border rounded p-1.5 text-sm outline-none"
+                  className="w-full border border-gray-300 rounded p-1.5 text-sm outline-none"
                 />
               </div>
             </div>

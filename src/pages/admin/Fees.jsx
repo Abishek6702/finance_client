@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import FeeManagementTable from "../../components/FeeManagementTable";
 import FeeManagementFilters from "../../components/FeeManagementFilters";
+import nodata from '../../assets/nodata.svg';
 
 const studentNames = [
   "Aarav Sharma", "Ananya Verma", "Rohan Patel", "Kavya Iyer", "Aditya Singh",
@@ -230,6 +231,12 @@ const Fees = () => {
         selectedIds={selectedIds}
         setSelectedIds={setSelectedIds}
       />
+      {filteredData.length === 0 && (
+        <div className="py-24 flex flex-col items-center justify-center text-gray-400">
+            <img src={nodata} alt="No data" className="w-50 " />
+          <p className="text-gray-500">No results found.</p>
+        </div>
+      )}
     </div>
   );
 };
