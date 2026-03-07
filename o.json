@@ -1,0 +1,44 @@
+
+{
+  "id": "e96a4b11-d003-4905-b0b3-9c8879eaaff1",
+  "name": "Qpulse Finance",
+  "values": [
+    {
+      "key": "base_url",
+      "value": "https://finance-backend-api-71x1.onrender.com/api",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "secret",
+      "enabled": true
+    },
+    {
+      "key": "academic_year",
+      "value": "2025-2026",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "batch_year",
+      "value": "2025-2029",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "student_roll_no",
+      "value": "25CS101",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "receipt_no",
+      "value": "REC-2025-001",
+      "type": "default",
+      "enabled": true
+    }
+  ],
+  "_postman_variable_scope": "environment"
+}

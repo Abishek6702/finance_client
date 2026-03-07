@@ -1,13 +1,11 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { RotateCcw, Plus, Search, MoveUpRight } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import RecallFilter from "./RecallFilter.jsx";
 import RecallDetail from "./RecallDetail.jsx";
 import nodata from "../assets/nodata.svg";
 import axios from "axios";
 
-const RecallReceipttable = () => {
-  const navigate = useNavigate();
+  const RecallReceipttable = () => {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedPayment, setSelectedPayment] = useState(null);
