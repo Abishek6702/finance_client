@@ -1,32 +1,44 @@
 import React, { useState } from "react";
 import { X } from "lucide-react";
 import toast from "react-hot-toast";
+import { ApiRequest } from "../utils/ApiRequest";
 
 const RecallDrawer = ({ isOpen, onClose, payment }) => {
   const [reason, setReason] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
   if (!isOpen) return null;
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!reason.trim()) {
       setError("Reason is required");
       return;
     }
 
-    setError(""); // clear error
+    setError("");
 
     const payload = {
-      paymentId: payment.id,
-      name: payment.name,
-      receipt: payment.receipt,
-      amount: payment.amount,
+      receiptNo: payment.receipt,
+      rollNo: payment.roll,
       reason: reason.trim(),
     };
 
-    console.log("Recall Request Data:", payload);
-    toast.success("Recall Requested")
+    try {
+      setLoading(true);
 
-    onClose();
+      await ApiRequest("/api/receiptRecall", "POST", payload);
+
+      toast.success("Recall requested successfully");
+
+      setReason("");
+      onClose();
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to request recall");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -35,25 +47,28 @@ const RecallDrawer = ({ isOpen, onClose, payment }) => {
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
 
       {/* Drawer */}
-      <div className="relative w-[25%] m-2 rounded-xl  bg-white shadow-2xl overflow-y-auto animate-slideIn">
-        <div className="border-b border-b-gray-300 w-full ">
-          <div className="flex justify-between items-center  p-4">
+      <div className="relative w-[25%] m-2 rounded-xl bg-white shadow-2xl overflow-y-auto animate-slideIn">
+        
+        {/* Header */}
+        <div className="border-b border-gray-300">
+          <div className="flex justify-between items-center p-4">
             <h2 className="text-xl font-semibold text-gray-800">
               Request for Re-call
             </h2>
-            <div className="flex justify-end">
-              <button
-                onClick={onClose}
-                className="bg-gray-200 hover:bg-gray-300 cursor-pointer transition-colors rounded-full p-1.5"
-              >
-                <X className="w-4 h-4 text-gray-600 hover:text-black" />
-              </button>
-            </div>
+
+            <button
+              onClick={onClose}
+              className="bg-gray-200 hover:bg-gray-300 cursor-pointer transition-colors rounded-full p-1.5"
+            >
+              <X className="w-4 h-4 text-gray-600 hover:text-black" />
+            </button>
           </div>
         </div>
 
         {payment && (
-          <div className="space-y-3 p-4">
+          <div className="space-y-4 p-4">
+            
+            {/* Student Info */}
             <div className="flex items-center gap-3">
               <img
                 src={payment.avatar}
@@ -66,16 +81,17 @@ const RecallDrawer = ({ isOpen, onClose, payment }) => {
               </div>
             </div>
 
-            {/* content */}
-            {/* Details Section */}
-            <div className="grid grid-cols-[150px_1fr] gap-x-15 gap-y-3 text-[15px]">
+            {/* Payment Details */}
+            <div className="grid grid-cols-[150px_1fr] gap-x-12 gap-y-3 text-[15px]">
               <span className="text-gray-600">Receipt Number</span>
               <span className="font-medium text-gray-800">
                 {payment.receipt}
               </span>
 
               <span className="text-gray-600">Roll Number</span>
-              <span className="font-medium text-gray-800">{payment.roll}</span>
+              <span className="font-medium text-gray-800">
+                {payment.roll}
+              </span>
 
               <span className="text-gray-600">Sem Period</span>
               <span className="font-medium text-gray-800">
@@ -83,25 +99,33 @@ const RecallDrawer = ({ isOpen, onClose, payment }) => {
               </span>
 
               <span className="text-gray-600">Fees Head</span>
-              <span className="font-medium text-gray-800">{payment.head}</span>
+              <span className="font-medium text-gray-800">
+                {payment.head}
+              </span>
 
               <span className="text-gray-600">Amount</span>
               <span className="font-medium text-gray-800">
-                {payment.amount}
+                ₹{payment.amount}
               </span>
 
               <span className="text-gray-600">Date</span>
-              <span className="font-medium text-gray-800">{payment.date}</span>
+              <span className="font-medium text-gray-800">
+                {new Date(payment.date).toLocaleDateString()}
+              </span>
 
               <span className="text-gray-600">Payment Mode</span>
-              <span className="font-medium text-gray-800">{payment.mode}</span>
+              <span className="font-medium text-gray-800">
+                {payment.mode}
+              </span>
 
               <span className="text-gray-600">Bank Name</span>
-              <span className="font-medium text-gray-800">{payment.bank}</span>
+              <span className="font-medium text-gray-800">
+                {payment.bank}
+              </span>
             </div>
 
-            {/* Reason Section */}
-            <div className="space-y-1 pt-1.5">
+            {/* Reason */}
+            <div className="space-y-1 pt-2">
               <label className="text-gray-700 font-medium">
                 Reason for Re-call :
               </label>
@@ -110,9 +134,9 @@ const RecallDrawer = ({ isOpen, onClose, payment }) => {
                 value={reason}
                 onChange={(e) => {
                   setReason(e.target.value);
-                  if (error) setError(""); // remove error while typing
+                  if (error) setError("");
                 }}
-                placeholder="write a reason here"
+                placeholder="Write a reason here..."
                 className={`w-full h-24 mt-1 border rounded-xl p-2 resize-none focus:outline-none ${
                   error
                     ? "border-red-500 focus:ring-1 focus:ring-red-500"
@@ -120,15 +144,24 @@ const RecallDrawer = ({ isOpen, onClose, payment }) => {
                 }`}
               />
 
-              {error && <p className="text-red-500 text-sm ">{error}</p>}
+              {error && (
+                <p className="text-red-500 text-sm">{error}</p>
+              )}
             </div>
 
+            {/* Submit Button */}
             <button
-              className=" w-full bg-[#0b56a4] cursor-pointer hover:bg-[#074c96] text-white py-2 rounded-lg "
               onClick={handleSubmit}
+              disabled={loading}
+              className={`w-full py-2 rounded-lg text-white transition ${
+                loading
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-[#0b56a4] hover:bg-[#074c96] cursor-pointer"
+              }`}
             >
-              Confirm Recall
+              {loading ? "Submitting..." : "Confirm Recall"}
             </button>
+
           </div>
         )}
       </div>

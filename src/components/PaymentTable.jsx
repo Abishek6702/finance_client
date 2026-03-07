@@ -20,18 +20,7 @@ const PaymentTable = ({ data }) => {
           {/* Vertical Scroll */}
           <div className="max-h-[calc(100vh-230px)] overflow-y-auto custom-scrollbar relative  rounded-xl">
             <table className="border-collapse w-full table-fixed">
-              <colgroup>
-                <col className="w-45" />
-                <col className="w-30" />
-                <col className="w-30" />
-                <col className="w-40" />
-                <col className="w-30" />
-                <col className="w-30" />
-                <col className="w-40" />
-                <col className="w-30" />
-                <col className="w-45" />
-                <col className="w-20" />
-              </colgroup>
+             <colgroup><col className="w-45"/><col className="w-30"/><col className="w-30"/><col className="w-40"/><col className="w-30"/><col className="w-30"/><col className="w-40"/><col className="w-30"/><col className="w-45"/><col className="w-20"/></colgroup>
               <thead className="sticky top-0 z-30 bg-[#F0F0F0]">
                 <tr>
                   <th className="p-3 text-center font-semibold sticky left-0 bg-[#F0F0F0] z-40">
@@ -58,8 +47,8 @@ const PaymentTable = ({ data }) => {
               </thead>
 
               <tbody className="bg-white">
-                {data.map((item) => (
-                  <tr key={item.id}>
+                {data.map((item,idx) => (
+                  <tr key={idx}>
                     <td className="p-3 sticky left-0 bg-white z-20">
                       <div className="flex items-center gap-3">
                         <img
@@ -72,7 +61,7 @@ const PaymentTable = ({ data }) => {
                             {item.name}
                           </div>
                           <div className="text-sm text-gray-500">
-                            {item.sub}
+                            {item.year==1?'1st year /':item.year==2?'2nd year /':item.year==3?'3rd year':'4th year /'}{item.dept}
                           </div>
                         </div>
                       </div>
@@ -82,7 +71,7 @@ const PaymentTable = ({ data }) => {
                     <td className="p-3 text-center">{item.semPeriod}</td>
                     <td className="p-3 text-center">{item.head}</td>
                     <td className="p-3 text-center">{item.amount}</td>
-                    <td className="p-3 text-center">{item.date}</td>
+                    <td className="p-3 text-center">{new Date(item.date).toLocaleDateString()}</td>
                     <td className="p-3 text-center">{item.mode}</td>
                     <td className="p-3 text-center">{item.bank}</td>
                     <td className="p-3 text-center">{item.receipt}</td>
