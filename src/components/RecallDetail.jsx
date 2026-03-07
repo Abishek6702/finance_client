@@ -5,19 +5,7 @@ import toast from "react-hot-toast";
 const RecallDetail = ({ isOpen, onClose, payment }) => {
   if (!isOpen) return null;
 
-  const getStatusStyles = (status) => {
-    if (!status) return "bg-gray-100 text-gray-600";
-
-    const normalized = status.toLowerCase();
-
-    if (normalized === "approved") return "bg-[#F3FCF7] text-[#44CF7D]";
-
-    if (normalized === "rejected") return "bg-[#FCEAEE] text-[#ED6C83]";
-
-    if (normalized === "pending") return "bg-[#FFF6EA] text-[#FFA02D]";
-
-    return "bg-gray-100 text-gray-600";
-  };
+  
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
@@ -53,18 +41,10 @@ const RecallDetail = ({ isOpen, onClose, payment }) => {
                 />
                 <div>
                   <div className="font-semibold">{payment.name}</div>
-                  <div className="text-sm text-gray-500">{payment.sub}</div>
+                  <div className="text-sm text-gray-500">{payment.year} Year / {payment.departmentName} - {payment.section}</div>
                 </div>
               </div>
-              <p className="p-3 text-center">
-                <span
-                  className={`px-4 py-1.5 rounded-md text-sm font-medium ${getStatusStyles(
-                    payment.Status,
-                  )}`}
-                >
-                  {payment.Status}
-                </span>
-              </p>
+             
             </div>
 
             {/* content */}
@@ -80,7 +60,7 @@ const RecallDetail = ({ isOpen, onClose, payment }) => {
 
               <span className="text-gray-600">Sem Period</span>
               <span className="font-medium text-gray-800">
-                {payment.semPeriod}
+                {payment.sem}
               </span>
 
               <span className="text-gray-600">Fees Head</span>
@@ -95,23 +75,9 @@ const RecallDetail = ({ isOpen, onClose, payment }) => {
               <span className="font-medium text-gray-800">
                 {payment.raisedOn}
               </span>
-              {payment.Status == "Approved" && (
-                <>
-                  <span className="text-gray-600">Approved On</span>
-                  <span className="font-medium text-gray-800">
-                    {payment.ApprovedOn}
-                  </span>
-                </>
-              )}
+              
 
-              {payment.Status == "Rejected" && (
-                <>
-                  <span className="text-gray-600">Rejected On</span>
-                  <span className="font-medium text-gray-800">
-                    {payment.RejectedOn}
-                  </span>
-                </>
-              )}
+              
 
               <span className="text-gray-600">Payment Mode</span>
               <span className="font-medium text-gray-800">{payment.mode}</span>
@@ -125,17 +91,7 @@ const RecallDetail = ({ isOpen, onClose, payment }) => {
               <p className="text-gray-600">{payment.Reasonforrecall}</p>
             </div>
 
-            {payment.Status == "Rejected" && (
-              <>
-              <div className="border-t border-gray-300"></div>
-                <div className="text-[15px]">
-                  <p className="font-medium text-gray-800">
-                    Reason for Rejected :{" "}
-                  </p>
-                  <p className="text-gray-600">{payment.Rejectreason}</p>
-                </div>
-              </>
-            )}
+            
           </div>
         )}
       </div>

@@ -8,7 +8,6 @@ const RecallFilter = ({ filters, setFilters, searchTerm, setSearchTerm }) => {
     academicYear: "",
     year: "",
     dept: "",
-    status: "",
     fromDate: "",
     toDate: "",
   };
@@ -34,7 +33,7 @@ const RecallFilter = ({ filters, setFilters, searchTerm, setSearchTerm }) => {
 
   // Dropdown Options
   const academicYearOptions = ["2024-2025", "2025-2026", "2026-2027"];
-  const yearOptions = ["1st Year", "2nd Year", "3rd Year", "4th Year"];
+  const yearOptions = ["1", "2", "3", "4"];
   const deptOptions = [
     "CSE",
     "MECH",
@@ -46,7 +45,6 @@ const RecallFilter = ({ filters, setFilters, searchTerm, setSearchTerm }) => {
     "AIML",
     "CSE(CYB)",
   ];
-  const statusOptions = ["Pending", "Approved", "Rejected"];
 
   return (
     <div className="flex flex-wrap items-center gap-4 ">
@@ -90,13 +88,7 @@ const RecallFilter = ({ filters, setFilters, searchTerm, setSearchTerm }) => {
         className="w-36"
       />
 
-      <CustomSelect
-        placeholder="Status"
-        value={filters.status}
-        options={statusOptions}
-        onChange={(v) => setFilters({ ...filters, status: v })}
-        className="w-36"
-      />
+     
 
       <div className="relative" ref={dateRef}>
 <button
