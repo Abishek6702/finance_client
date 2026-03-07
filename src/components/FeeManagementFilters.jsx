@@ -49,6 +49,14 @@ export default function FeeManagementFilters({
       />
 
       <CustomSelect
+        placeholder="Semester Type"
+        value={department}
+        onChange={onDepartmentChange}
+        options={["AIDS", "AIML", "CSE", "CCE", "ECE", "EEE", "IT", "MECH", "CYS"]}
+        className="w-40"
+      />
+
+      <CustomSelect
         placeholder="Payment Status"
         value={status}
         onChange={onStatusChange}

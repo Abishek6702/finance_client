@@ -1,152 +1,131 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import axios from "axios";
+import toast from "react-hot-toast";
+
 import FeeManagementTable from "../../components/FeeManagementTable";
 import FeeManagementFilters from "../../components/FeeManagementFilters";
-import nodata from '../../assets/nodata.svg';
-
-const studentNames = [
-  "Aarav Sharma", "Ananya Verma", "Rohan Patel", "Kavya Iyer", "Aditya Singh",
-  "Priya Nair", "Arjun Mehta", "Sneha Gupta", "Vikram Rao", "Pooja Malhotra",
-  "Rahul Khanna", "Neha Joshi", "Siddharth Jain", "Aishwarya Kulkarni", "Kunal Aggarwal",
-  "Meera Menon", "Aman Bansal", "Ritika Choudhary", "Nikhil Saxena", "Shreya Banerjee",
-  "Varun Kapoor", "Isha Arora", "Mohit Tandon", "Divya Mishra", "Yash Oberoi",
-];
-
-const yearMap = {
-  1: "1st Year",
-  2: "2nd Year",
-  3: "3rd Year",
-  4: "4th Year",
-};
-
-const classes = [
-  "CSE-A", "CSE-B", "CSE-C", "CCE", "IT", "AIDS-A", "AIDS-B", "AIDS-C",
-  "AIML", "EEE", "MECH", "ECE-A", "ECE-B", "ECE-C", "CSBS"
-];
-
-const communities = ["OC", "BC", "BCM", "MBC", "SCA", "SC", "ST"];  
-const studentTypes = ["Hostel", "Dayscholar", "Transport"];
-
-const BASE_YEAR = 2025;
-
-const generateMobile = (index) => {
-  return `9${String(800000000 + index).padStart(9, "1")}`;
-};
-
-const generateEmail = (name) => {
-  return `${name.toLowerCase().replace(/\s+/g, "")}@gmail.com`;
-};
-
-const feeData = Array.from({ length: 25 }, (_, index) => {
-  const totalFees = 25000;
-  const paidOptions = [25000, 15000, 10000, 5000, 0];
-  const paid = paidOptions[index % paidOptions.length];
-  const overdue = totalFees - paid;
-
-  let status = "Partial";
-  if (paid === totalFees) status = "Paid";
-  if (paid === 0) status = "Overdue";
-
-  const typeIndex = index % 3;
-
-  let type = "";
-  let ishostler = false;
-  let isdayscholer = false;
-  let iscollegetransport = false;
-  
-  if (typeIndex === 0) {
-    type = "Hostel";
-    ishostler = true;
-  }
-  
-  if (typeIndex === 1) {
-    type = "Dayscholar";
-    isdayscholer = true;
-  }
-  
-  if (typeIndex === 2) {
-    type = "Transport";
-    isdayscholer=true
-    iscollegetransport = true;
-  }
-  const yearNumber = (index % 4) + 1;
-
-  const startYear = BASE_YEAR - (yearNumber - 1);
-  const endYear = startYear + 4;
-
-  return {
-    id: index + 1,
-    name: studentNames[index],
-    year: yearMap[yearNumber],
-    rollNo: `7228201150${100 + index}`,
-    class: classes[index % classes.length],
-    community: communities[index % communities.length],
-    department: index % 2 === 0 ? "CSE" : "ECE",
-    totalFees,
-    concession: index % 3 === 0 ? 5000 : 0,
-    paid,
-    overdue,
-    status,
-  
-    type, // ✅ keep this
-    ishostler, // ✅ new
-    isdayscholer, // ✅ new
-    iscollegetransport, // ✅ new
-  
-    profileImage:
-      index % 2 === 0
-        ? `https://randomuser.me/api/portraits/men/${index}.jpg`
-        : `https://randomuser.me/api/portraits/women/${index}.jpg`,
-    mobile: generateMobile(index),
-    email: generateEmail(studentNames[index]),
-    batch: `${startYear} - ${endYear}`,
-  };
-});
+import nodata from "../../assets/nodata.svg";
 
 const Fees = () => {
+  const [feeData, setFeeData] = useState([]);
+  const [loading, setLoading] = useState(false);
+
   const [search, setSearch] = useState("");
   const [year, setYear] = useState("");
   const [department, setDepartment] = useState("");
   const [status, setStatus] = useState("");
   const [type, setType] = useState([]);
 
-  // State for managing selected checkboxes
   const [selectedIds, setSelectedIds] = useState([]);
 
+  // ================= API FETCH =================
+  const fetchFees = async () => {
+  setLoading(true);
+
+  try {
+    const token = localStorage.getItem("token");
+
+    console.log("Token Sent:", token);
+
+    const res = await axios.get(
+      `${import.meta.env.VITE_API_BASE_URL}/api/studentFeeTracking`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    console.log("API Response:", res);
+    console.log("Student Data:", res.data.data[0]);
+
+    const formattedData = (res.data.data || []).map((item, index) => {
+      const student = item.student;
+      const fee = item.feeTracking?.academicYearWiseRecord?.[0];
+
+      const totalFees = fee?.total?.total || 0;
+      const paid = fee?.total?.paid || 0;
+      const overdue = totalFees - paid;
+
+      return {
+        id: index + 1,
+
+        name: student.personal.studentName,
+        rollNo: student.personal.rollNo,
+        profileImage: student.personal.studentPhoto,
+
+        department: student.academic.departmentName,
+        year: student.academic.yearStudying,
+        batch: student.academic.batch,
+
+        mobile: student.contact.selfMobileNo,
+        email: student.contact.selfEmail,
+
+        totalFees: totalFees,
+        concession: fee?.concessions?.totalConcession || 0,
+        paid: paid,
+        overdue: overdue,
+
+        status: fee?.total?.status || "Unpaid",
+
+        ishostler: student.hostel?.isApplicable || false,
+        isdayscholer: !student.hostel?.isApplicable,
+        iscollegetransport: student.transport?.isApplicable || false
+      };
+    });
+
+setFeeData(formattedData);
+
+  } catch (error) {
+    console.error("API Error:", error);
+    console.error("Backend Message:", error.response?.data);
+  } finally {
+    console.log("API Call Finished");
+    setLoading(false);
+  }
+};
+
+  useEffect(() => {
+    fetchFees();
+  }, []);
+
+  // ================= FILTER =================
   const filteredData = useMemo(() => {
     return feeData.filter((s) => {
       return (
         (!search ||
-          s.name.toLowerCase().includes(search.toLowerCase()) ||
-          s.rollNo.includes(search)) &&
+          s.name?.toLowerCase().includes(search.toLowerCase()) ||
+          s.rollNo?.includes(search)) &&
         (!year || s.year === year) &&
         (!department || s.department === department) &&
         (!status || s.status === status) &&
-        (type.length === 0 || type.includes(s.type)) 
+        (type.length === 0 || type.includes(s.type))
       );
     });
-  }, [search, year, department, status, type]);
+  }, [feeData, search, year, department, status, type]);
 
+  // ================= CLEAR FILTER =================
   const handleClearFilters = () => {
     setSearch("");
     setYear("");
     setDepartment("");
     setStatus("");
     setType([]);
-    setSelectedIds([]); 
+    setSelectedIds([]);
   };
 
+  // ================= EXPORT CSV =================
   const exportCSV = () => {
-    // Determine the source of data: selected students first, otherwise all filtered data
-    const exportItems = selectedIds.length > 0 
-      ? filteredData.filter(student => selectedIds.includes(student.id))
-      : filteredData;
+    const exportItems =
+      selectedIds.length > 0
+        ? filteredData.filter((student) => selectedIds.includes(student.id))
+        : filteredData;
 
     if (!exportItems.length) {
-      alert("No data available to export.");
+      toast.error("No data available to export");
       return;
     }
 
-    // CSV Column Headers
     const headers = [
       "Roll No",
       "Student Name",
@@ -161,45 +140,47 @@ const Fees = () => {
       "Type",
       "Batch",
       "Mobile",
-      "Email"
+      "Email",
     ];
 
-    // Format data rows (wrapping text fields in quotes to handle commas)
-    const csvRows = exportItems.map(s => [
-      s.rollNo,
-      `"${s.name}"`,
-      `"${s.year}"`,
-      s.department,
-      s.class,
-      s.totalFees,
-      s.concession,
-      s.paid,
-      s.overdue,
-      s.status,
-      s.type,
-      `"${s.batch}"`,
-      s.mobile,
-      s.email
-    ].join(","));
+    const csvRows = exportItems.map((s) =>
+      [
+        s.rollNo,
+        `"${s.name}"`,
+        `"${s.year}"`,
+        s.department,
+        s.class,
+        s.totalFees,
+        s.concession,
+        s.paid,
+        s.overdue,
+        s.status,
+        s.type,
+        `"${s.batch}"`,
+        s.mobile,
+        s.email,
+      ].join(",")
+    );
 
-    // Combine headers and rows
     const csvString = [headers.join(","), ...csvRows].join("\n");
 
-    // Download Logic
     const blob = new Blob([csvString], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    
-    // Create a filename based on whether it's a "Selected" or "Full" report
-    const fileName = selectedIds.length > 0 
-      ? `Selected_Students_Fee_Report_${new Date().toLocaleDateString()}.csv`
-      : `Full_Fee_Report_${new Date().toLocaleDateString()}.csv`;
 
-    link.setAttribute("href", url);
-    link.setAttribute("download", fileName);
+    const link = document.createElement("a");
+
+    const fileName =
+      selectedIds.length > 0
+        ? `Selected_Students_Fee_Report_${new Date().toLocaleDateString()}.csv`
+        : `Full_Fee_Report_${new Date().toLocaleDateString()}.csv`;
+
+    link.href = url;
+    link.download = fileName;
+
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+
     URL.revokeObjectURL(url);
   };
 
@@ -223,17 +204,24 @@ const Fees = () => {
         onTypeChange={setType}
         onExport={exportCSV}
         onClearFilters={handleClearFilters}
-        selectedCount={selectedIds.length} 
+        selectedCount={selectedIds.length}
       />
 
-      <FeeManagementTable 
-        data={filteredData} 
-        selectedIds={selectedIds}
-        setSelectedIds={setSelectedIds}
-      />
-      {filteredData.length === 0 && (
+      {loading ? (
+        <div className="flex justify-center py-20 text-gray-500">
+          Loading fee data...
+        </div>
+      ) : (
+        <FeeManagementTable
+          data={filteredData}
+          selectedIds={selectedIds}
+          setSelectedIds={setSelectedIds}
+        />
+      )}
+
+      {!loading && filteredData.length === 0 && (
         <div className="py-24 flex flex-col items-center justify-center text-gray-400">
-            <img src={nodata} alt="No data" className="w-50 " />
+          <img src={nodata} alt="No data" className="w-50" />
           <p className="text-gray-500">No results found.</p>
         </div>
       )}

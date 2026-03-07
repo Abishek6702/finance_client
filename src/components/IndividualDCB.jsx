@@ -1,44 +1,78 @@
 import React from "react";
 import { ArrowUpRight } from "lucide-react";
+import { useLocation, Link } from "react-router-dom";
+
 import Dayscholar from "../assets/dayscholar.svg";
 import Hostel from "../assets/hostel.svg";
 import Transport from "../assets/transport1.svg";
-import { Link } from "react-router-dom";
 
-const IndividualDCB = (student) => {
-  const data = [
-    {
-      year: "2024 - 2025",
-      class: "CSE - A",
-      community: "BC",
-      demand: 50000,
-      concession: 2000,
-      paid: 2100,
-      fine: 0,
-      overdue: 2100,
-      type: "Paid",
-      total: 50000,
-    },
-    {
-      year: "2025 - 2026",
-      class: "CSE - A",
-      community: "BC",
-      demand: 50000,
-      concession: 2000,
-      paid: 2100,
-      fine: 0,
-      overdue: 2100,
-      type: "Partial",
-      total: 50000,
-    },
-  ];
-  console.log("student type:", student.student.type);
+const IndividualDCB = () => {
+
+  const location = useLocation();
+  const student = location.state?.student;
+
+  // =========================
+  // Convert Backend Data
+  // =========================
+
+  const records = student?.feeTracking?.academicYearWiseRecord || [];
+
+  const data = records.map((record) => ({
+    year: record.academicYear,
+    class: `${student.department}`,
+    demand: record.subTotal,
+    concession: record.concessions?.totalConcession || 0,
+    paid: record.total?.paid || 0,
+    fine: 0,
+    overdue: record.total.total - record.total.paid,
+    type: record.total.status,
+    total: record.total.total,
+  }));
+
+
+  // =========================
+  // Status Style
+  // =========================
 
   const getStatusStyle = (status) => {
-    if (status === "Paid") return "bg-green-100 text-green-600";
-    if (status === "Partial") return "bg-orange-100 text-orange-600";
+
+    const s = status?.toLowerCase();
+
+    if (s.includes("paid") && !s.includes("partial"))
+      return "bg-green-100 text-green-600";
+
+    if (s.includes("partial"))
+      return "bg-orange-100 text-orange-600";
+
+    if (s.includes("unpaid"))
+      return "bg-red-100 text-red-600";
+
     return "bg-gray-100 text-gray-600";
   };
+
+
+  // =========================
+  // Student Type Icons
+  // =========================
+
+  const getStudentImages = () => {
+
+    if (student?.ishostler) return [Hostel];
+
+    const images = [];
+
+    if (student?.isdayscholer) images.push(Dayscholar);
+
+    if (student?.iscollegetransport) images.push(Transport);
+
+    return images;
+  };
+
+
+  // =========================
+  // Totals Calculation
+  // =========================
+
   const totals = data.reduce(
     (acc, row) => {
       acc.demand += row.demand;
@@ -56,45 +90,34 @@ const IndividualDCB = (student) => {
       fine: 0,
       overdue: 0,
       total: 0,
-    },
+    }
   );
-  const overallStatus = data.every((row) => row.type === "Paid")
+
+  const overallStatus = data.every((row) =>
+    row.type?.toLowerCase().includes("paid") &&
+    !row.type?.toLowerCase().includes("partial")
+  )
     ? "Paid"
     : "Partial";
 
-  const getStudentImages = (student) => {
-    console.log("test1L:", student.st);
-    // If hostler → show only hostel
-    if (student.student.ishostler) {
-      return [Hostel];
-    }
 
-    const images = [];
 
-    // If day scholar → show day scholar
-    if (student.student.isdayscholer) {
-      images.push(Dayscholar);
-    }
-
-    // If transport → show transport
-    if (student.student.iscollegetransport) {
-      images.push(Transport);
-    }
-
-    return images;
-  };
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden ">
+    <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+
       {/* Table */}
       <div className="overflow-x-auto">
+
         <table className="w-full text-sm">
+
           {/* Header */}
+
           <thead className="bg-gray-100 text-gray-700">
+
             <tr>
               {[
                 "Academic Year",
                 "Class",
-                // "Community",
                 "Demand",
                 "Concession",
                 "Paid",
@@ -110,19 +133,29 @@ const IndividualDCB = (student) => {
                 </th>
               ))}
             </tr>
+
           </thead>
 
+
           {/* Body */}
+
           <tbody>
+
             {data.map((row, index) => (
+
               <tr
                 key={index}
                 className="border-t border-gray-200 hover:bg-gray-50 transition"
               >
+
                 <td className="px-4 py-3">{row.year}</td>
+
                 <td className="px-4 py-3">{row.class}</td>
-                {/* <td className="px-4 py-3">{row.community}</td> */}
-                <td className="px-4 py-3">₹{row.demand.toLocaleString()}</td>
+
+                <td className="px-4 py-3">
+                  ₹{row.demand.toLocaleString()}
+                </td>
+
                 <td className="px-4 py-3">
                   ₹{row.concession.toLocaleString()}
                 </td>
@@ -131,14 +164,21 @@ const IndividualDCB = (student) => {
                   ₹{row.paid.toLocaleString()}
                 </td>
 
-                <td className="px-4 py-3">{row.fine}</td>
+                <td className="px-4 py-3">
+                  ₹{row.fine.toLocaleString()}
+                </td>
 
                 <td className="px-4 py-3 text-red-500 font-medium">
                   ₹{row.overdue.toLocaleString()}
                 </td>
+
+
+                {/* Student Type */}
+
                 <td className="p-3">
                   <div className="flex gap-2">
-                    {getStudentImages(student).map((img, index) => (
+
+                    {getStudentImages().map((img, index) => (
                       <img
                         key={index}
                         src={img}
@@ -146,45 +186,71 @@ const IndividualDCB = (student) => {
                         className="w-6 h-6 object-contain"
                       />
                     ))}
+
                   </div>
                 </td>
 
-                {/* Status Badge */}
+
+                {/* Status */}
+
                 <td className="px-4 py-3">
+
                   <span
                     className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusStyle(
-                      row.type,
+                      row.type
                     )}`}
                   >
                     {row.type}
                   </span>
+
                 </td>
 
-                <td className="px-4 py-3">₹{row.total.toLocaleString()}</td>
+
+                <td className="px-4 py-3">
+                  ₹{row.total.toLocaleString()}
+                </td>
+
 
                 {/* Action */}
+
                 <td className="px-4 py-3">
+
                   <Link
-                    to={`/admin/fees_management/${student.student?.id}/${row.year}`}
+                    to={`/admin/fees_management/${student?.id}/${row.year}`}
                     state={{
                       row: row,
-                      student: student.student,
+                      student: student,
                     }}
                   >
-                    {" "}
+
                     <button className="bg-[#0B56A4] p-2 rounded-full text-white hover:scale-105 transition">
+
                       <ArrowUpRight size={16} />
+
                     </button>
+
                   </Link>
+
                 </td>
+
               </tr>
+
             ))}
+
           </tbody>
-          <tfoot className=" font-semibold border-t border-gray-200">
+
+
+          {/* Footer Totals */}
+
+          <tfoot className="font-semibold border-t border-gray-200">
+
             <tr>
+
               <td colSpan="2"></td>
 
-              <td className="px-4 py-3">₹{totals.demand.toLocaleString()}</td>
+              <td className="px-4 py-3">
+                ₹{totals.demand.toLocaleString()}
+              </td>
 
               <td className="px-4 py-3">
                 ₹{totals.concession.toLocaleString()}
@@ -194,7 +260,9 @@ const IndividualDCB = (student) => {
                 ₹{totals.paid.toLocaleString()}
               </td>
 
-              <td className="px-4 py-3">₹{totals.fine.toLocaleString()}</td>
+              <td className="px-4 py-3">
+                ₹{totals.fine.toLocaleString()}
+              </td>
 
               <td className="px-4 py-3 text-red-600">
                 ₹{totals.overdue.toLocaleString()}
@@ -202,24 +270,35 @@ const IndividualDCB = (student) => {
 
               <td></td>
 
+
               {/* Overall Status */}
+
               <td className="px-4 py-3">
+
                 <span
                   className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusStyle(
-                    overallStatus,
+                    overallStatus
                   )}`}
                 >
                   {overallStatus}
                 </span>
+
               </td>
 
-              <td className="px-4 py-3">₹{totals.total.toLocaleString()}</td>
+              <td className="px-4 py-3">
+                ₹{totals.total.toLocaleString()}
+              </td>
 
               <td></td>
+
             </tr>
+
           </tfoot>
+
         </table>
+
       </div>
+
     </div>
   );
 };
