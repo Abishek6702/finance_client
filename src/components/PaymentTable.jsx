@@ -97,7 +97,7 @@ const PaymentTable = ({ data }) => {
             </table>
 
             {data.length === 0 && (
-              <div className="py-24 flex flex-col items-center justify-center text-gray-400">
+              <div className="py-20 flex flex-col items-center justify-center text-gray-400">
                 <img src={nodata} alt="No data" className="w-50 " />
                               <p className="text-gray-500">No results found.</p>
               </div>
