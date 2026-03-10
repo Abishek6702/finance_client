@@ -12,6 +12,7 @@ const Fees = () => {
 
   const [search, setSearch] = useState("");
   const [year, setYear] = useState("");
+  const [years, setYears] = useState([]);
   const [department, setDepartment] = useState("");
   const [departments, setDepartments] = useState([]);
   const [status, setStatus] = useState("");
@@ -63,9 +64,16 @@ const Fees = () => {
       setFeeData(formattedData);
 
       // get department list from backend data
+      const uniqueYears = [
+        ...new Set(apiData.map((item) => `${item.student?.year} Year`))
+      ].filter(Boolean);
+
+      setYears(uniqueYears);
+
       const uniqueDepartments = [
         ...new Set(apiData.map((item) => item.student?.department)),
       ];
+      
 
       setDepartments(uniqueDepartments);
     } catch (error) {
@@ -88,7 +96,7 @@ const Fees = () => {
           s.rollNo?.includes(search)) &&
         (!year || s.year === year) &&
         (!department || s.department === department) &&
-        (!status || s.status === status) &&
+        (!status || s.status?.toLowerCase().includes(status.toLowerCase())) &&
         (type.length === 0 ||
           (type.includes("Hostel") && s.ishostler) ||
           (type.includes("Dayscholar") && s.isdayscholer) ||
@@ -189,6 +197,7 @@ const Fees = () => {
         onSearchChange={setSearch}
         year={year}
         onYearChange={setYear}
+        yearOptions={years}
         department={department}
         onDepartmentChange={setDepartment}
         departmentOptions={departments}

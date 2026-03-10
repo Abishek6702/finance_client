@@ -136,20 +136,20 @@ export default function FeeManagementTable({
                 </td>
 
                 <td className="p-3">
-                  <div className="flex gap-3 items-center">
+                  <div className="flex gap-3 items-start ">
 
                     <img
                       src={student.profileImage}
                       alt={student.name}
-                      className="w-10 h-10 rounded-full object-cover"
+                      className="w-10 h-10 rounded-full object-cover shrink-0"
                     />
 
                     <div>
-                      <div className="font-medium whitespace-nowrap">
+                      <div className="font-medium ">
                         {student.name}
                       </div>
 
-                      <div className="text-sm text-gray-500 whitespace-nowrap">
+                      <div className="text-sm text-gray-500 ">
                         {student.year} / {student.department}
                       </div>
                     </div>

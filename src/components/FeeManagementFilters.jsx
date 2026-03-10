@@ -7,6 +7,7 @@ export default function FeeManagementFilters({
   onSearchChange,
   year,
   onYearChange,
+  yearOptions,
   department,
   onDepartmentChange,
   departmentOptions,
@@ -37,7 +38,7 @@ export default function FeeManagementFilters({
         placeholder="Year"
         value={year}
         onChange={onYearChange}
-        options={["1st Year", "2nd Year", "3rd Year", "4th Year"]}
+        options={yearOptions||[]}
         className="w-32"
       />
 
