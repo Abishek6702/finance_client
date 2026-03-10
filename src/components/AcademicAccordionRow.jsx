@@ -1,21 +1,18 @@
 import React from "react";
 import { Download } from "lucide-react";
-import { academicSampleData } from "../data";
+// import { academicSampleData } from "../data";
 import nodata from "../assets/nodata.svg";
 
 
-const AcademicAccordionRow = () => {
-  console.log("AcademicAccordionRow - Row Data:", academicSampleData.details);
+const AcademicAccordionRow = ({feeHeads }) => {
+  // console.log("AcademicAccordionRow - Row Data:", academicSampleData.details);
+
   const getStatusStyles = (status) => {
     if (!status) return "bg-gray-100 text-gray-600";
-
     const normalized = status.toLowerCase();
-
     if (normalized === "paid") return "bg-[#F3FCF7] text-[#44CF7D]";
-
-    if (normalized === "overdue") return "bg-[#FCEAEE] text-[#ED6C83]";
-
-    if (normalized === "partial") return "bg-[#FFF6EA] text-[#FFA02D]";
+    if (normalized === "unpaid") return "bg-[#FCEAEE] text-[#ED6C83]";
+    if (normalized === "partially paid") return "bg-[#FFF6EA] text-[#FFA02D]";
 
     return "bg-gray-100 text-gray-600";
   };
@@ -31,7 +28,7 @@ const AcademicAccordionRow = () => {
                   <th className="p-3">Total</th>
 
                   <th className="p-3">Concession</th>
-                  <th className="">Fine</th>
+                  {/* <th className="">Fine</th> */}
                   <th className="">Paid</th>
                   <th className="">Overdue</th>
                   <th className="">Status</th>
@@ -39,16 +36,16 @@ const AcademicAccordionRow = () => {
               </thead>
 
               <tbody className="divide-y divide-gray-200">
-                {academicSampleData.length > 0 ? (
-                  academicSampleData.map((fee) => (
-                    <tr key={fee.receiptNo} className="">
-                      <td className="p-3">{fee.feesHead}</td>
+                {feeHeads && feeHeads.length > 0 ? (
+                  feeHeads.map((fee, index) => (
+                    <tr key={fee.name} className="">
+                      <td className="p-3">{fee.name}</td>
                       <td className="">{fee.total}</td>
                       <td className="">₹{fee.concession}</td>
 
-                      <td className="">{fee.fine}</td>
-                      <td className=" text-red-500 font-medium">₹{fee.paid}</td>
-                      <td className="">{fee.Overdue}</td>
+                      {/* <td className="">{fee.fine}</td> */}
+                      <td className=" text-green-500 font-medium">₹{fee.paid}</td>
+                      <td className="text-red-500 font-medium">{fee.overdue}</td>
 
                       <td className="p-3">
                         <span

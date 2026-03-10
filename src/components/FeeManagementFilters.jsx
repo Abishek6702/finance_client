@@ -9,6 +9,7 @@ export default function FeeManagementFilters({
   onYearChange,
   department,
   onDepartmentChange,
+  departmentOptions,
   status,
   onStatusChange,
   type,
@@ -44,17 +45,17 @@ export default function FeeManagementFilters({
         placeholder="Department"
         value={department}
         onChange={onDepartmentChange}
-        options={["AIDS", "AIML", "CSE", "CCE", "ECE", "EEE", "IT", "MECH", "CYS"]}
+        options={departmentOptions || []}
         className="w-40"
       />
 
-      <CustomSelect
+      {/* <CustomSelect
         placeholder="Semester Type"
         value={department}
         onChange={onDepartmentChange}
         options={["AIDS", "AIML", "CSE", "CCE", "ECE", "EEE", "IT", "MECH", "CYS"]}
         className="w-40"
-      />
+      /> */}
 
       <CustomSelect
         placeholder="Payment Status"
