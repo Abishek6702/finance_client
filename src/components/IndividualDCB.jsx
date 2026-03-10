@@ -6,28 +6,30 @@ import Dayscholar from "../assets/dayscholar.svg";
 import Hostel from "../assets/hostel.svg";
 import Transport from "../assets/transport1.svg";
 
-const IndividualDCB = () => {
+const IndividualDCB = ({student}) => {
 
-  const location = useLocation();
-  const student = location.state?.student;
+  // const location = useLocation();
+  // const student = location.state?.student;
 
   // =========================
   // Convert Backend Data
   // =========================
 
-  const records = student?.feeTracking?.academicYearWiseRecord || [];
+  const records = student?.feeSummary || [];
+  console.log("Student Data:", student);
+console.log("Fee Summary:", student?.feeSummary);
 
   const data = records.map((record) => ({
-    year: record.academicYear,
-    class: `${student.department}`,
-    demand: record.subTotal,
-    concession: record.concessions?.totalConcession || 0,
-    paid: record.total?.paid || 0,
-    fine: 0,
-    overdue: record.total.total - record.total.paid,
-    type: record.total.status,
-    total: record.total.total,
-  }));
+  year: record.academicYear,
+  class: student.department,
+  demand: record.demand,
+  concession: record.concession,
+  paid: record.paid,
+  fine: 0,
+  overdue: record.overdue,
+  type: record.status,
+  total: record.total,
+}));
 
 
   // =========================
@@ -55,15 +57,14 @@ const IndividualDCB = () => {
   // Student Type Icons
   // =========================
 
-  const getStudentImages = () => {
-
-    if (student?.ishostler) return [Hostel];
+  const getStudentImages = (record) => {
+    if (record?.studentType?.hostel) return [Hostel];
 
     const images = [];
 
-    if (student?.isdayscholer) images.push(Dayscholar);
+    if (!record?.studentType?.hostel) images.push(Dayscholar);
 
-    if (student?.iscollegetransport) images.push(Transport);
+    if (record?.studentType?.transport) images.push(Transport);
 
     return images;
   };
@@ -121,7 +122,6 @@ const IndividualDCB = () => {
                 "Demand",
                 "Concession",
                 "Paid",
-                "Fine",
                 "Overdue",
                 "Student Type",
                 "Status",
@@ -164,9 +164,9 @@ const IndividualDCB = () => {
                   ₹{row.paid.toLocaleString()}
                 </td>
 
-                <td className="px-4 py-3">
+                {/* <td className="px-4 py-3">
                   ₹{row.fine.toLocaleString()}
-                </td>
+                </td> */}
 
                 <td className="px-4 py-3 text-red-500 font-medium">
                   ₹{row.overdue.toLocaleString()}
@@ -178,7 +178,7 @@ const IndividualDCB = () => {
                 <td className="p-3">
                   <div className="flex gap-2">
 
-                    {getStudentImages().map((img, index) => (
+                    {getStudentImages(records[index]).map((img, index) => (
                       <img
                         key={index}
                         src={img}
@@ -216,7 +216,7 @@ const IndividualDCB = () => {
                 <td className="px-4 py-3">
 
                   <Link
-                    to={`/admin/fees_management/${student?.id}/${row.year}`}
+                    to={`/admin/fees_management/${student?.rollNo}/${row.year}`}
                     state={{
                       row: row,
                       student: student,
@@ -260,9 +260,9 @@ const IndividualDCB = () => {
                 ₹{totals.paid.toLocaleString()}
               </td>
 
-              <td className="px-4 py-3">
+              {/* <td className="px-4 py-3">
                 ₹{totals.fine.toLocaleString()}
-              </td>
+              </td> */}
 
               <td className="px-4 py-3 text-red-600">
                 ₹{totals.overdue.toLocaleString()}

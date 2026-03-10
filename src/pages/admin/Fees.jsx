@@ -13,6 +13,7 @@ const Fees = () => {
   const [search, setSearch] = useState("");
   const [year, setYear] = useState("");
   const [department, setDepartment] = useState("");
+  const [departments, setDepartments] = useState([]);
   const [status, setStatus] = useState("");
   const [type, setType] = useState([]);
 
@@ -20,70 +21,59 @@ const Fees = () => {
 
   // ================= API FETCH =================
   const fetchFees = async () => {
-  setLoading(true);
+    setLoading(true);
 
-  try {
-    const token = localStorage.getItem("token");
+    try {
+      const token = localStorage.getItem("token");
 
-    console.log("Token Sent:", token);
+      const res = await axios.get(
+        `${import.meta.env.VITE_API_BASE_URL}/api/feedetails`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-    const res = await axios.get(
-      `${import.meta.env.VITE_API_BASE_URL}/api/studentFeeTracking`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+      const apiData = res.data.data || [];
 
-    console.log("API Response:", res);
-    console.log("Student Data:", res.data.data[0]);
+      const formattedData = apiData.map((item, index) => {
+        return {
+          id: index + 1,
 
-    const formattedData = (res.data.data || []).map((item, index) => {
-      const student = item.student;
-      const fee = item.feeTracking?.academicYearWiseRecord?.[0];
+          name: item.student?.name,
+          rollNo: item.student?.rollNo,
+          profileImage: item.student?.photo,
 
-      const totalFees = fee?.total?.total || 0;
-      const paid = fee?.total?.paid || 0;
-      const overdue = totalFees - paid;
+          department: item.student?.department,
+          year: `${item.student?.year} Year`,
 
-      return {
-        id: index + 1,
+          totalFees: item.fee?.demand || 0,
+          concession: item.fee?.concession || 0,
+          paid: item.fee?.paid || 0,
+          overdue: item.fee?.overdue || 0,
+          status: item.fee?.status || "Unpaid",
 
-        name: student.personal.studentName,
-        rollNo: student.personal.rollNo,
-        profileImage: student.personal.studentPhoto,
+          ishostler: item.studentType?.hostel || false,
+          isdayscholer: !item.studentType?.hostel,
+          iscollegetransport: item.studentType?.transport || false,
+        };
+      });
 
-        department: student.academic.departmentName,
-        year: student.academic.yearStudying,
-        batch: student.academic.batch,
+      setFeeData(formattedData);
 
-        mobile: student.contact.selfMobileNo,
-        email: student.contact.selfEmail,
+      // get department list from backend data
+      const uniqueDepartments = [
+        ...new Set(apiData.map((item) => item.student?.department)),
+      ];
 
-        totalFees: totalFees,
-        concession: fee?.concessions?.totalConcession || 0,
-        paid: paid,
-        overdue: overdue,
-
-        status: fee?.total?.status || "Unpaid",
-
-        ishostler: student.hostel?.isApplicable || false,
-        isdayscholer: !student.hostel?.isApplicable,
-        iscollegetransport: student.transport?.isApplicable || false
-      };
-    });
-
-setFeeData(formattedData);
-
-  } catch (error) {
-    console.error("API Error:", error);
-    console.error("Backend Message:", error.response?.data);
-  } finally {
-    console.log("API Call Finished");
-    setLoading(false);
-  }
-};
+      setDepartments(uniqueDepartments);
+    } catch (error) {
+      console.error("API Error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     fetchFees();
@@ -99,7 +89,10 @@ setFeeData(formattedData);
         (!year || s.year === year) &&
         (!department || s.department === department) &&
         (!status || s.status === status) &&
-        (type.length === 0 || type.includes(s.type))
+        (type.length === 0 ||
+          (type.includes("Hostel") && s.ishostler) ||
+          (type.includes("Dayscholar") && s.isdayscholer) ||
+          (type.includes("Transport") && s.iscollegetransport))
       );
     });
   }, [feeData, search, year, department, status, type]);
@@ -198,6 +191,7 @@ setFeeData(formattedData);
         onYearChange={setYear}
         department={department}
         onDepartmentChange={setDepartment}
+        departmentOptions={departments}
         status={status}
         onStatusChange={setStatus}
         type={type}

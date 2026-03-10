@@ -14,7 +14,8 @@ export default function FeeManagementTable({
   const navigate = useNavigate();
 
   const handleNavigate = (student) => {
-    navigate(`/admin/fees_management/${student.id}`, {
+    console.log("Navigating with rollNo:", student.rollNo);
+    navigate(`/admin/fees_management/${student.rollNo}`, {
       state: { student },
     });
   };
@@ -65,7 +66,7 @@ export default function FeeManagementTable({
   return (
     <div className="w-full bg-white rounded-2xl shadow">
       <div className="max-h-[calc(100vh-260px)] overflow-auto rounded-2xl">
-        <table className="w-full table-fixed">
+        <table className="w-full">
 
           <thead className="sticky top-0 z-30">
             <tr className="bg-[#F0F0F0]">
@@ -144,11 +145,11 @@ export default function FeeManagementTable({
                     />
 
                     <div>
-                      <div className="font-medium">
+                      <div className="font-medium whitespace-nowrap">
                         {student.name}
                       </div>
 
-                      <div className="text-sm text-gray-500">
+                      <div className="text-sm text-gray-500 whitespace-nowrap">
                         {student.year} / {student.department}
                       </div>
                     </div>

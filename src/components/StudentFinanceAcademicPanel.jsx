@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import { ChevronRight } from "lucide-react";
 import Dayscholar from "../assets/dayscholar.svg";
 import Hostel from "../assets/hostel.svg";
@@ -6,37 +7,47 @@ import Transport from "../assets/transport1.svg";
 import AcademicAccordionRow from "./AcademicAccordionRow";
 
 const StudentFinanceAcademicPanel = ({ student, academicYear }) => {
-  const data = [
-    {
-      year: "2024 - 2025",
-      semester: "Odd",
-      class: "CSE - A",
-      community: "BC",
-      demand: 50000,
-      concession: 2000,
-      paid: 2100,
-      fine: 0,
-      overdue: 2100,
-      type: "Paid",
-      total: 50000,
-    },
-    {
-      year: "2024 - 2025",
-      semester: "Even",
-      class: "CSE - A",
-      community: "BC",
-      demand: 50000,
-      concession: 2000,
-      paid: 2100,
-      fine: 0,
-      overdue: 2100,
-      type: "Partial",
-      total: 50000,
-    },
-  ];
+  const [semesters, setSemesters] = useState([]);
+
+  const fetchSemesterDetails = async () => {
+    try {
+
+      const token = localStorage.getItem("token");
+
+      const res = await axios.get(
+        `${import.meta.env.VITE_API_BASE_URL}/api/feedetails/${student.rollNo}/${academicYear.year}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      setSemesters(res.data.data.semesters);
+
+    } catch (error) {
+      console.error("Semester API error:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (!student || !academicYear) return;
+    fetchSemesterDetails();
+  }, [student, academicYear]);
 
   const [openIndexes, setOpenIndexes] = React.useState([]);
 
+  const data = semesters.map((sem) => ({
+  semester: sem.semesterType,
+  demand: sem.overall.demand,
+  concession: sem.overall.concession,
+  paid: sem.overall.paid,
+  fine: 0,
+  overdue: sem.overall.overdue,
+  type: sem.overall.status,
+  total: sem.overall.total,
+  feeHeads: sem.feeHeads,
+}));
   const oddData = data.filter((row) => row.semester === "Odd");
   const evenData = data.filter((row) => row.semester === "Even");
 
@@ -49,10 +60,9 @@ const StudentFinanceAcademicPanel = ({ student, academicYear }) => {
   const getStatusStyles = (status) => {
     if (!status) return "bg-gray-100 text-gray-600";
     const normalized = status.toLowerCase();
-
     if (normalized === "paid") return "bg-[#F3FCF7] text-[#44CF7D]";
-    if (normalized === "overdue") return "bg-[#FCEAEE] text-[#ED6C83]";
-    if (normalized === "partial") return "bg-[#FFF6EA] text-[#FFA02D]";
+    if (normalized === "unpaid") return "bg-[#FCEAEE] text-[#ED6C83]";
+    if (normalized === "partially paid") return "bg-[#FFF6EA] text-[#FFA02D]";
 
     return "bg-gray-100 text-gray-600";
   };
@@ -86,7 +96,6 @@ const StudentFinanceAcademicPanel = ({ student, academicYear }) => {
                     "Demand",
                     "Concession",
                     "Paid",
-                    "Fine",
                     "Overdue",
                     "Student Type",
                     "Status",
@@ -135,9 +144,9 @@ const StudentFinanceAcademicPanel = ({ student, academicYear }) => {
                         ₹{row.paid.toLocaleString()}
                       </td>
 
-                      <td className="px-4 py-3">
+                      {/* <td className="px-4 py-3">
                         ₹{row.fine.toLocaleString()}
-                      </td>
+                      </td> */}
 
                       <td className="px-4 py-3 text-red-500 font-medium">
                         ₹{row.overdue.toLocaleString()}
@@ -174,7 +183,7 @@ const StudentFinanceAcademicPanel = ({ student, academicYear }) => {
                     </tr>
 
                     {openIndexes.includes(`${typePrefix}-${index}`) && (
-                      <AcademicAccordionRow row={row} />
+                      <AcademicAccordionRow feeHeads={row.feeHeads} />
                     )}
                   </React.Fragment>
                 ))}

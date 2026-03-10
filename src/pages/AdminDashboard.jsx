@@ -26,8 +26,8 @@ const AdminDashboard = () => {
             <Route path="payment" element={<Payment/>} />
             <Route path="payment/newpayment" element={<AddPayment/>} />
             <Route path="/fees_management" element={<Fees />} />
-            <Route path="/fees_management/:id" element={<StudentDetails />} />
-            <Route path="/fees_management/:id/:year" element={<StudentAcademicDetails />} />
+            <Route path="/fees_management/:rollNo" element={<StudentDetails />} />
+            <Route path="/fees_management/:rollNo/:year" element={<StudentAcademicDetails />} />
 
             <Route path="Fee_demand" element={<FeeDemand />} />
             <Route path="reports" element={<Reports/>}/>
