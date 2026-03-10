@@ -18,9 +18,15 @@ const PaymentMFilter = ({ filters, setFilters, searchTerm, setSearchTerm }) => {
 
   const yearOptions = ['1st Year', '2nd Year', '3rd Year', '4th Year'];
   const deptOptions = ['CSE', 'MECH', 'ECE', 'CCE', 'EEE', 'IT', 'AIDS', 'AIML', 'CSE(CYB)'];
-  const modeOptions = ['Cash', 'UPI', 'DD', 'NEFT'];
-  const feeHeadOptions = ['Tution Fees', 'Hostel Fees', 'Exam Fees', 'Software Fees'];
-
+  const modeOptions = ['Cash','Card','UPI','NetBanking','Cheque','DD'];
+  const feeHeadOptions = [
+  "Tuition Fees",
+  "Hostel Fees",
+  "Exam Fees",
+  "Book Fees",
+  "Lab Fees",
+  "ERP Fees",
+];
   return (
     <div className="flex flex-wrap items-center gap-3">
 

@@ -22,69 +22,60 @@ const PaymentDrawer = ({ show, onClose, onRefresh, selectedStudent, enteredRows,
 
   if (!show) return null;
 
-  const handleBilling = async () => {
-    if (totalAmount <= 0) return toast.error("Amount must be greater than 0");
-    setLoading(true);
+    const handleBilling = async () => {
+      if (totalAmount <= 0) return toast.error("Amount must be greater than 0");
+      setLoading(true);
 
-    try {
-      const firstRow = enteredRows[0];
-      const academicYear = firstRow?.academicYear || "";
-      const semNum = firstRow?.semesterNumber || (firstRow?.semester === "Odd" ? 1 : 2);
+      try {
+        // Grouping by semesterNumber to handle multi-semester records correctly
+        const breakdownMap = {};
 
-      const academicDetails = {
-        semesterNumber: Number(semNum),
-        tuition: 0,
-        exam: 0,
-        erp: 0,
-        book: 0,
-        lab: 0,
-      };
-      
-      let hostelTotal = 0;
-      let transportTotal = 0;
+        enteredRows.forEach((row) => {
+          const semNum = row.semesterNumber;
+          if (!breakdownMap[semNum]) {
+            breakdownMap[semNum] = {
+              academicYear: row.academicYear,
+              academic: { semesterNumber: semNum, tuition:0, exam:0, erp:0, book:0, lab:0 },
+              hostel: 0,
+              transport: 0,
+            };
+          }
 
-      enteredRows.forEach((row) => {
-        const head = row.subHead?.toLowerCase() || row.feeHead?.toLowerCase() || "";
-        const amt = Number(row.enteredAmount || 0);
-        if (amt <= 0) return;
+          const amt = Number(row.enteredAmount || 0);
+          
+          if (row.feeHead === "Academic") {
+            // row.rawKey holds 'tuition', 'exam', etc. set in Payment.jsx
+            breakdownMap[semNum].academic[row.rawKey] = amt;
+          } else if (row.feeHead.toLowerCase().includes("hostel")) {
+            breakdownMap[semNum].hostel += amt;
+          } else if (row.feeHead.toLowerCase().includes("transport")) {
+            breakdownMap[semNum].transport += amt;
+          }
+        });
 
-        if (head.includes("tuition")) academicDetails.tuition += amt;
-        else if (head.includes("exam")) academicDetails.exam += amt;
-        else if (head.includes("erp")) academicDetails.erp += amt;
-        else if (head.includes("book")) academicDetails.book += amt;
-        else if (head.includes("lab")) academicDetails.lab += amt;
-        else if (head.includes("hostel")) hostelTotal += amt;
-        else if (head.includes("transport") || head.includes("bus")) transportTotal += amt;
-      });
+        const payload = {
+          rollNo: selectedStudent?.id,
+          paymentType: paymentMethod,
+          bankName: formData.bankName || "N/A",
+          bankLocation: formData.bankLocation || "N/A",
+          billingDate: new Date().toLocaleDateString("en-GB"),
+          remarks: formData.remarks || "Fee Payment",
+          breakdowns: Object.values(breakdownMap), // Converts our map to the array expected by backend
+        };
 
-      const payload = {
-        rollNo: selectedStudent?.id,
-        paymentType: paymentMethod,
-        bankName: formData.bankName || "N/A",
-        bankLocation: formData.bankLocation || "N/A",
-        billingDate: new Date().toLocaleDateString("en-GB"), 
-        remarks: formData.remarks || `Fees for Sem ${semNum}`,
-        breakdowns: [{
-          academicYear: academicYear,
-          academic: academicDetails,
-          hostel: hostelTotal,
-          transport: transportTotal,
-        }],
-      };
+        const response = await ApiRequest("/api/feePayment/pay", "POST", payload);
 
-      const response = await ApiRequest("/api/feePayment/pay", "POST", payload);
-
-      if (response.success !== false) {
-        toast.success("Payment Successful!");
-        if (onRefresh) await onRefresh();
-        onClose();
+        if (response.success !== false) {
+          toast.success("Payment Successful!");
+          if (onRefresh) await onRefresh();
+          onClose();
+        }
+      } catch (error) {
+        toast.error(error.message || "Payment failed");
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      toast.error(error.message || "Payment failed");
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
@@ -144,7 +135,7 @@ const PaymentDrawer = ({ show, onClose, onRefresh, selectedStudent, enteredRows,
               <CustomSelect
                 value={paymentMethod}
                 onChange={(val) => { setPaymentMethod(val); setFormData({}); }}
-                options={["Cash", "UPI", "Cheque", "DD", "Card", "Net Banking"]}
+                options={["Cash", "UPI", "Cheque", "DD", "Card", "NetBanking"]}
               />
             </div>
             <PaymentMethodFields paymentMethod={paymentMethod} formData={formData} setFormData={setFormData} />

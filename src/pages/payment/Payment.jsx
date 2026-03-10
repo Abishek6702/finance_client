@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import PaymentTable from "../../components/PaymentTable";
@@ -6,10 +6,16 @@ import PaymentMFilter from "../../components/PaymentMFilter";
 import { ApiRequest } from "../../utils/ApiRequest";
 
 function Payment() {
-
   const navigate = useNavigate();
 
   const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+
+  const [payments, setPayments] = useState([]);
+
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
 
   const [filters, setFilters] = useState({
     year: "Year",
@@ -18,137 +24,111 @@ function Payment() {
     feeHead: "Fee Head",
   });
 
-  const [payments, setPayments] = useState([]);
-
-  const yearLabel = (year) => {
-    const map = {
-      1: "1st Year",
-      2: "2nd Year",
-      3: "3rd Year",
-      4: "4th Year",
-    };
-    return map[year] || year;
+  const getYearNumber = (year) => {
+    if (!year || year === "Year") return null;
+    const match = year.match(/\d+/);
+    return match ? parseInt(match[0]) : null;
   };
 
-  useEffect(() => {
+  const fetchPaymentData = useCallback(async (filterParams = {}, pageNo = 1) => {
+    try {
+      if (pageNo === 1) setLoading(true);
+      else setLoadingMore(true);
 
-    const fetchPaymentData = async () => {
+      const params = new URLSearchParams();
 
-      const response = await ApiRequest("/api/feePayment");
-      const responseData = response.data;
-      const formattedData = responseData.transactions.flatMap((item) => {
+      params.append("page", pageNo);
+      params.append("limit", 10);
 
-        const student = item.student;
-        const transaction = item.transaction;
-        const breakdown = transaction.breakdowns?.[0] || {};
+      if (filterParams.dept !== "Department")
+        params.append("department", filterParams.dept);
 
-        const semester = breakdown.academic?.semesterNumber || 1;
+      if (filterParams.mode !== "Mode")
+        params.append("paymentMode", filterParams.mode);
 
-        const semPeriod = semester % 2 === 0 ? "Even" : "Odd";
+      if (filterParams.feeHead !== "Fee Head") {
+        const head = filterParams.feeHead.split(" ")[0].toLowerCase();
+        params.append("feeHead", head);
+      }
 
-        const year = student.academic.yearStudying;
+      const year = getYearNumber(filterParams.year);
+      if (year) params.append("yearStudying", year);
 
-        const base = {
-          id: transaction._id,
-          receipt: transaction.receiptNo,
+      const url = `/api/feePayment/recent?${params.toString()}`;
 
-          roll: student.personal.rollNo,
-          name: student.personal.studentName,
-          avatar: student.personal.studentPhoto,
+      const res = await ApiRequest(url);
 
-          dept: student.academic.departmentName,
-          year: year,
+      const transactions = res?.data?.transactions || [];
+      const pagination = res?.data?.pagination;
 
-          sub: `${yearLabel(year)} / ${student.academic.departmentName}`,
+      const formatted = transactions.map((item) => ({
+        id: item.breakdownId,
+        breakdownId: item.breakdownId,
+        transactionId: item.transactionId,
+        receipt: item.receiptNo,
+        roll: item.rollNo,
+        name: item.studentName,
+        dept: item.department,
+        year: item.year,
+        semPeriod: item.semester,
+        head: item.feeHead,
+        amount: item.amount,
+        mode: item.paymentMode,
+        bank: item.bank !== "N/A" ? item.bank : "-",
+        date: item.paidOn,
+        avatar: item.photo,
+        section: item.section,
+        isrecallrequested: false,
+      }));
 
-          semPeriod,
+      if (pageNo === 1) {
+        setPayments(formatted);
+      } else {
+        setPayments((prev) => [...prev, ...formatted]);
+      }
 
-          mode: transaction.paymentType,
-          bank: transaction.bankName,
+      setHasMore(pageNo < pagination.totalPages);
 
-          date: transaction.paidOn,
-
-          billingDate: transaction.billingDate,
-          paidOn: transaction.paidOn,
-
-          academicYear: breakdown.academicYear,
-          remarks: transaction.remarks,
-
-          isrecallrequested: false
-        };
-
-        const feeHeads = [
-          { type: "Tution Fees", amount: breakdown.academic?.tuition },
-          { type: "Exam Fees", amount: breakdown.academic?.exam },
-          { type: "Software Fees", amount: breakdown.academic?.erp },
-          { type: "Book Fees", amount: breakdown.academic?.book },
-          { type: "Lab Fees", amount: breakdown.academic?.lab },
-          { type: "Hostel Fees", amount: breakdown.hostel },
-          { type: "Transport Fees", amount: breakdown.transport },
-        ];
-
-        return feeHeads
-          .filter((f) => f.amount && f.amount > 0)
-          .map((f) => ({
-            ...base,
-            head: f.type,
-            amount: f.amount,
-          }));
-      });
-
-      setPayments(formattedData);
-
-    };
-
-    fetchPaymentData();
-
+    } catch (err) {
+      console.error("Fetch Error:", err);
+    } finally {
+      setLoading(false);
+      setLoadingMore(false);
+    }
   }, []);
 
+  useEffect(() => {
+    setPage(1);
+    setPayments([]);
+    fetchPaymentData(filters, 1);
+  }, [filters]);
 
-  const filteredData = useMemo(() => {
+  const loadMore = () => {
+    if (!hasMore || loadingMore) return;
 
-    return payments.filter((item) => {
+    const nextPage = page + 1;
+    setPage(nextPage);
 
-      const matchesSearch =
-        item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.roll.toLowerCase().includes(searchTerm.toLowerCase());
+    fetchPaymentData(filters, nextPage);
+  };
 
-      const matchesYear =
-        filters.year === "Year" ||
-        yearLabel(item.year) === filters.year;
+  const filteredData = payments.filter((item) => {
+    const search = searchTerm.toLowerCase();
 
-      const matchesDept =
-        filters.dept === "Department" ||
-        item.dept === filters.dept;
-
-      const matchesMode =
-        filters.mode === "Mode" ||
-        item.mode === filters.mode;
-
-      const matchesHead =
-        filters.feeHead === "Fee Head" ||
-        item.head === filters.feeHead;
-
-      return (
-        matchesSearch &&
-        matchesYear &&
-        matchesDept &&
-        matchesMode &&
-        matchesHead
-      );
-
-    });
-
-  }, [searchTerm, filters, payments]);
-
+    return (
+      item.name?.toLowerCase().includes(search) ||
+      item.roll?.toLowerCase().includes(search) ||
+      item.receipt?.toLowerCase().includes(search)
+    );
+  });
 
   return (
-    <main className="max-w-400 flex flex-col gap-4">
+    <main className="max-w-full h-[calc(100vh-100px)] flex flex-col gap-4 p-4">
 
-      <div className="text-xl">
-        <span className="font-inter font-semibold">
-          Recent Payment Details / Academic Year{" "}
-          <span className="text-[#0B56A4] font-bold">(2025 - 2026)</span>
+      <div className="flex justify-between items-center">
+        <span className="text-xl font-semibold">
+          Recent Payment Details /
+          <span className="text-[#0B56A4]"> 2025 - 2026</span>
         </span>
       </div>
 
@@ -162,15 +142,24 @@ function Payment() {
         />
 
         <button
-          className="flex items-center gap-2 px-4 py-2.5 bg-[#0B56A4] text-white rounded-lg font-semibold hover:bg-[#084482] transition-colors shadow-sm whitespace-nowrap cursor-pointer"
+          className="flex items-center gap-2 px-4 py-2 bg-[#0B56A4] text-white rounded-lg hover:bg-[#084482]"
           onClick={() => navigate("/admin/payment/newpayment")}
         >
-          <Plus className="w-5 h-5" /> New Payment
+          <Plus size={20} /> New Payment
         </button>
 
       </div>
 
-      <PaymentTable data={filteredData} />
+      <div className="flex-1 min-h-0">
+
+        <PaymentTable
+          data={filteredData}
+          loading={loading}
+          loadingMore={loadingMore}
+          loadMore={loadMore}
+        />
+
+      </div>
 
     </main>
   );

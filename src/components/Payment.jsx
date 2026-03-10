@@ -17,6 +17,18 @@ const Payment = ({ selectedStudent }) => {
   // Track initialization per student to prevent infinite loops
   const initializedId = useRef(null);
 
+  const handleClear = () => {
+      // Since filters depend on the student data, we reset to the initialized values
+      if (transactions.length > 0) {
+        // You can either reset to the current student's defaults:
+        setFilters({
+          academicYear: academicYearOptions[0] || "", // or a specific year
+          semester: "Odd",
+          feeHead: "All",
+        });
+      }
+    };
+
   const fetchPayments = useCallback(async () => {
     if (!selectedStudent?.id) return;
     
@@ -24,46 +36,58 @@ const Payment = ({ selectedStudent }) => {
     try {
       const res = await ApiRequest(`/api/studentFeeTracking?rollNo=${selectedStudent.id}`);
       if (!res?.data?.length) return;
-
+        
       const responseData = res.data[0];
       const { student, feeTracking } = responseData;
       const feeRecords = feeTracking.academicYearWiseRecord || [];
 
-      // 1. Calculate Academic Years
+      // 1. Generate the 4-year span based on batch (e.g., 2023-2027)
       const startYear = Number(student.academic.batch.split("-")[0]);
-      const years = Array.from({ length: 4 }, (_, i) => `${startYear + i}-${startYear + i + 1}`);
+      const academicYearsList = Array.from({ length: 4 }, (_, i) => `${startYear + i}-${startYear + i + 1}`);
 
-      // 2. Process Rows (Existing logic preserved)
+      // 2. Process Rows with correct Semester Numbers (1-8)
       let rows = [];
       feeRecords.forEach((record) => {
+        // Find where this record fits in the 4-year cycle (Index 0 to 3)
+        const yearIndex = academicYearsList.indexOf(record.academicYear);
+        if (yearIndex === -1) return;
+
         const processSemester = (semData, type) => {
           if (!semData) return;
+          
+          // Calculation: (YearIndex * 2) + 1 for Odd, + 2 for Even
+          // Year 0: Odd=1, Even=2 | Year 1: Odd=3, Even=4...
+          const semNumber = (yearIndex * 2) + (type === "odd" ? 1 : 2);
+
           const feeHeads = ["tuition", "exam", "erp", "book", "lab"];
           feeHeads.forEach((key) => {
             const data = semData[key];
-            if (!data) return;
+            if (!data || data.subTotal === 0) return;
             rows.push({
               academicYear: record.academicYear,
-              semester: type === "odd" ? "Odd" : "Even",
+              semesterType: type === "odd" ? "Odd" : "Even", // For UI Filter
+              semesterNumber: semNumber,                    // FOR BACKEND API
               feeHead: "Academic",
-              subHead: key.charAt(0).toUpperCase() + key.slice(1) + " Fee",
+              subHead: key.charAt(0).toUpperCase() + key.slice(1), 
               totalAmount: data.subTotal || 0,
               concession: data.concession || 0,
-              lastDate: "20-06-2026", // Placeholder
+              lastDate: data.dueDate || "20-06-2026",
               paid: data.paid || 0,
               pending: (data.total || 0) - (data.paid || 0),
-              status: data.status === "Unpaid" ? "Overdue" : data.status,
+              status: data.status,
+              rawKey: key // e.g., 'tuition'
             });
           });
         };
+
         processSemester(record.academic.odd, "odd");
         processSemester(record.academic.even, "even");
       });
 
-      setAcademicYearOptions(years);
+      setAcademicYearOptions(academicYearsList);
       setTransactions(rows);
 
-      // 3. Sync Filters ONLY if the student has changed
+      // Initial Filter Sync
       if (initializedId.current !== selectedStudent.id) {
         setFilters({
           academicYear: student.academic.currentAcademicYear,
@@ -84,12 +108,13 @@ const Payment = ({ selectedStudent }) => {
   }, [fetchPayments]);
 
   return (
-    <div className="w-full h-full space-y-4">
+    <div className="w-full h-full flex flex-col space-y-4 pb-2">
       <NewPaymentFilter
         filters={filters}
         setFilters={setFilters}
         transactions={transactions}
         academicYearOptions={academicYearOptions}
+        onClear={handleClear}
       />
       {loading ? (
         <div className="p-10 text-center">Loading...</div>

@@ -1,9 +1,8 @@
 import React, { useState } from "react";
 import { ArrowUpRight } from "lucide-react";
 import PaymentDrawer from "./PaymentDrawer";
-import nodata from "../assets/nodata.svg";
 
-const NewpaymnetTable = ({ selectedStudent, transactions = [], filters,onRefresh }) => {
+const NewpaymnetTable = ({ selectedStudent, transactions = [], filters, onRefresh }) => {
   const [enteredAmounts, setEnteredAmounts] = useState({});
   const [showDrawer, setShowDrawer] = useState(false);
   const [errors, setErrors] = useState({});
@@ -30,29 +29,19 @@ const NewpaymnetTable = ({ selectedStudent, transactions = [], filters,onRefresh
   const filteredData = (transactions || []).filter((item) => {
     return (
       item.academicYear === filters.academicYear &&
-      item.semester === filters.semester &&
+      item.semesterType === filters.semester &&
       (filters.feeHead === "All" || item.feeHead === filters.feeHead)
     );
   });
 
   const handleAmountChange = (key, value, pendingAmount) => {
     const numericValue = Number(value);
-
-    setEnteredAmounts((prev) => ({
-      ...prev,
-      [key]: value
-    }));
+    setEnteredAmounts((prev) => ({ ...prev, [key]: value }));
 
     if (numericValue > pendingAmount) {
-      setErrors((prev) => ({
-        ...prev,
-        [key]: `Exceeds ₹${pendingAmount}`
-      }));
+      setErrors((prev) => ({ ...prev, [key]: `Exceeds ₹${pendingAmount}` }));
     } else {
-      setErrors((prev) => ({
-        ...prev,
-        [key]: ""
-      }));
+      setErrors((prev) => ({ ...prev, [key]: "" }));
     }
   };
 
@@ -70,7 +59,7 @@ const NewpaymnetTable = ({ selectedStudent, transactions = [], filters,onRefresh
   );
 
   const enteredRows = filteredData
-    .map((item) => ({ ...item, enteredAmount: Number(enteredAmounts[`${item.feeHead}-${item.subHead}`] || 0)}))
+    .map((item) => ({ ...item, enteredAmount: Number(enteredAmounts[`${item.feeHead}-${item.subHead}`] || 0) }))
     .filter((item) => item.enteredAmount > 0);
 
   const handleCloseDrawer = () => {
@@ -78,22 +67,28 @@ const NewpaymnetTable = ({ selectedStudent, transactions = [], filters,onRefresh
     setEnteredAmounts({});
     setErrors({});
   };
+
   const hasErrors = Object.values(errors).some((err) => err);
 
   return (
-    <div className="w-full border rounded-xl border-gray-200 bg-white overflow-hidden">
-      <div className="h-[calc(100vh-320px)] overflow-y-auto overflow-x-auto custom-scrollbar relative">
-        <table className="border-collapse w-full table-fixed min-w-[1100px]">
-          {/* Colgroup adjusted for no Fine field */}
-          <colgroup><col className="w-[13%]"/><col className="w-[13%]"/><col className="w-[12%]"/><col className="w-[11%]"/><col className="w-[12%]"/><col className="w-[11%]"/><col className="w-[11%]"/><col className="w-[11%]"/><col className="w-[15%]"/></colgroup>
+    <div className="w-full border rounded-xl border-gray-200 bg-white shadow-sm overflow-hidden flex flex-col h-[calc(100vh-160px)]">
+      
+      {/* Table Wrapper using Flexbox to push footer down */}
+      <div className="flex-1 overflow-y-auto overflow-x-auto custom-scrollbar relative flex flex-col">
+        <table className="border-collapse w-full table-fixed min-w-[1100px] flex-1">
+          <colgroup>
+            <col className="w-[13%]"/><col className="w-[11%]"/><col className="w-[12%]"/>
+            <col className="w-[11%]"/><col className="w-[12%]"/><col className="w-[11%]"/>
+            <col className="w-[11%]"/><col className="w-[13%]"/><col className="w-[15%]"/>
+          </colgroup>
 
-          <thead className="sticky top-0 z-40 bg-[#F0F0F0]">
-            <tr className="">
+          <thead className="sticky top-0 z-40 bg-[#F0F0F0] shadow-sm">
+            <tr>
               {[
                 "Fee Head", "Sub Head", "Total Amount", "Concession", 
                 "Last Date", "Paid", "Pending", "Status", "Enter Amount"
               ].map((header) => (
-                <th key={header} className="p-3 text-center font-semibold ">
+                <th key={header} className="p-3 text-center font-semibold text-gray-700">
                   {header}
                 </th>
               ))}
@@ -101,70 +96,76 @@ const NewpaymnetTable = ({ selectedStudent, transactions = [], filters,onRefresh
           </thead>
 
           <tbody className="bg-white">
-            {filteredData.map((item) => (
-              <tr key={`${item.feeHead}-${item.subHead}`} className="">
-                <td className="p-1.5 text-center truncate">{item.feeHead}</td>
-                <td className="p-1.5 text-center truncate">{item.subHead}</td>
-                <td className="p-1.5 text-center text-gray-800 ">₹{item.totalAmount}</td>
-                <td className="p-1.5 text-center text-gray-800 ">₹{item.concession}</td>
-                <td className={`p-1.5 text-center ${isOverdueDate(item.lastDate) ? "text-[#ed6c83]" : ""}`}>
-                  {item.lastDate}
-                </td>
-                <td className="p-1.5 text-center text-[#44CF7D] ">₹{item.paid}</td>
-                <td className="p-1.5 text-center ">₹{item.pending}</td>
-                <td className="p-1.5 text-center">
-                  <span className={`px-3 py-1 rounded-md text-[12px] font-semibold ${getStatusStyles(item.status)}`}>
-                    {item.status}
-                  </span>
-                </td>
-                <td className="p-1.5 text-center">
-                  <div className="flex flex-col items-center justify-center min-h-[48px]">
-                    <input
-                      type="number"
-                      min="0"
-                      disabled={item.status?.toLowerCase() === "paid"}
-                      value={enteredAmounts[`${item.feeHead}-${item.subHead}`] || ""}
-                      onChange={(e) => handleAmountChange(`${item.feeHead}-${item.subHead}`, e.target.value, item.pending)}
-                      placeholder="Enter Amount"
-                      className={`w-full max-w-[120px] px-2 py-1.5 border rounded-lg text-center outline-none transition-all ${
-                        item.status?.toLowerCase() === "paid" 
-                          ? "bg-gray-50 cursor-not-allowed text-gray-400 border-gray-200" 
-                          : errors[`${item.feeHead}-${item.subHead}`] 
-                            ? "border-red-500 bg-red-50 text-red-600" 
-                            : "border-gray-200 text-gray-700 focus:border-gray-400"
-                      }`}
-                    />
-                    {errors[`${item.feeHead}-${item.subHead}`] && (
-                      <span className="text-[10px] text-red-600 mt-1 leading-none font-medium">
-                        {errors[`${item.feeHead}-${item.subHead}`]}
-                      </span>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            ))}
+            {filteredData.map((item) => {
+              // Show Overdue if the status is Unpaid
+              const displayStatus = item.status === "Unpaid" ? "Overdue" : item.status;
+              
+              return (
+                <tr key={`${item.feeHead}-${item.subHead}`} className="">
+                  <td className="p-2 text-center ">{item.feeHead}</td>
+                  <td className="p-2 text-center ">{item.subHead}</td>
+                  <td className="p-2 text-center ">₹{item.totalAmount}</td>
+                  <td className="p-2 text-center ">₹{item.concession}</td>
+                  <td className={`p-2 text-center  ${isOverdueDate(item.lastDate) ? "text-[#ed6c83] " : ""}`}>
+                    {item.lastDate}
+                  </td>
+                  <td className="p-2 text-center  text-[#44CF7D]">₹{item.paid}</td>
+                  <td className="p-2 text-center ">₹{item.pending}</td>
+                  <td className="p-2 text-center">
+                    <span className={`px-3 py-1 rounded-md  ${getStatusStyles(displayStatus)}`}>
+                      {displayStatus}
+                    </span>
+                  </td>
+                  <td className="p-2 text-center">
+                    <div className="flex flex-col items-center justify-center min-h-[52px]">
+                      <input
+                        type="number"
+                        min="0"
+                        disabled={item.status?.toLowerCase() === "paid"}
+                        value={enteredAmounts[`${item.feeHead}-${item.subHead}`] || ""}
+                        onChange={(e) => handleAmountChange(`${item.feeHead}-${item.subHead}`, e.target.value, item.pending)}
+                        placeholder="0.00"
+                        className={`w-full max-w-[110px] px-2 py-1.5 border rounded-lg text-center text-sm outline-none transition-all ${
+                          item.status?.toLowerCase() === "paid" 
+                            ? "bg-gray-50 cursor-not-allowed text-gray-400 border-gray-100" 
+                            : errors[`${item.feeHead}-${item.subHead}`] 
+                              ? "border-red-500 bg-red-50 text-red-600" 
+                              : "border-gray-200 font-semibold"
+                        }`}
+                      />
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+            
+            {/* This empty row expands to fill space, pushing the footer to the bottom */}
+            <tr className="flex-1 min-h-0">
+               <td colSpan="9" className="h-full"></td>
+            </tr>
           </tbody>
 
-          <tfoot className="sticky bottom-0 z-40 bg-[#f3f4f6] border-t-2 border-gray-200">
-            <tr className="font-semibold ">
-              <td className="p-3 text-center">Total</td>
+          {/* Sticky footer that stays at the bottom line of the container */}
+          <tfoot className="sticky bottom-0 z-40 bg-[#f0f0f0] border-t-2 border-gray-200 shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
+            <tr className="font-semibold">
+              <td className="p-3 text-center">TOTAL</td>
               <td className="p-3"></td>
               <td className="p-3 text-center">₹{totals.totalAmount}</td>
               <td className="p-3 text-center">₹{totals.concession}</td>
               <td className="p-3"></td>
-              <td className="p-3 text-center ">₹{totals.paid}</td>
-              <td className="p-3 text-center ">₹{totals.pending}</td>
+              <td className="p-3 text-center text-[#2ea35f]">₹{totals.paid}</td>
+              <td className="p-3 text-center">₹{totals.pending}</td>
               <td className="p-3"></td>
               <td className="p-3 text-center">
-                <div className="flex items-center justify-center gap-2">
-                  <span className="text-gray-900">₹{totals.enterAmount}</span>
+                <div className="flex items-center justify-center gap-3">
+                  <span className="text-[#1f5aa6]">₹{totals.enterAmount}</span>
                   <button 
                     disabled={totals.enterAmount <= 0 || hasErrors}
                     onClick={() => setShowDrawer(true)}
-                    className={`p-1.5 rounded-lg transition-all ${
-                      totals.enterAmount > 0 
-                      ? "bg-[#1f5aa6] text-white hover:bg-gray-300 cursor-pointer" 
-                      : "bg-gray-200 rounded-xl cursor-not-allowed"
+                    className={`p-2 rounded-xl transition-all transform active:scale-95 ${
+                      totals.enterAmount > 0 && !hasErrors
+                      ? "bg-[#1f5aa6] text-white hover:bg-[#16427a] cursor-pointer shadow-md" 
+                      : "bg-gray-200 text-gray-400 cursor-not-allowed"
                     }`}
                   >
                     <ArrowUpRight className="w-4 h-4" />
@@ -174,23 +175,16 @@ const NewpaymnetTable = ({ selectedStudent, transactions = [], filters,onRefresh
             </tr>
           </tfoot>
         </table>
-
-        {filteredData.length === 0 && (
-          <div className="py-20 flex flex-col items-center justify-center bg-white">
-            <img src={nodata} alt="No data" className="w-40 opacity-60" />
-            <p className="text-gray-400 mt-4 font-medium">No payment records found.</p>
-          </div>
-        )}
       </div>
 
       <PaymentDrawer
-      show={showDrawer}
-      onClose={handleCloseDrawer}
-      onRefresh={onRefresh} // Pass it here
-      selectedStudent={selectedStudent}
-      enteredRows={enteredRows}
-      totalAmount={totals.enterAmount}
-    />
+        show={showDrawer}
+        onClose={handleCloseDrawer}
+        onRefresh={onRefresh}
+        selectedStudent={selectedStudent}
+        enteredRows={enteredRows}
+        totalAmount={totals.enterAmount}
+      />
     </div>
   );
 };
