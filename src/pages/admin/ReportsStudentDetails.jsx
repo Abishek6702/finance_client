@@ -1,16 +1,16 @@
-import React, { useMemo, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import React, { useEffect, useMemo, useState } from "react";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import * as XLSX from "xlsx";
 import ReportsDetailsFilter from "../../components/ReportsDetailsFilter";
 import CustomSelect from "../../components/CustomSelect"; // Import your CustomSelect
 import { ChevronRight, Download } from 'lucide-react';
 import nodata from '../../assets/nodata.svg'
+import axios from "axios";
 
 export default function ReportsStudentDetails() {
   const { state } = useLocation();
   const navigate = useNavigate();
-
-  const student = state?.user;
+  const { id } = useParams();
 
   const [search, setSearch] = useState("");
   const [sem, setSem] = useState("");
@@ -19,14 +19,44 @@ export default function ReportsStudentDetails() {
   const [dateRange, setDateRange] = useState({ start: "", end: "" });
   const [selectedRows, setSelectedRows] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
-  
+
+  const [student, setStudent] = useState(null);
+const [fees, setFees] = useState([]);
+const token = localStorage.getItem("token");
+  console.log("Roll No from URL:", id);
   // New State for Academic Year Filter
   const [academicYear, setAcademicYear] = useState(student?.academicyear || "2025-2026");
 
-  const filteredFees = useMemo(() => {
-    if (!student?.fees) return [];
+  useEffect(() => {
+    const fetchStudentReport = async () => {
+      try {
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_BASE_URL}/api/reports/individual?rollNo=${id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+  
+        const data = res.data.data;
+        console.log("Fetched individual report data:", res.data.data);
+  
+        setStudent(data.student);
+        setFees(data.rows);
+  
+      } catch (error) {
+        console.error("Error fetching individual report:", error);
+      }
+    };
+  
+    fetchStudentReport();
+  }, [id]);
 
-    return student.fees.filter((fee) => {
+  const filteredFees = useMemo(() => {
+    if (!fees) return [];
+
+    return fees.filter((fee) => {
       let matchesDate = true;
       if (dateRange.start) {
         if (dateRange.end) {
@@ -39,7 +69,7 @@ export default function ReportsStudentDetails() {
       return (
         (!search || fee.receiptNo.toLowerCase().includes(search.toLowerCase())) &&
         (!sem || fee.sem === sem) &&
-        (!feesHead || fee.feesHead === feesHead) &&
+        (!feesHead || fee.feeHead === feesHead) &&
         (!paymentMode || fee.paymentMode === paymentMode) &&
         matchesDate
       );
@@ -81,18 +111,20 @@ export default function ReportsStudentDetails() {
   if (!student) {
     return (
       <div className="p-10 text-center">
-        <p className="text-gray-500 mb-4">No student data found.</p>
-        <button onClick={() => navigate("/admin/reports")} className="text-[#1F5AA6] font-medium underline">
-          Back to Reports
-        </button>
+        <p className="text-gray-500 mb-4">Loading...</p>
+       
       </div>
     );
+  }
+
+  function normalizeDate(date) {
+    return new Date(date).toLocaleDateString("en-GB");
   }
 
   return (
     <div className="p-1">
       {/* 🔹 Navigation Tabs */}
-      <div className="flex gap-3 mb-6">
+      <div className="flex gap-3 mb-4">
         <button
           onClick={() => navigate("/admin/reports", { state: { activeTab: "individual" } })}
           className="px-5 py-2.5 rounded-lg font-medium bg-[#1F5AA6] text-white shadow-md cursor-pointer transition-all"
@@ -109,7 +141,7 @@ export default function ReportsStudentDetails() {
       </div>
 
       {/* 🔹 Breadcrumb + Academic Year Filter Row */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-2">
         <nav className="flex items-center space-x-1.5 text-xl">
           <Link to="/admin/reports" className="text-gray-600 hover:text-gray-800 transition-colors">
             Fees Details
@@ -166,7 +198,6 @@ export default function ReportsStudentDetails() {
               <th>Demand</th>
               <th>Concession</th>
               <th>Paid</th>
-              <th>Fine</th>
               <th>Balance</th>
               <th>Payment Date</th>
               <th className="text-center">Payment Mode</th>
@@ -187,21 +218,20 @@ export default function ReportsStudentDetails() {
                     />
                   </td>
                   <td className="py-4 px-2 ">{fee.receiptNo}</td>
-                  <td>{fee.feesHead}</td>
+                  <td>{fee.feeHead}</td>
                   <td>{fee.subHead}</td>
                   <td>₹{fee.demand}</td>
                   <td>₹{fee.concession}</td>
                   <td className="">₹{fee.paid}</td>
-                  <td>{fee.fine}</td>
                   <td className="text-red-500 ">₹{fee.balance}</td>
-                  <td>{fee.paymentDate}</td>
+                  <td>{normalizeDate(fee.paymentDate)}</td>
                   <td className="text-center">
                     <span className="">{fee.paymentMode}</span>
                   </td>
                   <td>
                     <button
                       onClick={() => handleSingleExport(fee)}
-                      className="bg-[#0B56A4] text-white p-2 rounded-full hover:bg-[#084482] transition-colors cursor-pointer"
+                      className="bg-[#0B56A4] mr-4 text-white p-2 rounded-full hover:bg-[#084482] transition-colors cursor-pointer"
                     >
                       <Download size={14} />
                     </button>

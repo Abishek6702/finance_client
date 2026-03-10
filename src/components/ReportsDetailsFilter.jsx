@@ -47,8 +47,8 @@ export default function ReportsDetailsFilter({
           <Search size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
         </div>
 
-        <CustomSelect placeholder="Even Sem" value={sem} onChange={onSemChange} options={["Odd", "Even"]} />
-        <CustomSelect placeholder="Fees Head" value={feesHead} onChange={onFeesHeadChange} options={["Exam Fees", "Tuition Fees", "Practical"]} />
+        {/* <CustomSelect placeholder="Even Sem" value={sem} onChange={onSemChange} options={["Odd", "Even"]} /> */}
+        <CustomSelect placeholder="Fees Head" value={feesHead} onChange={onFeesHeadChange} options={["Transport", "Hostel", "Academic Fees"]} />
         <CustomSelect placeholder="Payment Mode" value={paymentMode} onChange={onPaymentModeChange} options={["UPI", "Cash", "Card", "Net Banking"]} />
 
         {/* Date Range Popover */}

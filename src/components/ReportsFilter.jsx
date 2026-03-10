@@ -36,7 +36,7 @@ export default function ReportsFilter({search,
             placeholder="Year"
             value={year}
             onChange={onYearChange}
-            options={["1st Year", "2nd Year", "3rd Year", "4th Year"]}
+            options={["1", "2", "3", "4"]}
             className="w-32"
         />
 

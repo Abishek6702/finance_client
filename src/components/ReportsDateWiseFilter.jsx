@@ -87,14 +87,14 @@ export default function ReportsDateWiseFilter({
           )}
         </div>
 
-        {/* 🔹 Academic Year Filter */}
+        {/* 🔹 Academic Year Filter
         <CustomSelect
           placeholder="Academic Year"
           value={year}
           onChange={onYearChange}
           options={["2024-2025", "2025-2026", "2026-2027"]}
           className="w-48"
-        />
+        /> */}
 
         {/* 🔹 Clear Button */}
         <button
