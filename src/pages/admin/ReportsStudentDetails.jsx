@@ -92,13 +92,46 @@ const token = localStorage.getItem("token");
   };
 
   const handleExport = () => {
-    const dataToExport = filteredFees.filter((fee) => selectedRows.includes(fee.receiptNo));
-    if (dataToExport.length === 0) return alert("Please select at least one row");
-
-    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    if (!filteredFees.length) {
+      alert("No data to export");
+      return;
+    }
+  
+    // if selectedRows empty → export all
+    const dataToExport =
+      selectedRows.length > 0
+        ? filteredFees.filter((fee) => selectedRows.includes(fee.receiptNo))
+        : filteredFees;
+  
+    const exportData = dataToExport.map((fee) => ({
+      "Roll No": student.rollNo,
+      "Student Name": student.studentName || student.name,
+      "Department": student.departmentName || student.department,
+      "Year": student.yearStudying || student.year,
+      "Section": student.section,
+  
+      "Receipt No": fee.receiptNo,
+      "Fee Head": fee.feeHead,
+      "Sub Head": fee.subHead,
+  
+      "Demand": fee.demand,
+      "Concession": fee.concession,
+      "Paid": fee.paid,
+      "Balance": fee.balance,
+  
+      "Payment Date": normalizeDate(fee.paymentDate),
+      "Payment Mode": fee.paymentMode,
+    }));
+  
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+  
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Fees Report");
-    XLSX.writeFile(workbook, `${student.name}_Fees_Report.xlsx`);
+  
+    XLSX.writeFile(
+      workbook,
+      `${student.rollNo}_Fees_Report.xlsx`
+    );
   };
 
   const handleSingleExport = (fee) => {
@@ -148,7 +181,7 @@ const token = localStorage.getItem("token");
           </Link>
           <ChevronRight size={20} className="text-gray-400" />
           <span className="text-[#0b56a4] font-semibold">
-            {student.name} ({student.rollNo})
+            {student.studentName} ({student.rollNo})
           </span>
         </nav>
 

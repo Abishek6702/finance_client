@@ -98,7 +98,9 @@ export default function ReportsDetailsFilter({
         className="bg-[#1F5AA6] text-white px-5 py-2 rounded-lg flex items-center gap-2 cursor-pointer"
       >
         <Download size={18} />
-        <span>Export ({selectedRows.length})</span>
+        <span>
+  Export {selectedRows.length > 0 && `(${selectedRows.length})`}
+</span>
       </button>
     </div>
   );
