@@ -28,7 +28,7 @@ const PaymentTable = ({ data, loading, loadingMore, loadMore }) => {
         <div className="overflow-x-auto">
 
           <div
-            className="max-h-[calc(100vh-320px)] overflow-y-auto"
+            className=" overflow-y-auto"
             onScroll={handleScroll}
           >
 
@@ -51,7 +51,7 @@ const PaymentTable = ({ data, loading, loadingMore, loadMore }) => {
 
                 <tr className="bg-[#F8F9FA]">
 
-                  <th className="p-4 text-left font-semibold sticky left-0 bg-[#F8F9FA] border-b border-gray-100 z-40">
+                  <th className="p-4 text-center font-semibold sticky left-0 bg-[#F8F9FA] border-b border-gray-100 z-40">
                     Student Details
                   </th>
 
@@ -60,7 +60,7 @@ const PaymentTable = ({ data, loading, loadingMore, loadMore }) => {
                   <th className="p-4 text-center font-semibold">Fee Head</th>
                   <th className="p-4 text-center font-semibold">Amount</th>
                   <th className="p-4 text-center font-semibold">Date</th>
-                  <th className="p-4 text-center font-semibold">Payment Mode</th>
+                  <th className="p-4 text-center font-semibold whitespace-nowrap">Payment Mode</th>
                   <th className="p-4 text-center font-semibold">Bank</th>
                   <th className="p-4 text-center font-semibold">Receipt</th>
 
