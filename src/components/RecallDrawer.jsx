@@ -3,7 +3,8 @@ import { X } from "lucide-react";
 import toast from "react-hot-toast";
 import { ApiRequest } from "../utils/ApiRequest";
 
-const RecallDrawer = ({ isOpen, onClose, payment }) => {
+// ADDED: onSuccess to the props destructuring
+const RecallDrawer = ({ isOpen, onClose, payment, onSuccess }) => {
   const [reason, setReason] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -17,25 +18,34 @@ const RecallDrawer = ({ isOpen, onClose, payment }) => {
     }
 
     setError("");
+    setLoading(true);
 
     const payload = {
       receiptNo: payment.receipt,
       rollNo: payment.roll,
       reason: reason.trim(),
+      feeHeadIds: [payment.breakdownId], 
     };
 
     try {
-      setLoading(true);
+      const response = await ApiRequest("/api/receiptRecall", "POST", payload);
 
-      await ApiRequest("/api/receiptRecall", "POST", payload);
-
-      toast.success("Recall requested successfully");
-
-      setReason("");
-      onClose();
+      if (response.success) {
+        toast.success("Recall processed successfully");
+        setReason("");
+        
+        // Safety check: Only call onSuccess if it was actually passed as a prop
+        if (onSuccess) {
+          await onSuccess();
+        }
+        
+        onClose();
+      } else {
+        toast.error(response.message || "Recall failed");
+      }
     } catch (err) {
       console.error(err);
-      toast.error("Failed to request recall");
+      toast.error(err.response?.data?.message || "Failed to process recall");
     } finally {
       setLoading(false);
     }
@@ -84,43 +94,23 @@ const RecallDrawer = ({ isOpen, onClose, payment }) => {
             {/* Payment Details */}
             <div className="grid grid-cols-[150px_1fr] gap-x-12 gap-y-3 text-[15px]">
               <span className="text-gray-600">Receipt Number</span>
-              <span className="font-medium text-gray-800">
-                {payment.receipt}
-              </span>
+              <span className="font-medium text-gray-800">{payment.receipt}</span>
 
               <span className="text-gray-600">Roll Number</span>
-              <span className="font-medium text-gray-800">
-                {payment.roll}
-              </span>
+              <span className="font-medium text-gray-800">{payment.roll}</span>
 
               <span className="text-gray-600">Sem Period</span>
-              <span className="font-medium text-gray-800">
-                {payment.semPeriod}
-              </span>
+              <span className="font-medium text-gray-800">{payment.semPeriod}</span>
 
               <span className="text-gray-600">Fees Head</span>
-              <span className="font-medium text-gray-800">
-                {payment.head}
-              </span>
+              <span className="font-medium text-gray-800">{payment.head}</span>
 
               <span className="text-gray-600">Amount</span>
-              <span className="font-medium text-gray-800">
-                ₹{payment.amount}
-              </span>
+              <span className="font-medium text-gray-800">₹{payment.amount}</span>
 
               <span className="text-gray-600">Date</span>
               <span className="font-medium text-gray-800">
                 {new Date(payment.date).toLocaleDateString()}
-              </span>
-
-              <span className="text-gray-600">Payment Mode</span>
-              <span className="font-medium text-gray-800">
-                {payment.mode}
-              </span>
-
-              <span className="text-gray-600">Bank Name</span>
-              <span className="font-medium text-gray-800">
-                {payment.bank}
               </span>
             </div>
 

@@ -74,7 +74,7 @@ const PaymentMethodFields = ({ paymentMethod, formData, setFormData }) => {
         </div>
       );
 
-    case "Net Banking":
+    case "NetBanking":
       return (
         <div className="mt-3 grid grid-cols-2 gap-3">
           <input
