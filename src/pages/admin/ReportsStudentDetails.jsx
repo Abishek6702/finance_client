@@ -221,7 +221,7 @@ const token = localStorage.getItem("token");
       />
 
       {/* 🔹 Fees Table */}
-      <div className="bg-white rounded-xl border border-[#D9D9D9] overflow-hidden">
+      <div className="bg-white rounded-xl border border-[#D9D9D9] h-[calc(100vh-300px)] overflow-auto">
         <table className="w-full text-center">
           <thead className="bg-gray-100">
             <tr>
