@@ -9,6 +9,8 @@ export default function ReportsDateWiseFilter({
   onYearChange,
   onExport,
   onClearFilters,
+  paymentFilter,
+  onPaymentFilterChange
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const popoverRef = useRef();
@@ -95,6 +97,14 @@ export default function ReportsDateWiseFilter({
           options={["2024-2025", "2025-2026", "2026-2027"]}
           className="w-48"
         /> */}
+
+        <CustomSelect
+          placeholder="Payment Mode"
+          value={paymentFilter}
+          onChange={onPaymentFilterChange}
+          options={["Cash", "Online Payments"]}
+          className="w-48"
+        /> 
 
         {/* 🔹 Clear Button */}
         <button

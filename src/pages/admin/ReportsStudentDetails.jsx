@@ -71,10 +71,13 @@ const token = localStorage.getItem("token");
         (!sem || fee.sem === sem) &&
         (!feesHead || fee.feeHead === feesHead) &&
         (!paymentMode || fee.paymentMode === paymentMode) &&
+        (!academicYear ||
+          fee.paidForAcademicYear === academicYear ||
+          fee.currentAcademicYear === academicYear) &&
         matchesDate
       );
     });
-  }, [student, search, sem, feesHead, paymentMode, dateRange]);
+  }, [student, search, sem, feesHead, paymentMode, dateRange, academicYear]);
 
   const handleRowSelect = (receiptNo) => {
     setSelectedRows((prev) =>

@@ -5,7 +5,9 @@ import toast from "react-hot-toast";
 const RecallDetail = ({ isOpen, onClose, payment }) => {
   if (!isOpen) return null;
 
-  
+  function normalizeDate(date) {
+    return new Date(date).toLocaleDateString("en-GB");
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
@@ -35,13 +37,13 @@ const RecallDetail = ({ isOpen, onClose, payment }) => {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <img
-                  src={payment.avatar}
+                  src={payment.studentPhoto}
                   className="w-12 h-12 rounded-full object-cover"
                   alt=""
                 />
                 <div>
-                  <div className="font-semibold">{payment.name}</div>
-                  <div className="text-sm text-gray-500">{payment.year} Year / {payment.departmentName} - {payment.section}</div>
+                  <div className="font-semibold">{payment.studentName}</div>
+                  <div className="text-sm text-gray-500">{payment.year} Year / {payment.department} - {payment.section}</div>
                 </div>
               </div>
              
@@ -52,19 +54,19 @@ const RecallDetail = ({ isOpen, onClose, payment }) => {
             <div className="grid grid-cols-[150px_1fr] gap-x-13 gap-y-3 text-[15px]">
               <span className="text-gray-600">Receipt Number</span>
               <span className="font-medium text-gray-800">
-                {payment.receipt}
+                {payment.receiptNo}
               </span>
 
               <span className="text-gray-600">Roll Number</span>
-              <span className="font-medium text-gray-800">{payment.roll}</span>
+              <span className="font-medium text-gray-800">{payment.rollNo}</span>
 
               <span className="text-gray-600">Sem Period</span>
               <span className="font-medium text-gray-800">
-                {payment.sem}
+                {payment.semester}
               </span>
 
               <span className="text-gray-600">Fees Head</span>
-              <span className="font-medium text-gray-800">{payment.head}</span>
+              <span className="font-medium text-gray-800">{payment.feeHead}</span>
 
               <span className="text-gray-600">Amount</span>
               <span className="font-medium text-gray-800">
@@ -73,14 +75,14 @@ const RecallDetail = ({ isOpen, onClose, payment }) => {
 
               <span className="text-gray-600">Raised On</span>
               <span className="font-medium text-gray-800">
-                {payment.raisedOn}
+                {normalizeDate(payment.raisedOn)}
               </span>
               
 
               
 
               <span className="text-gray-600">Payment Mode</span>
-              <span className="font-medium text-gray-800">{payment.mode}</span>
+              <span className="font-medium text-gray-800">{payment.paymentMode}</span>
 
               <span className="text-gray-600">Bank Name</span>
               <span className="font-medium text-gray-800">{payment.bank}</span>
@@ -88,7 +90,7 @@ const RecallDetail = ({ isOpen, onClose, payment }) => {
 
             <div className="text-[15px] mt-4">
               <p className="font-medium text-gray-800">Reason for Re-call : </p>
-              <p className="text-gray-600">{payment.Reasonforrecall}</p>
+              <p className="text-gray-600">{payment.reason}</p>
             </div>
 
             

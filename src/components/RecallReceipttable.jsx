@@ -39,29 +39,8 @@ import axios from "axios";
             },
           },
         );
-        console.log("recall res: ", res.data.data.records);
-        const mappedData = res.data.data.records.map((item, index) => ({
-          id: item._id,
-          name: item.studentInfo.name || `Student ${index + 1}`,
-          sem: `Sem ${item.studentInfo.currentSemesterNumber}`,
-          year: item.studentInfo.yearStudying,
-          departmentName: item.studentInfo.departmentName,
-          roll: item.rollNo,
-          head: "Fees",
-          amount: `₹${item.breakdownSnapshots?.[0]?.total}`,
-          receipt: item.receiptNo,
-          avatar:
-  item.studentInfo.avatar ||
-  `https://i.pravatar.cc/150?u=${item.rollNo}`,
-          raisedOn: item.createdAt?.split("T")[0],
-          Reasonforrecall: item.reason,
-          mode: item.paymentType,
-          bank: item.bankName,
-          academicYear: item.studentInfo.currentAcademicYear,
-          section: item.studentInfo.section || "A",
-        }));
 
-        setPayments(mappedData);
+        setPayments(res.data.data.records);
       } catch (err) {
         console.error(err);
       } finally {
@@ -75,13 +54,13 @@ import axios from "axios";
   const filteredData = useMemo(() => {
     return payments.filter((item) => {
       const matchesSearch =
-        item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.roll.toLowerCase().includes(searchTerm.toLowerCase());
+        item.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.rollNo.toLowerCase().includes(searchTerm.toLowerCase());
 
       const matchesYear =
         !filters.year || String(item.year) === String(filters.year);
 
-      const matchesDept = !filters.dept || item.departmentName === filters.dept;
+      const matchesDept = !filters.dept || item.department === filters.dept;
 
       const matchesAcademicYear =
         !filters.academicYear || item.academicYear === filters.academicYear;
@@ -112,6 +91,10 @@ import axios from "axios";
     setIsModalOpen(true);
     setSelectedPayment(item);
   };
+
+  function normalizeDate(date) {
+    return new Date(date).toLocaleDateString("en-GB");
+  }
 
   return (
     <div className="flex flex-col gap-5">
@@ -165,28 +148,28 @@ import axios from "axios";
                     <td className="p-3 sticky left-0 bg-white z-20 ">
                       <div className="flex items-center gap-3 ">
                         <img
-                          src={item.avatar}
+                          src={item.studentPhoto}
                           className="w-10 h-10 rounded-full object-cover border border-gray-200"
                           alt=""
                         />
                         <div>
                           <div className="font-medium whitespace-nowrap">
-                            {item.name}
+                            {item.studentName}
                           </div>
                           <div className="text-sm text-gray-500">
-                            {item.year} Year / {item.departmentName} - {item.section}
+                            {item.year} Year / {item.department} - {item.section}
                           </div>
                         </div>
                       </div>
                     </td>
 
-                    <td className="p-3 text-center">{item.roll}</td>
-                    <td className="p-3 text-center">{item.head}</td>
-                    <td className="p-3 text-center">{item.amount}</td>
-                    <td className="p-3 text-center">{item.raisedOn}</td>
-                    <td className="p-3 text-center">{item.mode}</td>
+                    <td className="p-3 text-center">{item.rollNo}</td>
+                    <td className="p-3 text-center">{item.feeHead}</td>
+                    <td className="p-3 text-center">₹ {item.amount}</td>
+                    <td className="p-3 text-center">{normalizeDate(item.raisedOn)}</td>
+                    <td className="p-3 text-center">{item.paymentMode}</td>
                     <td className="p-3 text-center">{item.bank}</td>
-                    <td className="p-3 text-center">{item.receipt}</td>
+                    <td className="p-3 text-center">{item.receiptNo}</td>
 
                     <td className=" p-3">
                       <button

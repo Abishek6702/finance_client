@@ -68,7 +68,7 @@ export default function Reports() {
           (!year || s.currentYear === Number(year))&&
         (!department || s.department === department) &&
         (!section || s.section === section) &&
-        (!academicyear || s.academicyear === academicyear)
+        (!academicyear || s.currentAcademicYear === academicyear)
       );
     });
   }, [students, search, year, department, section, academicyear]);

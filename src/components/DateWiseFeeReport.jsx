@@ -13,6 +13,7 @@ export default function DateWiseFeeReport() {
   });
 
   const [academicYear, setAcademicYear] = useState("");
+  const [paymentFilter, setPaymentFilter] = useState("");
 
   // // 🔹 Prepare All Transactions
   // const allTransactions = useMemo(() => {
@@ -51,24 +52,23 @@ export default function DateWiseFeeReport() {
             headers: {
               Authorization: `Bearer ${token}`,
             },
-          }
+          },
         );
-  
+
         const data = await response.json();
         // console.log("API Response date wise :", data.data.rows);
-  
+
         if (data.success) {
           setAllTransactions(data.data.rows);
         } else {
           setAllTransactions([]);
         }
-  
       } catch (error) {
         console.error("Error fetching transactions:", error);
         setAllTransactions([]);
       }
     };
-  
+
     if (dateRange.start && dateRange.end) {
       fetchTransactions();
     }
@@ -82,19 +82,33 @@ export default function DateWiseFeeReport() {
 
   const filteredData = useMemo(() => {
     if (!Array.isArray(allTransactions)) return [];
-  
+
     return allTransactions.filter((item) => {
       const itemDate = new Date(item.date).toISOString().split("T")[0];
-  
-      const matchesStart =
-        !dateRange.start || itemDate >= dateRange.start;
-  
-      const matchesEnd =
-        !dateRange.end || itemDate <= dateRange.end;
-  
-      return matchesStart && matchesEnd;
+
+      const matchesStart = !dateRange.start || itemDate >= dateRange.start;
+
+      const matchesEnd = !dateRange.end || itemDate <= dateRange.end;
+
+      let matchesPayment = true;
+
+      if (paymentFilter === "Cash") {
+        matchesPayment = item.paymentMode === "Cash";
+      }
+
+      if (paymentFilter === "Online Payments") {
+        matchesPayment = [
+          "UPI",
+          "Net Banking",
+          "Card",
+          "Cheque",
+          "DD",
+        ].includes(item.paymentMode);
+      }
+
+      return matchesStart && matchesEnd && matchesPayment;
     });
-  }, [allTransactions, dateRange]);
+  }, [allTransactions, dateRange, paymentFilter]);
 
   // 🔹 Export Function
   const handleExport = () => {
@@ -102,36 +116,40 @@ export default function DateWiseFeeReport() {
       alert("No data to export");
       return;
     }
-  
+
     const exportData = filteredData.map((item) => ({
       "Roll No": item.rollNo,
       "Student Name": item.student?.studentName,
-      "Year": item.student?.year,
-      "Section": item.student?.section,
-      "Department": item.student?.department,
+      Year: item.student?.year,
+      Section: item.student?.section,
+      Department: item.student?.department,
       "Sem Period": item.paymentSemester,
       "Fee Head": item.feeHead,
       "Sub Head": item.subHead,
-      "Amount": item.amount,
-      "Date": new Date(item.date).toLocaleDateString("en-GB"),
+      Amount: item.amount,
+      Date: new Date(item.date).toLocaleDateString("en-GB"),
       "Payment Mode": item.paymentMode,
-      "Bank": item.bank,
+      Bank: item.bank,
       "Receipt No": item.receiptNo,
     }));
-  
+
     const worksheet = XLSX.utils.json_to_sheet(exportData);
-  
+
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "DateWise_Report");
-  
+
     const fileName = `Fee_Report_${dateRange.start || "All"}_${dateRange.end || ""}.xlsx`;
-  
+
     XLSX.writeFile(workbook, fileName);
   };
   console.log("Filtered Data:", filteredData);
   function normalizeDate(date) {
     return new Date(date).toLocaleDateString("en-GB");
   }
+
+  const totalAmount = useMemo(() => {
+    return filteredData.reduce((sum, item) => sum + (item.amount || 0), 0);
+  }, [filteredData]);
   return (
     <div className="mt-4">
       <ReportsDateWiseFilter
@@ -143,10 +161,13 @@ export default function DateWiseFeeReport() {
         onClearFilters={() => {
           setDateRange({ start: "", end: "" });
           setAcademicYear("");
+          setPaymentFilter("");
         }}
+        paymentFilter={paymentFilter}
+        onPaymentFilterChange={setPaymentFilter}
       />
 
-      <div className="bg-white rounded-xl border border-gray-300 h-[calc(100vh-35vh)] overflow-auto shadow-sm">
+      <div className="bg-white rounded-xl border border-gray-300 h-[calc(100vh-40vh)] overflow-auto shadow-sm">
         <table className="w-full border-collapse table-fixed">
           <colgroup>
             <col className="w-[22%]" />
@@ -181,14 +202,15 @@ export default function DateWiseFeeReport() {
                   <td className="pl-4 py-4">
                     <div className="flex items-center gap-3">
                       <img
-                        src={item.student.studentPhoto  || "/default-avatar.png"}
+                        src={item.student.studentPhoto || "/default-avatar.png"}
                         alt={item.student.studentName}
                         className="w-10 h-10 rounded-full object-cover"
                       />
                       <div>
                         <p>{item.student.studentName}</p>
                         <p className="text-gray-500">
-                          {item.student.year} year / {item.student.department} - {item.student.section}
+                          {item.student.year} year / {item.student.department} -{" "}
+                          {item.student.section}
                         </p>
                       </div>
                     </div>
@@ -215,6 +237,17 @@ export default function DateWiseFeeReport() {
               </tr>
             )}
           </tbody>
+          <tfoot className="bg-gray-100 sticky bottom-0 z-10">
+            <tr>
+              <td colSpan="8" className="text-right font-semibold py-3 pr-4">
+                Total {paymentFilter ? `(${paymentFilter})` : ""}:
+              </td>
+              <td className="text-center font-semibold text-green-700 text-lg ">
+                ₹{totalAmount.toLocaleString()}
+              </td>
+              <td colSpan="4"></td>
+            </tr>
+          </tfoot>
         </table>
       </div>
     </div>
