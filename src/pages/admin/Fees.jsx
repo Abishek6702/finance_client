@@ -96,7 +96,7 @@ const Fees = () => {
           s.rollNo?.includes(search)) &&
         (!year || s.year === year) &&
         (!department || s.department === department) &&
-        (!status || s.status?.toLowerCase().includes(status.toLowerCase())) &&
+        (!status || s.status?.toLowerCase() === status.toLowerCase()) &&
         (type.length === 0 ||
           (type.includes("Hostel") && s.ishostler) ||
           (type.includes("Dayscholar") && s.isdayscholer) ||

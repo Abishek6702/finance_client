@@ -39,14 +39,14 @@ export default function FeeManagementTable({
   const getStatusStyles = (status) => {
     const normalized = status?.toLowerCase();
 
-    if (normalized.includes("paid") && !normalized.includes("partial"))
-      return "bg-green-100 text-green-700";
+    if (normalized.includes("unpaid"))
+      return "bg-red-100 text-red-700";
 
     if (normalized.includes("partial"))
       return "bg-orange-100 text-orange-700";
 
-    if (normalized.includes("unpaid"))
-      return "bg-red-100 text-red-700";
+    if (normalized.includes("paid"))
+      return "bg-green-100 text-green-700";
 
     return "bg-gray-100 text-gray-700";
   };
