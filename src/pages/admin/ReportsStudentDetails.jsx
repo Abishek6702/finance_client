@@ -3,8 +3,8 @@ import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import * as XLSX from "xlsx";
 import ReportsDetailsFilter from "../../components/ReportsDetailsFilter";
 import CustomSelect from "../../components/CustomSelect"; // Import your CustomSelect
-import { ChevronRight, Download } from 'lucide-react';
-import nodata from '../../assets/nodata.svg'
+import { ChevronRight, Download } from "lucide-react";
+import nodata from "../../assets/nodata.svg";
 import axios from "axios";
 
 export default function ReportsStudentDetails() {
@@ -21,11 +21,13 @@ export default function ReportsStudentDetails() {
   const [selectAll, setSelectAll] = useState(false);
 
   const [student, setStudent] = useState(null);
-const [fees, setFees] = useState([]);
-const token = localStorage.getItem("token");
+  const [fees, setFees] = useState([]);
+  const token = localStorage.getItem("token");
   console.log("Roll No from URL:", id);
   // New State for Academic Year Filter
-  const [academicYear, setAcademicYear] = useState(student?.academicyear || "2025-2026");
+  const [academicYear, setAcademicYear] = useState(
+    student?.academicyear || "2025-2026",
+  );
 
   useEffect(() => {
     const fetchStudentReport = async () => {
@@ -36,20 +38,19 @@ const token = localStorage.getItem("token");
             headers: {
               Authorization: `Bearer ${token}`,
             },
-          }
+          },
         );
-  
+
         const data = res.data.data;
         console.log("Fetched individual report data:", res.data.data);
-  
+
         setStudent(data.student);
         setFees(data.rows);
-  
       } catch (error) {
         console.error("Error fetching individual report:", error);
       }
     };
-  
+
     fetchStudentReport();
   }, [id]);
 
@@ -60,14 +61,17 @@ const token = localStorage.getItem("token");
       let matchesDate = true;
       if (dateRange.start) {
         if (dateRange.end) {
-          matchesDate = fee.paymentDate >= dateRange.start && fee.paymentDate <= dateRange.end;
+          matchesDate =
+            fee.paymentDate >= dateRange.start &&
+            fee.paymentDate <= dateRange.end;
         } else {
           matchesDate = fee.paymentDate === dateRange.start;
         }
       }
 
       return (
-        (!search || fee.receiptNo.toLowerCase().includes(search.toLowerCase())) &&
+        (!search ||
+          fee.receiptNo.toLowerCase().includes(search.toLowerCase())) &&
         (!sem || fee.sem === sem) &&
         (!feesHead || fee.feeHead === feesHead) &&
         (!paymentMode || fee.paymentMode === paymentMode) &&
@@ -81,7 +85,9 @@ const token = localStorage.getItem("token");
 
   const handleRowSelect = (receiptNo) => {
     setSelectedRows((prev) =>
-      prev.includes(receiptNo) ? prev.filter((id) => id !== receiptNo) : [...prev, receiptNo]
+      prev.includes(receiptNo)
+        ? prev.filter((id) => id !== receiptNo)
+        : [...prev, receiptNo],
     );
   };
 
@@ -99,56 +105,51 @@ const token = localStorage.getItem("token");
       alert("No data to export");
       return;
     }
-  
+
     // if selectedRows empty → export all
     const dataToExport =
       selectedRows.length > 0
         ? filteredFees.filter((fee) => selectedRows.includes(fee.receiptNo))
         : filteredFees;
-  
+
     const exportData = dataToExport.map((fee) => ({
       "Roll No": student.rollNo,
       "Student Name": student.studentName || student.name,
-      "Department": student.departmentName || student.department,
-      "Year": student.yearStudying || student.year,
-      "Section": student.section,
-  
+      Department: student.departmentName || student.department,
+      Year: student.yearStudying || student.year,
+      Section: student.section,
+
       "Receipt No": fee.receiptNo,
       "Fee Head": fee.feeHead,
       "Sub Head": fee.subHead,
-  
-      "Demand": fee.demand,
-      "Concession": fee.concession,
-      "Paid": fee.paid,
-      "Balance": fee.balance,
-  
+
+      Demand: fee.demand,
+      Concession: fee.concession,
+      Paid: fee.paid,
+      Balance: fee.balance,
+
       "Payment Date": normalizeDate(fee.paymentDate),
       "Payment Mode": fee.paymentMode,
     }));
-  
+
     const worksheet = XLSX.utils.json_to_sheet(exportData);
-  
+
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Fees Report");
-  
-    XLSX.writeFile(
-      workbook,
-      `${student.rollNo}_Fees_Report.xlsx`
-    );
+
+    XLSX.writeFile(workbook, `${student.rollNo}_Fees_Report.xlsx`);
   };
 
-  const handleSingleExport = (fee) => {
-    const worksheet = XLSX.utils.json_to_sheet([fee]);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Receipt");
-    XLSX.writeFile(workbook, `Receipt_${fee.receiptNo}.xlsx`);
-  };
+ const handleSingleExport = (fee) => {
+
+  window.open(`/receipt/${fee.receiptNo}`, "_blank");
+
+};
 
   if (!student) {
     return (
       <div className="p-10 text-center">
         <p className="text-gray-500 mb-4">Loading...</p>
-       
       </div>
     );
   }
@@ -162,14 +163,18 @@ const token = localStorage.getItem("token");
       {/* 🔹 Navigation Tabs */}
       <div className="flex gap-3 mb-4">
         <button
-          onClick={() => navigate("/admin/reports", { state: { activeTab: "individual" } })}
+          onClick={() =>
+            navigate("/admin/reports", { state: { activeTab: "individual" } })
+          }
           className="px-5 py-2.5 rounded-lg font-medium bg-[#1F5AA6] text-white shadow-md cursor-pointer transition-all"
         >
           Individual Fees Report
         </button>
 
         <button
-          onClick={() => navigate("/admin/reports", { state: { activeTab: "datewise" } })}
+          onClick={() =>
+            navigate("/admin/reports", { state: { activeTab: "datewise" } })
+          }
           className="px-5 py-2.5 rounded-lg font-medium bg-gray-200 text-gray-600 hover:bg-gray-300 cursor-pointer transition-all"
         >
           Date Wise Fee Report
@@ -179,7 +184,10 @@ const token = localStorage.getItem("token");
       {/* 🔹 Breadcrumb + Academic Year Filter Row */}
       <div className="flex items-center justify-between mb-2">
         <nav className="flex items-center space-x-1.5 text-xl">
-          <Link to="/admin/reports" className="text-gray-600 hover:text-gray-800 transition-colors">
+          <Link
+            to="/admin/reports"
+            className="text-gray-600 hover:text-gray-800 transition-colors"
+          >
             Fees Details
           </Link>
           <ChevronRight size={20} className="text-gray-400" />
@@ -226,7 +234,12 @@ const token = localStorage.getItem("token");
           <thead className="bg-gray-100">
             <tr>
               <th className="p-4">
-                <input type="checkbox" checked={selectAll} onChange={handleSelectAll} className="cursor-pointer" />
+                <input
+                  type="checkbox"
+                  checked={selectAll}
+                  onChange={handleSelectAll}
+                  className="cursor-pointer"
+                />
               </th>
               <th className="py-4 px-2">Receipt No</th>
               <th>Fees Head</th>
@@ -275,14 +288,14 @@ const token = localStorage.getItem("token");
                 </tr>
               ))
             ) : (
-                <tr>
-                  <td colSpan="12">
-                    <div className="flex flex-col items-center justify-center py-24 text-gray-400">
-                      <img src={nodata} alt="No data" className="w-40 mb-4" />
-                      <p className="text-gray-500">No results found.</p>
-                    </div>
-                  </td>
-                </tr>
+              <tr>
+                <td colSpan="12">
+                  <div className="flex flex-col items-center justify-center py-24 text-gray-400">
+                    <img src={nodata} alt="No data" className="w-40 mb-4" />
+                    <p className="text-gray-500">No results found.</p>
+                  </div>
+                </td>
+              </tr>
             )}
           </tbody>
         </table>

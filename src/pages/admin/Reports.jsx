@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import ReportsFilter from "../../components/ReportsFilter";
 import ReportsStudentDetailCard from "../../components/ReportsStudentDetailCard";
 import DateWiseFeeReport from "../../components/DateWiseFeeReport";
+import ClassWiseFeeReport from "../../components/ClassWiseFeeReport.jsx";
 import nodata from "../../assets/nodata.svg";
 import axios from "axios";
 
@@ -114,6 +115,16 @@ export default function Reports() {
         >
           Date Wise Fee Report
         </button>
+        <button
+          onClick={() => handleTabChange("classwise")}
+          className={`px-5 py-2.5 rounded-lg font-medium transition-all cursor-pointer ${
+            activeTab === "classwise"
+              ? "bg-[#1F5AA6] text-white shadow-md"
+              : "bg-gray-200 text-gray-600 hover:bg-gray-300"
+          }`}
+        >
+          Class Wise Report
+        </button>
       </div>
 
       {activeTab === "individual" && (
@@ -150,6 +161,9 @@ export default function Reports() {
       )}
 
       {activeTab === "datewise" && <DateWiseFeeReport />}
+      {activeTab === "classwise" && <ClassWiseFeeReport />}
+
+
     </div>
   );
 }
