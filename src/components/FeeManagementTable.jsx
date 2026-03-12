@@ -37,31 +37,38 @@ export default function FeeManagementTable({
   };
 
   const getStatusStyles = (status) => {
-    const normalized = status?.toLowerCase();
-
+    if (!status) return "bg-gray-100 text-gray-600";
+    const normalized = status.toLowerCase();
     if (normalized.includes("unpaid"))
-      return "bg-red-100 text-red-700";
-
+      return "bg-red-100 text-red-600";
     if (normalized.includes("partial"))
-      return "bg-orange-100 text-orange-700";
-
+      return "bg-orange-100 text-orange-600";
     if (normalized.includes("paid"))
-      return "bg-green-100 text-green-700";
+      return "bg-green-100 text-green-600";
 
-    return "bg-gray-100 text-gray-700";
+    return "bg-gray-100 text-gray-600";
   };
 
-  const getStudentImages = (student) => {
-    if (student.ishostler) return [Hostel];
+ const getStudentImages = (student) => {
+  console.log("ak", student);
 
-    const images = [];
+  // Highest priority
+  if (student.ishostler) {
+    return [Hostel];
+  }
 
-    if (student.isdayscholer) images.push(Dayscholar);
+  // Transport overrides dayscholar
+  if (student.iscollegetransport) {
+    return [Transport];
+  }
 
-    if (student.iscollegetransport) images.push(Transport);
+  // Only dayscholar
+  if (student.isdayscholer) {
+    return [Dayscholar];
+  }
 
-    return images;
-  };
+  return [];
+};
 
   return (
     <div className="w-full bg-white rounded-2xl shadow">
@@ -181,9 +188,9 @@ export default function FeeManagementTable({
                   ₹{student.overdue}
                 </td>
 
-                <td className="p-3 text-center">
+                <td className="px-4 py-3 ">
                   <span
-                    className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusStyles(
+                    className={`px-3 py-1 rounded-md text-xs font-medium ${getStatusStyles(
                       student.status
                     )}`}
                   >

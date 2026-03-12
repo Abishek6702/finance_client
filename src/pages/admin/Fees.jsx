@@ -15,6 +15,8 @@ const Fees = () => {
   const [years, setYears] = useState([]);
   const [department, setDepartment] = useState("");
   const [departments, setDepartments] = useState([]);
+  const [academicYearFilter, setAcademicYearFilter] = useState("");
+  const [academicYear, setAcadamicYear] = useState([]);
   const [status, setStatus] = useState("");
   const [type, setType] = useState([]);
 
@@ -38,6 +40,8 @@ const Fees = () => {
 
       const apiData = res.data.data || [];
 
+      console.log("apiData",apiData);
+      
       const formattedData = apiData.map((item, index) => {
         return {
           id: index + 1,
@@ -67,15 +71,18 @@ const Fees = () => {
       const uniqueYears = [
         ...new Set(apiData.map((item) => `${item.student?.year} Year`))
       ].filter(Boolean);
-
       setYears(uniqueYears);
 
       const uniqueDepartments = [
         ...new Set(apiData.map((item) => item.student?.department)),
       ];
-      
-
       setDepartments(uniqueDepartments);
+
+      const uniqueAcademicYear = [
+        ...new Set(apiData.map((item) => item.student?.academicYear))
+      ].filter(Boolean);
+      setAcadamicYear(uniqueAcademicYear);
+
     } catch (error) {
       console.error("API Error:", error);
     } finally {
@@ -96,6 +103,7 @@ const Fees = () => {
           s.rollNo?.includes(search)) &&
         (!year || s.year === year) &&
         (!department || s.department === department) &&
+        (!academicYearFilter || s.academicYear === academicYearFilter) &&
         (!status || s.status?.toLowerCase() === status.toLowerCase()) &&
         (type.length === 0 ||
           (type.includes("Hostel") && s.ishostler) ||
@@ -103,7 +111,7 @@ const Fees = () => {
           (type.includes("Transport") && s.iscollegetransport))
       );
     });
-  }, [feeData, search, year, department, status, type]);
+  }, [feeData, search, year, department, academicYearFilter, status, type]);
 
   // ================= CLEAR FILTER =================
   const handleClearFilters = () => {
@@ -113,6 +121,7 @@ const Fees = () => {
     setStatus("");
     setType([]);
     setSelectedIds([]);
+    setAcademicYearFilter("");
   };
 
   // ================= EXPORT CSV =================
@@ -201,6 +210,9 @@ const Fees = () => {
         department={department}
         onDepartmentChange={setDepartment}
         departmentOptions={departments}
+        academicYear={academicYearFilter}
+        onAcademicYearChange={setAcademicYearFilter}
+        academicYearOptions={academicYear}
         status={status}
         onStatusChange={setStatus}
         type={type}

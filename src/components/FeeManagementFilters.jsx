@@ -11,6 +11,9 @@ export default function FeeManagementFilters({
   department,
   onDepartmentChange,
   departmentOptions,
+  academicYear,
+  onAcademicYearChange,
+  academicYearOptions,
   status,
   onStatusChange,
   type,
@@ -47,7 +50,7 @@ export default function FeeManagementFilters({
         value={department}
         onChange={onDepartmentChange}
         options={departmentOptions || []}
-        className="w-40"
+        className="w-42"
       />
 
       {/* <CustomSelect
@@ -63,7 +66,7 @@ export default function FeeManagementFilters({
         value={status}
         onChange={onStatusChange}
         options={["Paid", "Partial", "Unpaid"]}
-        className="w-44"
+        className="w-42"
       />
 
       <CustomSelect
@@ -72,7 +75,15 @@ export default function FeeManagementFilters({
         onChange={onTypeChange}
         options={["Hostel", "Dayscholar", "Transport"]}
         multiple
-        className="w-52"
+        className="w-42"
+      />
+
+      <CustomSelect
+        placeholder="Academic Year"
+        value={academicYear}
+        onChange={onAcademicYearChange}
+        options={academicYearOptions  || []}
+        className="w-42"
       />
 
       <button

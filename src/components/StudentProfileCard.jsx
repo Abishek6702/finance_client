@@ -13,15 +13,15 @@ export default function StudentProfileCard({ student }) {
     <div className="p-2 border-b last:border-b-0 border-[#d9d9d9]">
       <div className="flex items-start gap-4">
 
-        <div className="w-10 h-10 rounded-lg bg-gray-50 border border-[#d9d9d9] flex items-center justify-center">
+        <div className="w-10 h-10 rounded-lg bg-gray-50 border border-[#d9d9d9] flex items-center justify-center shrink-0">
           <img src={icon} alt={label} className="w-5 h-5 object-contain" />
         </div>
 
-        <div>
+        <div className="flex flex-col min-w-0 flex-1">
           <p className="text-gray-500 text-[12px]">{label}</p>
           <p
             title={value}
-            className="text-[14px] font-semibold text-gray-700 max-w-[140px] truncate"
+            className="text-[14px] font-semibold text-gray-700 truncate"
           >
             {value ? value : "Not Provided"}
           </p>

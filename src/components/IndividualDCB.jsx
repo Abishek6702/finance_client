@@ -35,19 +35,15 @@ console.log("Fee Summary:", student?.feeSummary);
   // =========================
   // Status Style
   // =========================
-
-  const getStatusStyle = (status) => {
-
-    const s = status?.toLowerCase();
-
-    if (s.includes("paid") && !s.includes("partial"))
-      return "bg-green-100 text-green-600";
-
-    if (s.includes("partial"))
-      return "bg-orange-100 text-orange-600";
-
-    if (s.includes("unpaid"))
+  const getStatusStyles = (status) => {
+    if (!status) return "bg-gray-100 text-gray-600";
+    const normalized = status.toLowerCase();
+    if (normalized.includes("unpaid"))
       return "bg-red-100 text-red-600";
+    if (normalized.includes("partial"))
+      return "bg-orange-100 text-orange-600";
+    if (normalized.includes("paid"))
+      return "bg-green-100 text-green-600";
 
     return "bg-gray-100 text-gray-600";
   };
@@ -196,7 +192,7 @@ console.log("Fee Summary:", student?.feeSummary);
                 <td className="px-4 py-3">
 
                   <span
-                    className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusStyle(
+                    className={`px-3 py-1 rounded-md text-xs font-medium ${getStatusStyles(
                       row.type
                     )}`}
                   >
@@ -276,7 +272,7 @@ console.log("Fee Summary:", student?.feeSummary);
               <td className="px-4 py-3">
 
                 <span
-                  className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusStyle(
+                  className={`px-3 py-1 rounded-md text-xs font-medium ${getStatusStyles(
                     overallStatus
                   )}`}
                 >
