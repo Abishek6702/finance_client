@@ -52,6 +52,7 @@ const Fees = () => {
 
           department: item.student?.department,
           year: `${item.student?.year} Year`,
+          academicYear: item.student?.currentAcademicYear,
 
           totalFees: item.fee?.demand || 0,
           concession: item.fee?.concession || 0,
@@ -79,7 +80,7 @@ const Fees = () => {
       setDepartments(uniqueDepartments);
 
       const uniqueAcademicYear = [
-        ...new Set(apiData.map((item) => item.student?.academicYear))
+        ...new Set(apiData.map((item) => item.student?.currentAcademicYear))
       ].filter(Boolean);
       setAcadamicYear(uniqueAcademicYear);
 
