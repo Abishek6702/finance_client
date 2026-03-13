@@ -199,7 +199,7 @@ const Fees = () => {
     <div className="flex flex-col max-h-[calc(100vh-140px)]">
       <h1 className="font-inter font-semibold text-xl mb-4">
         Fees Management / Academic Year{" "}
-        <span className="text-[#0B56A4] font-bold">(2025 - 2026)</span>
+        <span className="text-[#0B56A4] font-bold">{!academicYearFilter ? "" : `(${academicYearFilter})`}</span>
       </h1>
 
       <FeeManagementFilters
