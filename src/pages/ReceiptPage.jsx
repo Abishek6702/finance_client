@@ -30,7 +30,13 @@ export default function ReceiptPage() {
     loadReceipt();
   }, [receiptNo]);
 
-  if (!data) return <div className="p-10 text-center">Loading receipt...</div>;
+  if (!data)
+    return (
+      <div className="w-full border h-screen flex flex-col items-center justify-center">
+        <div className="loader "></div>
+        <p className="mt-10">Loading receipt...</p>
+      </div>
+    );
 
   return (
     <>
@@ -71,11 +77,14 @@ export default function ReceiptPage() {
 
           <div className="grid grid-cols-2 border-b">
             <div className="p-2">
-              <span className="font-semibold">Receipt No:</span> {receiptNo}
+              <span className="font-semibold">Receipt No:</span>{" "}
+              <span className="pl-3">{receiptNo}</span>
             </div>
 
             <div className="p-2">
-              <span className="font-semibold">Date:</span> {data.date}
+              <span className="font-semibold">Date:</span>{" "}
+              <span className="pl-13">{data.date}</span>{" "}
+              <span className="font-bold pl-14">ORIGINAL</span>
             </div>
           </div>
 
@@ -83,12 +92,16 @@ export default function ReceiptPage() {
 
           <div className="grid grid-cols-2">
             <div className="px-2 py-1">
-              <span className="font-semibold">Name:</span> {data.studentName}
+              <span className="font-semibold">Name:</span>{" "}
+              <span className="pl-11">{data.studentName}</span>
             </div>
 
             <div className="px-2 p-1">
-              <span className="font-semibold">Class:</span> {data.year}{" "}
-              {data.educationType} {data.department} - {data.section}
+              <span className="font-semibold">Class:</span>{" "}
+              <span className="pl-13">
+                {data.year} {data.educationType} {data.department} -{" "}
+                {data.section}
+              </span>
             </div>
           </div>
 
@@ -96,13 +109,17 @@ export default function ReceiptPage() {
 
           <div className="grid grid-cols-2 border-b">
             <div className="px-2 py-1">
-              <span className="font-semibold">Roll no:</span> {data.rollNo}
+              <span className="font-semibold ">Roll no:</span>{" "}
+              <span className="pl-9.5">{data.rollNo}</span>
             </div>
 
             <div className="px-2 py-1">
-              <span className="font-semibold">Sem period:</span>{" "}
-              {data.paidForSemNumber % 2 == 0 ? "Even" : "Odd"} -{" "}
-              {data.paidForAcadamicYear}
+              <span className="font-semibold">Sem period:</span>
+              <span className="pl-3">
+                {" "}
+                {data.paidForSemNumber % 2 == 0 ? "Even" : "Odd"} -{" "}
+                {data.paidForAcadamicYear}
+              </span>
             </div>
           </div>
 
@@ -123,15 +140,15 @@ export default function ReceiptPage() {
               {Object.entries(data.breakdowns || {}).map(
                 ([name, amount], index) => (
                   <tr key={index}>
-                    <td className=" border-b border-dashed border-r  p-2 text-center">
+                    <td className=" border-b border-r [border-bottom-style:dashed] last:border-b-0 text-center">
                       {index + 1}
                     </td>
 
-                    <td className=" border-b border-r border-dashed p-2">
+                    <td className=" border-b border-r [border-bottom-style:dashed] last:border-b-0 px-4 ">
                       {name}
                     </td>
 
-                    <td className=" border-b border-dashed p-2 text-right">
+                    <td className=" border-b border-dashed  p-1.5 text-right pr-5">
                       {amount.toLocaleString()}
                     </td>
                   </tr>
@@ -154,11 +171,11 @@ export default function ReceiptPage() {
             </span>
 
             <span className="flex gap-2">
-              <p>Adj:</p> <span>0</span>
+              <p>Adj:</p> <span className="font-bold">0</span>
             </span>
 
             <span className="flex gap-2">
-              <p>Fine</p> <span>0</span>
+              <p>Fine</p> <span className="font-bold">0</span>
             </span>
           </div>
 
@@ -176,16 +193,19 @@ export default function ReceiptPage() {
 
           {/* FOOTER */}
 
-          <div className="grid grid-cols-2 border-t p-3 text-xs">
-            <div>
-              Union Bank of India - Kinathukadavu Direct Remittance
-              <br />#{data.studentName} - {data.date} Direct Remittance Amount
+          <div className="grid grid-cols-2 border-t p-3 text-sm">
+            <div className=" w-87.5">
+              Union Bank of India - Kinathukadavu Direct Remittance #
+              {data.studentName} - {data.date} Direct Remittance Amount:
+              <br /> {data.totalAmount}.00 Coimbatore
             </div>
 
             <div className="text-right">
-              <div>For Sri Eshwar College of Engineering</div>
+              <div className="italic">
+                For Sri Eshwar College of Engineering
+              </div>
 
-              <div className="mt-8">Authorized Signatory</div>
+              <div className="mt-12">Authorized Signatory</div>
             </div>
           </div>
         </div>
