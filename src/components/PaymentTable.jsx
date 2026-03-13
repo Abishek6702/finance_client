@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { RotateCcw } from "lucide-react";
 import nodata from "../assets/nodata.svg";
 import RecallDrawer from "./RecallDrawer";
@@ -11,40 +11,49 @@ const PaymentTable = ({ data, loading, loadingMore, loadMore }) => {
     const labels = { 1: "1st", 2: "2nd", 3: "3rd", 4: "4th" };
     return labels[year] ? `${labels[year]} year` : `${year} year`;
   };
+  const tableRef=useRef(null);
+   
 
-  const handleScroll = (e) => {
-    const { scrollTop, scrollHeight, clientHeight } = e.target;
+  const handleScroll=()=>{
+    const element=tableRef.current;
+    if(!element) return ;
+      const scrollTop=element.scrollTop;
+      const clientHeight=element.clientHeight;
+      const scrollHeight=element.scrollHeight;
 
-    if (scrollHeight - scrollTop <= clientHeight + 50) {
-      loadMore();
+      const scrollPercent=(scrollTop+clientHeight)/scrollHeight;
+      if(scrollPercent>0.8 && !loading && loadingMore){
+        console.log(scrollPercent);
+        loadMore();
     }
-  };
+  }
 
   return (
     <div className="h-full">
 
-      <div className="w-full bg-white rounded-2xl shadow-sm h-full flex flex-col overflow-hidden border border-gray-100">
+      <div className="w-full bg-white rounded-2xl shadow-sm h-full flex flex-col border border-gray-100">
 
-        <div className="overflow-x-auto">
+        <div
+          className="flex-1 overflow-y-auto"
+          ref={tableRef}
+          onScroll={handleScroll}
+        >
 
-          <div
-            className=" overflow-y-auto"
-            onScroll={handleScroll}
-          >
+          <div className="overflow-x-auto">
 
             <table className="w-full table-fixed border-separate border-spacing-0">
 
               <colgroup>
-                <col className="w-56" />
-                <col className="w-32" />
-                <col className="w-32" />
-                <col className="w-40" />
-                <col className="w-32" />
-                <col className="w-40" />
-                <col className="w-32" />
-                <col className="w-32" />
-                <col className="w-44" />
-                <col className="w-20" />
+                <col className="w-56"/>
+                <col className="w-32"/>
+                <col className="w-32"/>
+                <col className="w-40"/>
+                <col className="w-32"/>
+                <col className="w-40"/>
+                <col className="w-32"/>
+                <col className="w-32"/>
+                <col className="w-44"/>
+                <col className="w-20"/>
               </colgroup>
 
               <thead className="sticky top-0 z-30">
@@ -85,7 +94,6 @@ const PaymentTable = ({ data, loading, loadingMore, loadMore }) => {
                           className="w-10 h-10 rounded-full object-cover border border-gray-100"
                           alt=""
                         />
-
                         <div className="flex flex-col">
 
                           <span className="font-medium">{item.name}</span>
