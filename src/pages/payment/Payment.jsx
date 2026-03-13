@@ -125,6 +125,13 @@ function Payment() {
     );
   });
 
+
+  const refreshPayments = async () => {
+  setPage(1);
+  setPayments([]);
+  await fetchPaymentData(filters, 1);
+};
+
   return (
     <main className="max-w-full h-[calc(100vh-100px)] flex flex-col gap-4 p-4">
 
@@ -160,6 +167,7 @@ function Payment() {
           loading={loading}
           loadingMore={loadingMore}
           loadMore={loadMore}
+          onRecallSuccess={refreshPayments}
         />
 
       </div>

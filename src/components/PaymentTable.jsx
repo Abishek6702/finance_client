@@ -3,7 +3,7 @@ import { RotateCcw } from "lucide-react";
 import nodata from "../assets/nodata.svg";
 import RecallDrawer from "./RecallDrawer";
 
-const PaymentTable = ({ data, loading, loadingMore, loadMore }) => {
+const PaymentTable = ({ data, loading, loadingMore, loadMore,onRecallSuccess }) => {
   const [selectedPayment, setSelectedPayment] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -175,6 +175,7 @@ const PaymentTable = ({ data, loading, loadingMore, loadMore }) => {
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           payment={selectedPayment}
+          onSuccess={onRecallSuccess}
         />
       )}
 
