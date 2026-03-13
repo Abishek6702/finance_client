@@ -10,13 +10,12 @@ function Payment() {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
-  const [loadingMore, setLoadingMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(true);
 
   const [payments, setPayments] = useState([]);
 
   const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-
+  
   const [filters, setFilters] = useState({
     year: "Year",
     dept: "Department",
@@ -32,13 +31,14 @@ function Payment() {
 
   const fetchPaymentData = useCallback(async (filterParams = {}, pageNo = 1) => {
     try {
+      console.log('payements length',payments.length);
+      if(pageNo!=1) console.log('fetch called by scroll bar');
       if (pageNo === 1) setLoading(true);
       else setLoadingMore(true);
-
       const params = new URLSearchParams();
-
+      console.log(filterParams);
       params.append("page", pageNo);
-      params.append("limit", 10);
+      params.append("limit", 30);
 
       if (filterParams.dept !== "Department")
         params.append("department", filterParams.dept);
@@ -53,13 +53,12 @@ function Payment() {
 
       const year = getYearNumber(filterParams.year);
       if (year) params.append("yearStudying", year);
-
+       console.log(params.toString());
       const url = `/api/feePayment/recent?${params.toString()}`;
 
       const res = await ApiRequest(url);
 
       const transactions = res?.data?.transactions || [];
-      const pagination = res?.data?.pagination;
 
       const formatted = transactions.map((item) => ({
         id: item.breakdownId,
@@ -81,19 +80,21 @@ function Payment() {
         isrecallrequested: false,
       }));
 
+      console.log('length is ',formatted.length);
+      if(formatted.length<30){
+        setLoadingMore(false);
+      }
+
       if (pageNo === 1) {
         setPayments(formatted);
       } else {
         setPayments((prev) => [...prev, ...formatted]);
       }
 
-      setHasMore(pageNo < pagination.totalPages);
-
     } catch (err) {
       console.error("Fetch Error:", err);
     } finally {
       setLoading(false);
-      setLoadingMore(false);
     }
   }, []);
 
@@ -104,12 +105,14 @@ function Payment() {
   }, [filters]);
 
   const loadMore = () => {
-    if (!hasMore || loadingMore) return;
-
+    console.log('loadmore function is triggered');
+    console.log(loadingMore);
+    if(!loadingMore){ console.log('all details fetched no need to load more'); return ;}
     const nextPage = page + 1;
     setPage(nextPage);
-
-    fetchPaymentData(filters, nextPage);
+    console.log('paymentlenght',payments.length);
+    console.log(nextPage);
+     fetchPaymentData(filters, nextPage);
   };
 
   const filteredData = payments.filter((item) => {

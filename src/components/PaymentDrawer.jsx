@@ -10,6 +10,9 @@ const PaymentDrawer = ({ show, onClose, onRefresh, selectedStudent, enteredRows,
   const [paymentMethod, setPaymentMethod] = useState("Cash");
   const [formData, setFormData] = useState({});
   const [loading, setLoading] = useState(false);
+  const today=new Date().toISOString().split("T")[0];
+  const [selectedDate, setSelectedDate] = useState(today);
+
 
   // Functionality: Reset state when drawer closes
   useEffect(() => {
@@ -58,11 +61,11 @@ const PaymentDrawer = ({ show, onClose, onRefresh, selectedStudent, enteredRows,
           paymentType: paymentMethod,
           bankName: formData.bankName || "N/A",
           bankLocation: formData.bankLocation || "N/A",
-          billingDate: new Date().toLocaleDateString("en-GB"),
+          billingDate: selectedDate,
           remarks: formData.remarks || "Fee Payment",
           breakdowns: Object.values(breakdownMap), // Converts our map to the array expected by backend
         };
-
+        
         const response = await ApiRequest("/api/feePayment/pay", "POST", payload);
 
         if (response.success !== false) {
@@ -106,6 +109,14 @@ const PaymentDrawer = ({ show, onClose, onRefresh, selectedStudent, enteredRows,
             </div>
             <p className="text-gray-400 text-xs font-mono">{selectedStudent?.id}</p>
           </div>
+            <div className="border inline-block p-2 ml-2 border-gray-500 border-1 rounded-sm ">
+              <input
+                type="date"
+                value={selectedDate}
+                max={today}   // prevents selecting future dates
+                onChange={(e) => setSelectedDate(e.target.value)}
+              />
+            </div>
 
           {/* Amount Box - Original Style */}
           <div className="bg-[#F8F9FA] rounded-xl p-4 border border-gray-100">
