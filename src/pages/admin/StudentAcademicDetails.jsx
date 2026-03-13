@@ -30,7 +30,7 @@ const StudentAcademicDetails = () => {
           }}
           className="text-[#0b56a4] font-semibold"
         >
-          {student.name}data 
+          {student.name} 
         </Link>
         <ChevronRight size={24} className="" />
 

@@ -35,16 +35,11 @@ console.log("Fee Summary:", student?.feeSummary);
   // =========================
   // Status Style
   // =========================
-  const getStatusStyles = (status) => {
+ const getStatusStyles = (status) => {
     if (!status) return "bg-gray-100 text-gray-600";
-    const normalized = status.toLowerCase();
-    if (normalized.includes("unpaid"))
-      return "bg-red-100 text-red-600";
-    if (normalized.includes("partial"))
-      return "bg-orange-100 text-orange-600";
-    if (normalized.includes("paid"))
-      return "bg-green-100 text-green-600";
-
+    if (status === "Paid") return "bg-[#F3FCF7] text-[#44CF7D]";
+    if (status === "Unpaid") return "bg-[#FCEAEE] text-[#ED6C83]";
+    if (status === "Partial") return "bg-[#FFF6EA] text-[#FFA02D]";
     return "bg-gray-100 text-gray-600";
   };
 

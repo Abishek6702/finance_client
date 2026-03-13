@@ -9,10 +9,9 @@ const NewpaymnetTable = ({ selectedStudent, transactions = [], filters, onRefres
 
   const getStatusStyles = (status) => {
     if (!status) return "bg-gray-100 text-gray-600";
-    const normalized = status.toLowerCase();
-    if (normalized === "paid") return "bg-[#F3FCF7] text-[#44CF7D]";
-    if (normalized === "overdue") return "bg-[#FCEAEE] text-[#ED6C83]";
-    if (normalized === "partially paid") return "bg-[#FFF6EA] text-[#FFA02D]";
+    if (status === "Paid") return "bg-[#F3FCF7] text-[#44CF7D]";
+    if (status === "Unpaid") return "bg-[#FCEAEE] text-[#ED6C83]";
+    if (status === "Partial") return "bg-[#FFF6EA] text-[#FFA02D]";
     return "bg-gray-100 text-gray-600";
   };
 
@@ -98,7 +97,6 @@ const NewpaymnetTable = ({ selectedStudent, transactions = [], filters, onRefres
           <tbody className="bg-white">
             {filteredData.map((item) => {
               // Show Overdue if the status is Unpaid
-              const displayStatus = item.status === "Unpaid" ? "Overdue" : item.status;
               
               return (
                 <tr key={`${item.feeHead}-${item.subHead}`} className="">
@@ -112,8 +110,8 @@ const NewpaymnetTable = ({ selectedStudent, transactions = [], filters, onRefres
                   <td className="p-2 text-center  text-[#44CF7D]">₹{item.paid}</td>
                   <td className="p-2 text-center ">₹{item.pending}</td>
                   <td className="p-2 text-center">
-                    <span className={`px-3 py-1 rounded-md  ${getStatusStyles(displayStatus)}`}>
-                      {displayStatus}
+                    <span className={`px-3 py-1 rounded-md  ${getStatusStyles(item.status)}`}>
+                      {item.status}
                     </span>
                   </td>
                   <td className="p-2 text-center">

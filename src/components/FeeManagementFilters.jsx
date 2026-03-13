@@ -42,7 +42,7 @@ export default function FeeManagementFilters({
         value={year}
         onChange={onYearChange}
         options={yearOptions||[]}
-        className="w-32"
+        className="w-24"
       />
 
       <CustomSelect
@@ -50,7 +50,7 @@ export default function FeeManagementFilters({
         value={department}
         onChange={onDepartmentChange}
         options={departmentOptions || []}
-        className="w-42"
+        className="w-38"
       />
 
       {/* <CustomSelect
@@ -75,7 +75,7 @@ export default function FeeManagementFilters({
         onChange={onTypeChange}
         options={["Hostel", "Dayscholar", "Transport"]}
         multiple
-        className="w-42"
+        className="w-40"
       />
 
       <CustomSelect
