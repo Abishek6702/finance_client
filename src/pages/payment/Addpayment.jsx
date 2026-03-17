@@ -45,7 +45,7 @@ const AddPayment = () => {
     try {
       // Using the specific search endpoint from your documentation
       const res = await ApiRequest(`/api/studentsManagement/search?q=${query}`);
-      console.log(res);
+      console.log("jk",res);
       if (res.success && res.data) {
         const formatted = res.data.map((student) => ({
           id: student.rollNo, // Mapping from search API structure
@@ -53,8 +53,11 @@ const AddPayment = () => {
           year: yearLabel(student.currentYear),
           dept: student.department,
           img: student.profile,
+          isExcessAmountTrue: student.isExcessAmountTrue,
+          excessAmount: student.excessAmount,
         }));
         setStudents(formatted);
+
       }
     } catch (error) {
       console.error("Error fetching students:", error);

@@ -25,13 +25,13 @@ const NewpaymnetTable = ({ selectedStudent, transactions = [], filters, onRefres
     return lastDate < today;
   };
 
-  const filteredData = (transactions || []).filter((item) => {
-    return (
-      item.academicYear === filters.academicYear &&
-      item.semesterType === filters.semester &&
-      (filters.feeHead === "All" || item.feeHead === filters.feeHead)
-    );
-  });
+ const filteredData = transactions.filter((item) => {
+  return (
+    (!filters.academicYear || item.academicYear === filters.academicYear) &&
+    (!filters.semester || item.semesterType === filters.semester) &&
+    (!filters.feeHead || item.feeHead === filters.feeHead)
+  );
+});
 
   const handleAmountChange = (key, value, pendingAmount) => {
     const numericValue = Number(value);
@@ -50,7 +50,7 @@ const NewpaymnetTable = ({ selectedStudent, transactions = [], filters, onRefres
       acc.concession += Number(item.concession || 0);
       acc.paid += Number(item.paid || 0);
       acc.pending += Number(item.pending || 0);
-      const key = `${item.feeHead}-${item.subHead}`;
+      const key = `${item.academicYear}-${item.semesterNumber}-${item.feeHead}-${item.subHead}`;
       acc.enterAmount += Number(enteredAmounts[key] || 0);
       return acc;
     },
@@ -58,7 +58,7 @@ const NewpaymnetTable = ({ selectedStudent, transactions = [], filters, onRefres
   );
 
   const enteredRows = filteredData
-    .map((item) => ({ ...item, enteredAmount: Number(enteredAmounts[`${item.feeHead}-${item.subHead}`] || 0) }))
+    .map((item) => ({ ...item, enteredAmount: Number(enteredAmounts[`${item.academicYear}-${item.semesterNumber}-${item.feeHead}-${item.subHead}`] || 0) }))
     .filter((item) => item.enteredAmount > 0);
 
   const handleCloseDrawer = () => {
@@ -99,7 +99,7 @@ const NewpaymnetTable = ({ selectedStudent, transactions = [], filters, onRefres
               // Show Overdue if the status is Unpaid
               
               return (
-                <tr key={`${item.feeHead}-${item.subHead}`} className="">
+                <tr key={`${item.academicYear}-${item.semesterNumber}-${item.feeHead}-${item.subHead}`}>
                   <td className="p-2 text-center ">{item.feeHead}</td>
                   <td className="p-2 text-center ">{item.subHead}</td>
                   <td className="p-2 text-center ">₹{item.totalAmount}</td>
@@ -120,13 +120,13 @@ const NewpaymnetTable = ({ selectedStudent, transactions = [], filters, onRefres
                         type="number"
                         min="0"
                         disabled={item.status?.toLowerCase() === "paid"}
-                        value={enteredAmounts[`${item.feeHead}-${item.subHead}`] || ""}
-                        onChange={(e) => handleAmountChange(`${item.feeHead}-${item.subHead}`, e.target.value, item.pending)}
+                        value={enteredAmounts[`${item.academicYear}-${item.semesterNumber}-${item.feeHead}-${item.subHead}`] || ""}
+                        onChange={(e) => handleAmountChange(`${item.academicYear}-${item.semesterNumber}-${item.feeHead}-${item.subHead}`, e.target.value, item.pending)}
                         placeholder="0.00"
                         className={`w-full max-w-[110px] px-2 py-1.5 border rounded-lg text-center text-sm outline-none transition-all ${
                           item.status?.toLowerCase() === "paid" 
                             ? "bg-gray-50 cursor-not-allowed text-gray-400 border-gray-100" 
-                            : errors[`${item.feeHead}-${item.subHead}`] 
+                            : errors[`${item.academicYear}-${item.semesterNumber}-${item.feeHead}-${item.subHead}`] 
                               ? "border-red-500 bg-red-50 text-red-600" 
                               : "border-gray-200 font-semibold"
                         }`}

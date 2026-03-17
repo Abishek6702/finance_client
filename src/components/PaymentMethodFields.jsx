@@ -39,6 +39,13 @@ const PaymentMethodFields = ({ paymentMethod, formData, setFormData }) => {
             value={formData.bankName || ""}
             onChange={(e) => handleChange("bankName", e.target.value)}
           />
+          <input
+            type="number"
+            placeholder="Cheque Amount"
+            className="w-full border border-gray-300 rounded-lg px-3 py-2"
+            value={formData.chequeAmount || ""}
+            onChange={(e) => handleChange("chequeAmount", e.target.value)}
+          />
         </div>
       );
 
@@ -58,6 +65,13 @@ const PaymentMethodFields = ({ paymentMethod, formData, setFormData }) => {
             className="w-full border border-gray-300 rounded-lg px-3 py-2"
             value={formData.bankName || ""}
             onChange={(e) => handleChange("bankName", e.target.value)}
+          />
+          <input
+            type="number"
+            placeholder="DD Amount"
+            className="w-full border border-gray-300 rounded-lg px-3 py-2"
+            value={formData.ddAmount || ""}
+            onChange={(e) => handleChange("ddAmount", e.target.value)}
           />
         </div>
       );

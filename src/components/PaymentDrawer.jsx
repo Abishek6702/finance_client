@@ -31,6 +31,19 @@ const PaymentDrawer = ({
 
   if (!show) return null;
 
+  const chequeAmount = Number(formData.chequeAmount || 0);
+  const ddAmount = Number(formData.ddAmount || 0);
+
+  const instrumentAmount =
+    paymentMethod === "Cheque"
+      ? chequeAmount
+      : paymentMethod === "DD"
+        ? ddAmount
+        : 0;
+
+  const excessAmount =
+    instrumentAmount > totalAmount ? instrumentAmount - totalAmount : 0;
+
   const handleBilling = async () => {
     if (totalAmount <= 0) return toast.error("Amount must be greater than 0");
     setLoading(true);
@@ -71,10 +84,14 @@ const PaymentDrawer = ({
 
       const payload = {
         rollNo: selectedStudent?.id,
-        paymentType: paymentMethod,
+        paymentType:
+          paymentMethod === "Student Wallet" ? "excessAmount" : paymentMethod,
         bankName: formData.bankName || "N/A",
         bankLocation: formData.bankLocation || "N/A",
         billingDate: selectedDate,
+        chequeAmount: chequeAmount,
+        ddAmount: ddAmount,
+        excessAmount: excessAmount,
         remarks: formData.remarks || "Fee Payment",
         breakdowns: Object.values(breakdownMap), // Converts our map to the array expected by backend
       };
@@ -93,6 +110,19 @@ const PaymentDrawer = ({
       setLoading(false);
     }
   };
+  console.log("Payment Drawer - Selected Student:", selectedStudent);
+  const excessBalance = 100;
+  const paymentOptions = [
+    "Cash",
+    "UPI",
+    "Cheque",
+    "DD",
+    "Card",
+    "NetBanking",
+    ...(selectedStudent?.excessAmount > 0
+      ? [`Student Wallet (₹${selectedStudent.excessAmount})`]
+      : []),
+  ];
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
@@ -135,14 +165,6 @@ const PaymentDrawer = ({
               {selectedStudent?.id}
             </p>
           </div>
-          <div className="border inline-block p-2 ml-2 border-gray-500 border-1 rounded-sm ">
-            <input
-              type="date"
-              value={selectedDate}
-              max={today} // prevents selecting future dates
-              onChange={(e) => setSelectedDate(e.target.value)}
-            />
-          </div>
 
           {/* Amount Box - Original Style */}
           <div className="bg-[#F8F9FA] rounded-xl p-4 border border-gray-100">
@@ -178,20 +200,44 @@ const PaymentDrawer = ({
               </div>
             )}
           </div>
+          {(paymentMethod === "Cheque" || paymentMethod === "DD") && (
+            <div className="border inline-block p-2 outline-none rounded-lg w-full border-gray-300">
+              <input
+                type="date"
+                value={selectedDate}
+                max={today} // prevents selecting future dates
+                onChange={(e) => setSelectedDate(e.target.value)}
+                className="w-full outline-none"
+              />
+            </div>
+          )}
 
           {/* Payment Method Section */}
           <div className="space-y-4">
-            <div>
+            <div className="w-full ">
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Payment Method
               </label>
               <CustomSelect
                 value={paymentMethod}
                 onChange={(val) => {
-                  setPaymentMethod(val);
+                  const method = val.includes("Student Wallet")
+                    ? "Student Wallet"
+                    : val;
+
+                  if (
+                    method === "Student Wallet" &&
+                    totalAmount > selectedStudent.excessAmount
+                  ) {
+                    toast.error("Wallet balance is insufficient");
+                    return;
+                  }
+
+                  setPaymentMethod(method);
                   setFormData({});
                 }}
-                options={["Cash", "UPI", "Cheque", "DD", "Card", "NetBanking"]}
+                className="w-full"
+                options={paymentOptions}
               />
             </div>
             <PaymentMethodFields
@@ -200,6 +246,13 @@ const PaymentDrawer = ({
               setFormData={setFormData}
             />
           </div>
+
+          {(paymentMethod === "Cheque" || paymentMethod === "DD") &&
+            excessAmount > 0 && (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-sm text-yellow-700">
+                Excess Amount: <b>₹{excessAmount}</b>
+              </div>
+            )}
         </div>
 
         {/* Footer - Original Blue Button Style */}

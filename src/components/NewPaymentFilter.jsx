@@ -9,23 +9,21 @@ const NewPaymentFilter = ({
   academicYearOptions,
   onClear,
 }) => {
-  const semesterOptions = ["Odd", "Even"];
+  const semesterOptions = [ "Odd", "Even"];
 
   // FIX: Changed item.semester to item.semesterType to match your data structure
-  const filteredByYearSem = (transactions || []).filter(
-    (item) =>
-      item.academicYear === filters.academicYear &&
-      item.semesterType === filters.semester 
+  const filteredByYearSem = transactions.filter((item) => {
+  return (
+    (!filters.academicYear || item.academicYear === filters.academicYear) &&
+    (!filters.semester || item.semesterType === filters.semester) &&
+    (!filters.feeHead || item.feeHead === filters.feeHead)
   );
+});
   
   // DYNAMIC: This now correctly derives Fee Heads available for the selected Year/Sem
-  const dynamicFeeHeads = [...new Set(filteredByYearSem.map((item) => item.feeHead))];
 
   // Combine static defaults with dynamic values found in the data
-  const feeHeadOptions = [
-    "All",
-    ...dynamicFeeHeads
-  ];
+ const feeHeadOptions = [...new Set(filteredByYearSem.map((item) => item.feeHead))];
 
   const handleClearClick = () => {
     if (onClear) {
@@ -42,7 +40,7 @@ const NewPaymentFilter = ({
     <div className="w-full bg-white rounded-xl flex items-center justify-between">
       <h2 className="text-lg font-semibold text-gray-800">
         Payment Details / Academic Year{" "}
-        <span className="text-[#0b56a4]">({filters.academicYear || "N/A"})</span>
+        <span className="text-[#0b56a4]">({filters.academicYear || "All years"})</span>
       </h2>
 
       <div className="flex items-center gap-4">
@@ -50,6 +48,7 @@ const NewPaymentFilter = ({
         <CustomSelect
           label="Fee Head"
           options={feeHeadOptions}
+          placeholder="Fee Head"
           value={filters.feeHead}
           onChange={(value) => setFilters({ ...filters, feeHead: value })}
         />
@@ -63,6 +62,7 @@ const NewPaymentFilter = ({
 
         <CustomSelect
           label="Semester"
+          placeholder="Semester"
           options={semesterOptions}
           value={filters.semester}
           onChange={(value) => setFilters({ ...filters, semester: value })}

@@ -4,7 +4,7 @@ import Dashboard from "./superadmin/SuperDashboard.jsx";
 
 import SuperAdminNavbar from "../components/SuperAdminNavbar.jsx";
 import FeesManagement from "./superadmin/FeesManagement.jsx";
-import RecallReceipts from "./superadmin/RecallReceipts.jsx"
+import RecallReceipts from "./admin/Recall_Receipts.jsx"
 
 const SuperAdminDashboard = () => {
   return (
