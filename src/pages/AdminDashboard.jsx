@@ -4,13 +4,14 @@ import Navbar from "../components/Navbar";
 import Dashboard from "../pages/admin/Dashboard";
 import Fees from "./admin/Fees.jsx";
 import FeeDemand from "./admin/FeeDemand.jsx"
-import StudentDetails from "./admin/StudentDetails.jsx";
+// import StudentDetails from "./admin/StudentDetails.jsx";
 import StudentAcademicDetails from "./admin/StudentAcademicDetails.jsx";
 import Payment from "./payment/Payment.jsx";
 import AddPayment from "./payment/Addpayment.jsx";
 import Reports from '../pages/admin/Reports.jsx';
 import ReportsStudentDetails from '../pages/admin/ReportsStudentDetails.jsx';
 import Recall_Receipts from "./admin/Recall_Receipts.jsx";
+import StudentFeeDetails from "./admin/StudentFeeDetails.jsx";
 
 const AdminDashboard = () => {
   return (
@@ -25,9 +26,10 @@ const AdminDashboard = () => {
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="payment" element={<Payment/>} />
             <Route path="payment/newpayment" element={<AddPayment/>} />
-            <Route path="/fees_management" element={<Fees />} />
-            <Route path="/fees_management/:rollNo" element={<StudentDetails />} />
-            <Route path="/fees_management/:rollNo/:year" element={<StudentAcademicDetails />} />
+            <Route path="fees_management" element={<Fees />} />
+            <Route path="fees_management/:rollNo" element={<StudentFeeDetails/>}/>
+            {/* <Route path="/fees_management/:rollNo" element={<StudentDetails />} /> */}
+            <Route path="fees_management/:rollNo/:year" element={<StudentAcademicDetails />} />
 
             <Route path="Fee_demand" element={<FeeDemand />} />
             <Route path="reports" element={<Reports/>}/>
