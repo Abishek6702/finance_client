@@ -4,6 +4,14 @@ import Dayscholar from "../assets/dayscholar.svg";
 import Hostel from "../assets/hostel.svg";
 import Transport from "../assets/transport1.svg";
 import CustomSelect from "./CustomSelect";
+import RequireHostelFlow from "./feedemand/RequireHostelFlow";
+import TransportWithdrawalFlow from "./feedemand/Transportwithdrawalflow ";
+import RouteChangeFlow from "./feedemand/RouteChangeFlow";
+import RequiresHostelFlow from "./feedemand/RequiresHostelFlow";
+import RequiresTransportFlow from "./feedemand/RequiresTransportFlow";
+import RequireTransportFlow from "./feedemand/RequireTransportFlow";
+import HostelWithdrawalFlow from "./feedemand/HostelWithdrawalFlow";
+import RoomChangeFlow from "./feedemand/RoomChangeFlow";
 
 const FeeDemandDrawer = ({ student, isOpen, onClose }) => {
   console.log("drawer student", student);
@@ -47,7 +55,7 @@ const FeeDemandDrawer = ({ student, isOpen, onClose }) => {
     }
 
     if (student?.isdayscholer) {
-      return ["Require Hostel", "Require Transport"];
+      return ["Requires Hostel", "Requires Transport"];
     }
 
     return [];
@@ -114,7 +122,7 @@ const FeeDemandDrawer = ({ student, isOpen, onClose }) => {
           </div>
         </div>
 
-        <div className=" px-6 py-3">
+        <div className=" px-6 ">
           <div className="status">
             <label
               htmlFor="status-select"
@@ -130,6 +138,33 @@ const FeeDemandDrawer = ({ student, isOpen, onClose }) => {
               className="w-full"
             />
           </div>
+
+          {selectedStatus === "Require Hostel" && (
+            <RequireHostelFlow student={student} onClose={onClose} />
+          )}
+
+          {selectedStatus === "Transport Withdrawal" && (
+            <TransportWithdrawalFlow student={student} onClose={onClose} />
+          )}
+          {selectedStatus === "Route Change" && (
+            <RouteChangeFlow student={student} onClose={onClose} />
+          )}
+          {selectedStatus === "Requires Hostel" && (
+            <RequiresHostelFlow student={student} onClose={onClose} />
+          )}
+          {selectedStatus === "Requires Transport" && (
+            <RequiresTransportFlow student={student} onClose={onClose} />
+          )}
+
+{selectedStatus === "Require Transport" && (
+            <RequireTransportFlow student={student} onClose={onClose} />
+          )}
+          {selectedStatus === "Hostel Withdrawal" && (
+            <HostelWithdrawalFlow student={student} onClose={onClose} />
+          )}
+          {selectedStatus === "Room Change" && (
+            <RoomChangeFlow student={student} onClose={onClose} />
+          )}
         </div>
       </div>
     </div>
