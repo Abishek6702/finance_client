@@ -221,6 +221,7 @@ const validateHostel = (data) => {
   if (!data.sharing) errors.sharing = "Sharing type is required";
   if (!data.roomNo) errors.roomNo = "Room number is required";
   if (!data.roomType) errors.roomType = "Please select bathroom type";
+  if (!data.effectiveDate) errors.effectiveDate = "Effective date is required";
   return errors;
 };
 // Fee map keyed by "sharing|roomType" — replace with API when ready
@@ -255,6 +256,7 @@ const RequireHostelFlow = ({ student, onClose }) => {
     roomNo: "",
     floor: "",
     roomType: "",
+    effectiveDate: "",
   });
 
   const [transportErrors, setTransportErrors] = useState({});
@@ -444,6 +446,14 @@ const RequireHostelFlow = ({ student, onClose }) => {
                 onChange={(e) => setH("floor", e.target.value)}
               />
             </Field>
+            <Field label="Effective Date" required error={hostelErrors.effectiveDate}>
+          <input
+            className={inputCls(hostelErrors.effectiveDate)}
+            type="date"
+            value={hostel.effectiveDate}
+            onChange={(e) => setH("effectiveDate", e.target.value)}
+          />
+        </Field>
           </div>
 
           {/* Bathroom type */}
