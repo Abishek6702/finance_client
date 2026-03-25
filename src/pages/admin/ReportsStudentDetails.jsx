@@ -7,6 +7,9 @@ import { ChevronRight, Download } from "lucide-react";
 import nodata from "../../assets/nodata.svg";
 import axios from "axios";
 
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+
 export default function ReportsStudentDetails() {
   const { state } = useLocation();
   const navigate = useNavigate();
@@ -106,33 +109,39 @@ export default function ReportsStudentDetails() {
       return;
     }
 
-    // if selectedRows empty → export all
     const dataToExport =
       selectedRows.length > 0
         ? filteredFees.filter((fee) => selectedRows.includes(fee.receiptNo))
         : filteredFees;
 
-    const exportData = dataToExport.map((fee) => ({
-      "Roll No": student.rollNo,
-      "Student Name": student.studentName || student.name,
-      Department: student.departmentName || student.department,
-      Year: student.yearStudying || student.year,
-      Section: student.section,
+    // ✅ Student Header (Top Section)
+    const studentInfo = [
+      ["Student Name", student.studentName || student.name],
+      ["Roll No", student.rollNo],
+      ["Department", student.departmentName || student.department],
+      ["Year", student.yearStudying || student.year],
+      ["Section", student.section],
+      [], // empty row
+    ];
 
+    // ✅ Table Data
+    const tableData = dataToExport.map((fee) => ({
       "Receipt No": fee.receiptNo,
       "Fee Head": fee.feeHead,
       "Sub Head": fee.subHead,
-
       Demand: fee.demand,
       Concession: fee.concession,
       Paid: fee.paid,
       Balance: fee.balance,
-
       "Payment Date": normalizeDate(fee.paymentDate),
       "Payment Mode": fee.paymentMode,
     }));
 
-    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    // Convert table
+    const worksheet = XLSX.utils.json_to_sheet(tableData, { origin: "A7" });
+
+    // Add student info manually at top
+    XLSX.utils.sheet_add_aoa(worksheet, studentInfo, { origin: "A1" });
 
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Fees Report");
@@ -140,11 +149,114 @@ export default function ReportsStudentDetails() {
     XLSX.writeFile(workbook, `${student.rollNo}_Fees_Report.xlsx`);
   };
 
- const handleSingleExport = (fee) => {
+  const handlePdfExport = () => {
+    if (!filteredFees.length) {
+      alert("No data to export");
+      return;
+    }
 
-  window.open(`/receipt/${fee.receiptNo}`, "_blank");
+    const dataToExport =
+      selectedRows.length > 0
+        ? filteredFees.filter((fee) => selectedRows.includes(fee.receiptNo))
+        : filteredFees;
 
-};
+    const doc = new jsPDF();
+
+    // ✅ Title
+    doc.setFontSize(14);
+    doc.setFont(undefined, "bold");
+    doc.text("Student Fee Report", 14, 15);
+
+    // ✅ Student Info (Top Section)
+    doc.setFontSize(10);
+    doc.setFont(undefined, "normal");
+    console.log("Student data for PDF export:", student);
+    const studentDetails = [
+      ["Name", student.studentName || student.name],
+      ["Roll No", student.rollNo],
+      [
+        "Class",
+        `${student.yearStudying} ${student.departmentName} ${student.section}`,
+      ],
+    ];
+
+    let startY = 22;
+
+    studentDetails.forEach(([label, value], index) => {
+      doc.text(`${label} : ${value}`, 14, startY + index * 6);
+    });
+
+    // ✅ Table Data
+    const tableColumn = [
+      "Receipt No",
+      "Fee Head",
+      "Sub Head",
+      "Demand",
+      "Concession",
+      "Paid",
+      "Balance",
+      "Payment Date",
+      "Payment Mode",
+    ];
+
+    const tableRows = dataToExport.map((fee) => [
+      fee.receiptNo,
+      fee.feeHead,
+      fee.subHead,
+      fee.demand,
+      fee.concession,
+      fee.paid,
+      fee.balance,
+      new Date(fee.paymentDate).toLocaleDateString("en-GB"),
+      fee.paymentMode,
+    ]);
+
+    // ✅ Calculate Total (Paid or Demand — your choice)
+    const totalAmount = dataToExport.reduce(
+      (sum, fee) => sum + (fee.paid || 0),
+      0,
+    );
+
+    // ✅ Table
+    autoTable(doc, {
+      startY: startY + studentDetails.length * 6 + 4,
+      head: [tableColumn],
+      body: tableRows,
+      styles: { fontSize: 8 },
+    });
+
+    let finalY = doc.lastAutoTable.finalY || 40;
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const pageWidth = doc.internal.pageSize.getWidth();
+
+    // ✅ If no space → new page
+    if (finalY + 20 > pageHeight) {
+      doc.addPage();
+      finalY = 20;
+    }
+
+    // ✅ Background bar (full width inside margin)
+    doc.setFillColor(240, 240, 240);
+    doc.rect(10, finalY + 5, pageWidth - 20, 10, "F");
+
+    // ✅ Text (CENTER aligned)
+    doc.setFontSize(11);
+    doc.setFont(undefined, "bold");
+    doc.setCharSpace(0); // fix weird spacing
+
+    doc.text(
+      `Total Paid :  ${totalAmount.toLocaleString()}`,
+      pageWidth / 2, // ✅ center horizontally
+      finalY + 12,
+      { align: "center" }, // ✅ center alignment
+    );
+
+    // ✅ Save
+    doc.save(`${student.rollNo}_Fee_Report.pdf`);
+  };
+  const handleSingleExport = (fee) => {
+    window.open(`/receipt/${fee.receiptNo}`, "_blank");
+  };
 
   if (!student) {
     return (
@@ -226,6 +338,7 @@ export default function ReportsStudentDetails() {
           setDateRange({ start: "", end: "" });
         }}
         onExport={handleExport}
+        onPdfExport={handlePdfExport}
       />
 
       {/* 🔹 Fees Table */}

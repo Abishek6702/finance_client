@@ -3,6 +3,8 @@ import { StudentDetails } from "../data";
 import ReportsDateWiseFilter from "./ReportsDateWiseFilter";
 import * as XLSX from "xlsx";
 import nodata from "../assets/nodata.svg";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 export default function DateWiseFeeReport() {
   const today = new Date().toISOString().split("T")[0];
@@ -132,6 +134,20 @@ export default function DateWiseFeeReport() {
       Bank: item.bank,
       "Receipt No": item.receiptNo,
     }));
+    // ✅ Calculate total
+    const totalAmount = filteredData.reduce(
+      (sum, item) => sum + (item.amount || 0),
+      0,
+    );
+
+    // ✅ Add empty row (spacing)
+    exportData.push({});
+
+    // ✅ Add TOTAL row
+    exportData.push({
+      "Fee Head": "TOTAL",
+      Amount: totalAmount,
+    });
 
     const worksheet = XLSX.utils.json_to_sheet(exportData);
 
@@ -142,7 +158,68 @@ export default function DateWiseFeeReport() {
 
     XLSX.writeFile(workbook, fileName);
   };
-  console.log("Filtered Data:", filteredData);
+
+  const handlePdfExport = () => {
+    if (filteredData.length === 0) {
+      alert("No data to export");
+      return;
+    }
+
+    const doc = new jsPDF();
+
+    const tableColumn = [
+      "Roll No",
+      "Student Name",
+      "Year",
+      "Fee Head",
+      "Amount",
+      "Date",
+      "Payment Mode",
+      "Receipt No",
+    ];
+
+    const tableRows = filteredData.map((item) => [
+      item.rollNo,
+      item.student?.studentName,
+      `${item.student?.year} - ${item.student?.department} - ${item.student?.section}`,
+      item.feeHead,
+      item.amount,
+      new Date(item.date).toLocaleDateString("en-GB"),
+      item.paymentMode,
+      item.receiptNo,
+    ]);
+
+    // ✅ Calculate total
+    const totalAmount = filteredData.reduce(
+      (sum, item) => sum + (item.amount || 0),
+      0,
+    );
+
+    // ✅ Add total row
+    tableRows.push(["", "", "", "", "", "", "TOTAL", ` ${totalAmount}`]);
+
+    // Title
+    doc.text("Date Wise Fee Report", 14, 15);
+
+    autoTable(doc, {
+      startY: 20,
+      head: [tableColumn],
+      body: tableRows,
+      styles: { fontSize: 8 },
+
+      didParseCell: function (data) {
+        if (data.row.index === tableRows.length - 1) {
+          data.cell.styles.fontStyle = "bold";
+          data.cell.styles.fillColor = [240, 240, 240];
+        }
+      },
+    });
+
+    doc.save(
+      `Fee_Report_${dateRange.start || "All"}_${dateRange.end || ""}.pdf`,
+    );
+  };
+
   function normalizeDate(date) {
     return new Date(date).toLocaleDateString("en-GB");
   }
@@ -158,6 +235,7 @@ export default function DateWiseFeeReport() {
         year={academicYear}
         onYearChange={setAcademicYear}
         onExport={handleExport}
+        onPdfExport={handlePdfExport}
         onClearFilters={() => {
           setDateRange({ start: "", end: "" });
           setAcademicYear("");

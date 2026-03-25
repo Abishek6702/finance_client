@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Download, ListFilter, Search } from "lucide-react";
 import CustomSelect from "./CustomSelect";
 
@@ -21,6 +21,7 @@ export default function FeeDemandFilters({
   onClearFilters,
   selectedCount,
 }) {
+  const [open, setOpen] = useState(false);
   return (
     <div className="flex gap-4 mb-4 items-center">
       <div className="relative">
@@ -77,13 +78,39 @@ export default function FeeDemandFilters({
         <ListFilter className="w-4 h-4" />
       </button>
 
-      <button
-        onClick={onExport}
-        className="ml-auto bg-[#0B56A4] text-white px-5 py-2 rounded-lg flex items-center gap-2 font-inter hover:bg-[#094685] transition-colors shadow-sm cursor-pointer"
-      >
-        <Download size={18} />
-        Export ({selectedCount})
-      </button>
+      <div className="relative ml-auto">
+        <button
+          onClick={() => setOpen(!open)}
+          className="bg-[#0B56A4] text-white px-5 py-2 rounded-lg flex items-center gap-2 font-inter hover:bg-[#094685] transition-colors shadow-sm cursor-pointer"
+        >
+          <Download size={18} />
+          Export ({selectedCount})
+        </button>
+
+        {open && (
+          <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-300 rounded-lg shadow-lg z-50">
+            <button
+              onClick={() => {
+                onExport("excel");
+                setOpen(false);
+              }}
+              className="w-full text-left px-4 py-2 hover:bg-gray-100"
+            >
+              Export Excel
+            </button>
+
+            <button
+              onClick={() => {
+                onExport("pdf");
+                setOpen(false);
+              }}
+              className="w-full text-left px-4 py-2 hover:bg-gray-100"
+            >
+              Export PDF
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

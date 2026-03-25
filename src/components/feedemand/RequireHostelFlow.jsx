@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { CheckCircle2, AlertCircle, ChevronDown, Search } from "lucide-react";
 
-
 // ─── Utilities ────────────────────────────────────────────────────────────────
 const fmt = (val) =>
   isNaN(parseFloat(val))
@@ -204,7 +203,6 @@ const SearchableRoomSelect = ({ value, onChange, error }) => {
   );
 };
 
-
 // ─── Validation ───────────────────────────────────────────────────────────────
 const validateTransport = (data) => {
   const errors = {};
@@ -222,17 +220,19 @@ const validateHostel = (data) => {
   if (!data.roomNo) errors.roomNo = "Room number is required";
   if (!data.roomType) errors.roomType = "Please select bathroom type";
   if (!data.effectiveDate) errors.effectiveDate = "Effective date is required";
+  if (data.refundMode === "refund" && !data.refundMethod)
+    errors.refundMethod = "Please select cash or bank";
   return errors;
 };
 // Fee map keyed by "sharing|roomType" — replace with API when ready
 const HOSTEL_FEES = {
-  "Single|attached":        25000,
-  "Single|not_attached":    20000,
-  "Double|attached":        18000,
-  "Double|not_attached":    15000,
-  "Triple|attached":        14000,
-  "Triple|not_attached":    12000,
-  "4-Sharing|attached":     12000,
+  "Single|attached": 25000,
+  "Single|not_attached": 20000,
+  "Double|attached": 18000,
+  "Double|not_attached": 15000,
+  "Triple|attached": 14000,
+  "Triple|not_attached": 12000,
+  "4-Sharing|attached": 12000,
   "4-Sharing|not_attached": 10000,
 };
 // ─── RequireHostelFlow ────────────────────────────────────────────────────────
@@ -248,6 +248,7 @@ const RequireHostelFlow = ({ student, onClose }) => {
     endDate: "",
     conceptionAmount: "",
     refundMode: "",
+    refundMethod: "",
   });
 
   const [hostel, setHostel] = useState({
@@ -277,10 +278,14 @@ const RequireHostelFlow = ({ student, onClose }) => {
     paidAmount - (parseFloat(transport.conceptionAmount) || 0),
   );
 
-  const feeKey       = hostel.sharing && hostel.roomType ? `${hostel.sharing}|${hostel.roomType}` : null;
-  const hostelTotal  = feeKey ? (HOSTEL_FEES[feeKey] ?? null) : null;
+  const feeKey =
+    hostel.sharing && hostel.roomType
+      ? `${hostel.sharing}|${hostel.roomType}`
+      : null;
+  const hostelTotal = feeKey ? (HOSTEL_FEES[feeKey] ?? null) : null;
   const reductionAmt = parseFloat(hostel.reductionAmount) || 0;
-  const payable      = hostelTotal !== null ? Math.max(0, hostelTotal - reductionAmt) : null;
+  const payable =
+    hostelTotal !== null ? Math.max(0, hostelTotal - reductionAmt) : null;
 
   const handleContinue = () => {
     const errors = validateTransport(transport);
@@ -373,7 +378,11 @@ const RequireHostelFlow = ({ student, onClose }) => {
               <RadioCard
                 label="Student Wallet"
                 checked={transport.refundMode === "wallet"}
-                onChange={() => setT("refundMode", "wallet")}
+                // change Student Wallet onChange to:
+                onChange={() => {
+                  setT("refundMode", "wallet");
+                  setT("refundMethod", "");
+                }}
               />
             </div>
             {transportErrors.refundMode && (
@@ -382,6 +391,33 @@ const RequireHostelFlow = ({ student, onClose }) => {
                 <span className="text-xs text-red-400">
                   {transportErrors.refundMode}
                 </span>
+              </div>
+            )}
+            {transport.refundMode === "refund" && (
+              <div className="mt-3">
+                <p className="text-sm font-medium text-gray-700 mb-2">
+                  Refund Via <span className="text-red-400">*</span>
+                </p>
+                <div className="grid grid-cols-2 gap-3">
+                  <RadioCard
+                    label="Cash"
+                    checked={transport.refundMethod === "cash"}
+                    onChange={() => setT("refundMethod", "cash")}
+                  />
+                  <RadioCard
+                    label="Bank"
+                    checked={transport.refundMethod === "bank"}
+                    onChange={() => setT("refundMethod", "bank")}
+                  />
+                </div>
+                {err.refundMethod && (
+                  <div className="flex items-center gap-1 mt-1.5">
+                    <AlertCircle className="w-3 h-3 text-red-400 shrink-0" />
+                    <span className="text-xs text-red-400">
+                      {transportErrors.refundMethod}
+                    </span>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -446,14 +482,18 @@ const RequireHostelFlow = ({ student, onClose }) => {
                 onChange={(e) => setH("floor", e.target.value)}
               />
             </Field>
-            <Field label="Effective Date" required error={hostelErrors.effectiveDate}>
-          <input
-            className={inputCls(hostelErrors.effectiveDate)}
-            type="date"
-            value={hostel.effectiveDate}
-            onChange={(e) => setH("effectiveDate", e.target.value)}
-          />
-        </Field>
+            <Field
+              label="Effective Date"
+              required
+              error={hostelErrors.effectiveDate}
+            >
+              <input
+                className={inputCls(hostelErrors.effectiveDate)}
+                type="date"
+                value={hostel.effectiveDate}
+                onChange={(e) => setH("effectiveDate", e.target.value)}
+              />
+            </Field>
           </div>
 
           {/* Bathroom type */}
@@ -501,13 +541,16 @@ const RequireHostelFlow = ({ student, onClose }) => {
               </div>
               {hostel.reductionAmount !== "" && (
                 <div className="flex items-center justify-between px-4 py-3 bg-green-50 border border-green-100 rounded-lg">
-                  <span className="text-sm font-medium text-gray-600">Payable Amount</span>
-                  <span className="text-base font-bold text-green-700">{fmt(payable)}</span>
+                  <span className="text-sm font-medium text-gray-600">
+                    Payable Amount
+                  </span>
+                  <span className="text-base font-bold text-green-700">
+                    {fmt(payable)}
+                  </span>
                 </div>
               )}
             </div>
           )}
-
 
           <div className="flex gap-3">
             <button

@@ -1,9 +1,12 @@
 import React, { useEffect, useState, useMemo } from "react";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 import FeeDemandFilters from "../../components/FeeDemandFilters.jsx";
 import axios from "axios";
 import FeeDemandTable from "../../components/FeeDemandTable.jsx";
 import nodata from "../../assets/nodata.svg";
 import FeeDemandDrawer from "../../components/FeeDemandDrawer.jsx";
+import * as XLSX from "xlsx";
 
 function getAcademicYear() {
   const today = new Date();
@@ -141,66 +144,89 @@ const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     setAcademicYearFilter("");
   };
 
+  console.log("filteredData", filteredData);
   // ================= EXPORT CSV =================
-  const exportCSV = () => {
+  const getStudentType = (s) => {
+    
+    if (s.ishostler) return "Hostel";
+    if (s.iscollegetransport) return "Transport";
+    if (s.isdayscholer) return "Dayscholar";
+    return "Home"; // ✅ both false
+  };
+  const exportExcel = () => {
     const exportItems =
       selectedIds.length > 0
-        ? filteredData.filter((student) => selectedIds.includes(student.id))
+        ? filteredData.filter((student) =>
+            selectedIds.includes(student.id)
+          )
         : filteredData;
-
+  
     if (!exportItems.length) {
       toast.error("No data available to export");
       return;
     }
-
-    const headers = [
-      "Roll No",
-      "Student Name",
-      "Year",
-      "Department",
-      "Class",
-      "Type",
-      "Batch",
-      "Mobile",
-      "Email",
-    ];
-
-    const csvRows = exportItems.map((s) =>
-      [
-        s.rollNo,
-        `"${s.name}"`,
-        `"${s.year}"`,
-        s.department,
-        s.class,
-        s.type,
-        `"${s.batch}"`,
-        s.mobile,
-        s.email,
-      ].join(","),
-    );
-
-    const csvString = [headers.join(","), ...csvRows].join("\n");
-
-    const blob = new Blob([csvString], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-
-    const link = document.createElement("a");
-
-    const fileName =
-      selectedIds.length > 0
-        ? `Selected_Students_Fee_Report_${new Date().toLocaleDateString()}.csv`
-        : `Full_Fee_Report_${new Date().toLocaleDateString()}.csv`;
-
-    link.href = url;
-    link.download = fileName;
-
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    URL.revokeObjectURL(url);
+  
+    const data = exportItems.map((s) => ({
+      "Roll No": s.rollNo,
+      "Student Name": s.name,
+      "Year": s.year,
+      "Department": s.department,
+      "Section": s.section,
+      "Type": getStudentType(s),
+    }));
+  
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+  
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Fees");
+  
+    XLSX.writeFile(workbook, "Fee_Report.xlsx");
   };
 
+
+
+const exportPDF = () => {
+  const exportItems =
+    selectedIds.length > 0
+      ? filteredData.filter((student) => selectedIds.includes(student.id))
+      : filteredData;
+
+  if (!exportItems.length) {
+    toast.error("No data available to export");
+    return;
+  }
+
+  const doc = new jsPDF();
+
+  const tableColumn = [
+    "Roll No",
+    "Name",
+    "Year",
+    "Department",
+    "Section",
+    "Type",
+  ];
+
+  const tableRows = exportItems.map((s) => [
+    s.rollNo,
+    s.name,
+    s.year,
+    s.department,
+    s.section,
+    getStudentType(s),
+  ]);
+
+  autoTable(doc, {
+    head: [tableColumn],
+    body: tableRows,
+  });
+
+  doc.save("Fee_Report.pdf");
+};
+const handleExport = (type) => {
+  if (type === "excel") exportExcel();
+  if (type === "pdf") exportPDF();
+};
 
   const handleRowClick = (student) => {
   setSelectedStudent(student);
@@ -233,7 +259,7 @@ const [isDrawerOpen, setIsDrawerOpen] = useState(false);
             onStatusChange={setStatus}
             type={type}
             onTypeChange={setType}
-            onExport={exportCSV}
+            onExport={handleExport}
             onClearFilters={handleClearFilters}
             selectedCount={selectedIds.length}
           />

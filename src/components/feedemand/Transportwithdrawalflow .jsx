@@ -40,9 +40,17 @@ const Field = ({ label, required, error, children }) => (
 
 // ─── Info tile ────────────────────────────────────────────────────────────────
 const Tile = ({ label, value, highlight }) => (
-  <div className={`flex flex-col gap-0.5 p-3 rounded-lg ${highlight ? "bg-blue-50 border border-blue-100" : "bg-gray-50"}`}>
-    <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide">{label}</span>
-    <span className={`text-sm font-bold ${highlight ? "text-[#0b56a4]" : "text-gray-800"}`}>{value}</span>
+  <div
+    className={`flex flex-col gap-0.5 p-3 rounded-lg ${highlight ? "bg-blue-50 border border-blue-100" : "bg-gray-50"}`}
+  >
+    <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide">
+      {label}
+    </span>
+    <span
+      className={`text-sm font-bold ${highlight ? "text-[#0b56a4]" : "text-gray-800"}`}
+    >
+      {value}
+    </span>
   </div>
 );
 
@@ -52,10 +60,21 @@ const RadioCard = ({ label, description, checked, onChange }) => (
     className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-all
       ${checked ? "border-[#0b56a4] bg-blue-50" : "border-gray-200 bg-white hover:border-gray-300"}`}
   >
-    <input type="radio" className="mt-0.5 accent-[#0b56a4]" checked={checked} onChange={onChange} />
+    <input
+      type="radio"
+      className="mt-0.5 accent-[#0b56a4]"
+      checked={checked}
+      onChange={onChange}
+    />
     <div>
-      <p className={`text-sm font-semibold ${checked ? "text-[#0b56a4]" : "text-gray-700"}`}>{label}</p>
-      {description && <p className="text-xs text-gray-400 mt-0.5">{description}</p>}
+      <p
+        className={`text-sm font-semibold ${checked ? "text-[#0b56a4]" : "text-gray-700"}`}
+      >
+        {label}
+      </p>
+      {description && (
+        <p className="text-xs text-gray-400 mt-0.5">{description}</p>
+      )}
     </div>
   </label>
 );
@@ -63,9 +82,12 @@ const RadioCard = ({ label, description, checked, onChange }) => (
 // ─── Validation ───────────────────────────────────────────────────────────────
 const validate = (data) => {
   const errors = {};
-  if (!data.endDate)          errors.endDate          = "End date is required";
-  if (!data.conceptionAmount) errors.conceptionAmount = "Conception amount is required";
-  if (!data.refundMode)       errors.refundMode       = "Please select a refund mode";
+  if (!data.endDate) errors.endDate = "End date is required";
+  if (!data.conceptionAmount)
+    errors.conceptionAmount = "Conception amount is required";
+  if (!data.refundMode) errors.refundMode = "Please select a refund mode";
+  if (data.refundMode === "refund" && !data.refundMethod)
+    errors.refundMethod = "Please select cash or bank";
   return errors;
 };
 
@@ -74,18 +96,19 @@ const TransportWithdrawalFlow = ({ student, onClose }) => {
   // From backend — fallback to static for now
   // TODO: replace field names once backend is ready
   const totalAmount = student?.transportTotalAmount ?? 18000;
-  const paidAmount  = student?.transportPaidAmount  ?? 12000;
+  const paidAmount = student?.transportPaidAmount ?? 12000;
 
   const [data, setData] = useState({
-    endDate:          "",
+    endDate: "",
     conceptionAmount: "",
-    refundMode:       "",
+    refundMode: "",
+    refundMethod: "",
   });
 
   // Balance = Paid − Conception
   const balance = Math.max(
     0,
-    paidAmount - (parseFloat(data.conceptionAmount) || 0)
+    paidAmount - (parseFloat(data.conceptionAmount) || 0),
   );
 
   const [errors, setErrors] = useState({});
@@ -97,7 +120,10 @@ const TransportWithdrawalFlow = ({ student, onClose }) => {
 
   const handleSubmit = () => {
     const errs = validate(data);
-    if (Object.keys(errs).length > 0) { setErrors(errs); return; }
+    if (Object.keys(errs).length > 0) {
+      setErrors(errs);
+      return;
+    }
     // TODO: replace with your API call
     console.log("Transport Withdrawal submit", {
       student,
@@ -108,11 +134,13 @@ const TransportWithdrawalFlow = ({ student, onClose }) => {
 
   return (
     <div className="flex flex-col gap-6 mt-4">
-
       <div className="grid grid-cols-2 gap-3">
         {/* Read-only — from backend */}
-        <ReadOnlyField label="Total Transport Amount" value={fmt(totalAmount)} />
-        <ReadOnlyField label="Paid Amount"            value={fmt(paidAmount)} />
+        <ReadOnlyField
+          label="Total Transport Amount"
+          value={fmt(totalAmount)}
+        />
+        <ReadOnlyField label="Paid Amount" value={fmt(paidAmount)} />
 
         {/* Editable */}
         <Field label="Transport End Date" required error={errors.endDate}>
@@ -124,7 +152,11 @@ const TransportWithdrawalFlow = ({ student, onClose }) => {
           />
         </Field>
 
-        <Field label="Conception Amount" required error={errors.conceptionAmount}>
+        <Field
+          label="Conception Amount"
+          required
+          error={errors.conceptionAmount}
+        >
           <input
             className={inputCls(errors.conceptionAmount)}
             type="number"
@@ -138,8 +170,8 @@ const TransportWithdrawalFlow = ({ student, onClose }) => {
 
       {/* Balance tiles */}
       <div className="grid grid-cols-3 gap-3">
-        <Tile label="Paid Amount"          value={fmt(paidAmount)} />
-        <Tile label="Conception Amount"    value={fmt(data.conceptionAmount)} />
+        <Tile label="Paid Amount" value={fmt(paidAmount)} />
+        <Tile label="Conception Amount" value={fmt(data.conceptionAmount)} />
         <Tile label="Balance (Refundable)" value={fmt(balance)} highlight />
       </div>
 
@@ -157,13 +189,44 @@ const TransportWithdrawalFlow = ({ student, onClose }) => {
           <RadioCard
             label="Student Wallet"
             checked={data.refundMode === "wallet"}
-            onChange={() => set("refundMode", "wallet")}
+            // change Student Wallet onChange to:
+            onChange={() => {
+              set("refundMode", "wallet");
+              set("refundMethod", "");
+            }}
           />
         </div>
         {errors.refundMode && (
           <div className="flex items-center gap-1 mt-1.5">
             <AlertCircle className="w-3 h-3 text-red-400 shrink-0" />
             <span className="text-xs text-red-400">{errors.refundMode}</span>
+          </div>
+        )}
+        {data.refundMode === "refund" && (
+          <div className="mt-3">
+            <p className="text-sm font-medium text-gray-700 mb-2">
+              Refund Via <span className="text-red-400">*</span>
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+              <RadioCard
+                label="Cash"
+                checked={data.refundMethod === "cash"}
+                onChange={() => set("refundMethod", "cash")}
+              />
+              <RadioCard
+                label="Bank"
+                checked={data.refundMethod === "bank"}
+                onChange={() => set("refundMethod", "bank")}
+              />
+            </div>
+            {errors.refundMethod && (
+              <div className="flex items-center gap-1 mt-1.5">
+                <AlertCircle className="w-3 h-3 text-red-400 shrink-0" />
+                <span className="text-xs text-red-400">
+                  {errors.refundMethod}
+                </span>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -174,7 +237,6 @@ const TransportWithdrawalFlow = ({ student, onClose }) => {
       >
         Submit
       </button>
-
     </div>
   );
 };

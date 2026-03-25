@@ -8,12 +8,15 @@ export default function ReportsDateWiseFilter({
   year,
   onYearChange,
   onExport,
+  onPdfExport,
+
   onClearFilters,
   paymentFilter,
-  onPaymentFilterChange
+  onPaymentFilterChange,
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const popoverRef = useRef();
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -37,7 +40,6 @@ export default function ReportsDateWiseFilter({
   return (
     <div className="flex justify-between items-center gap-4 mb-6">
       <div className="flex items-center gap-4">
-
         {/* 🔹 Date Range Picker */}
         <div className="relative" ref={popoverRef}>
           <div
@@ -104,7 +106,7 @@ export default function ReportsDateWiseFilter({
           onChange={onPaymentFilterChange}
           options={["Cash", "Online Payments"]}
           className="w-48"
-        /> 
+        />
 
         {/* 🔹 Clear Button */}
         <button
@@ -116,14 +118,39 @@ export default function ReportsDateWiseFilter({
         </button>
       </div>
 
-      {/* 🔹 Export Button */}
-      <button
-        onClick={onExport}
-        className="bg-[#1F5AA6] text-white px-5 py-2.5 rounded-lg flex items-center gap-2 cursor-pointer hover:bg-[#174a8c] transition-all shadow-sm active:scale-95 h-[42px]"
-      >
-        <Download size={18} />
-        <span className="font-medium text-sm">Export Data</span>
-      </button>
+      <div className="relative">
+        <button
+          onClick={() => setOpen(!open)}
+          className="bg-[#1F5AA6] text-white px-5 py-2.5 rounded-lg flex items-center gap-2 cursor-pointer hover:bg-[#174a8c] transition-all shadow-sm h-[42px]"
+        >
+          <Download size={18} />
+          <span className="font-medium text-sm">Export Data</span>
+        </button>
+
+        {open && (
+          <div className="absolute right-0 mt-2 w-44 bg-white border border-gray-300 rounded-lg shadow-lg z-50">
+            <button
+              onClick={() => {
+                onExport(); // Excel
+                setOpen(false);
+              }}
+              className="w-full text-left px-4 py-2 hover:bg-gray-100"
+            >
+              Export Excel
+            </button>
+
+            <button
+              onClick={() => {
+                onPdfExport(); // PDF
+                setOpen(false);
+              }}
+              className="w-full text-left px-4 py-2 hover:bg-gray-100"
+            >
+              Export PDF
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

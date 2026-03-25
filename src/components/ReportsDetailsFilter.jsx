@@ -16,13 +16,16 @@ export default function ReportsDetailsFilter({
   onExport,
   selectedRows = [],
   onClearFilters,
+  onPdfExport,
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const popoverRef = useRef(null);
+  const [openExport, setOpenExport] = useState(false);
 
   useEffect(() => {
     const handleClick = (e) => {
-      if (popoverRef.current && !popoverRef.current.contains(e.target)) setIsOpen(false);
+      if (popoverRef.current && !popoverRef.current.contains(e.target))
+        setIsOpen(false);
     };
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
@@ -30,7 +33,9 @@ export default function ReportsDetailsFilter({
 
   const getDateLabel = () => {
     if (!dateRange?.start) return "Date";
-    return dateRange.end ? `${dateRange.start} to ${dateRange.end}` : dateRange.start;
+    return dateRange.end
+      ? `${dateRange.start} to ${dateRange.end}`
+      : dateRange.start;
   };
 
   return (
@@ -44,12 +49,25 @@ export default function ReportsDetailsFilter({
             placeholder="Search Receipt number"
             className="pl-4 pr-10 py-2 border border-[#D9D9D9] rounded-lg bg-white outline-none"
           />
-          <Search size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <Search
+            size={18}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+          />
         </div>
 
         {/* <CustomSelect placeholder="Even Sem" value={sem} onChange={onSemChange} options={["Odd", "Even"]} /> */}
-        <CustomSelect placeholder="Fees Head" value={feesHead} onChange={onFeesHeadChange} options={["Transport", "Hostel", "Academic Fees"]} />
-        <CustomSelect placeholder="Payment Mode" value={paymentMode} onChange={onPaymentModeChange} options={["UPI", "Cash", "Card", "Net Banking"]} />
+        <CustomSelect
+          placeholder="Fees Head"
+          value={feesHead}
+          onChange={onFeesHeadChange}
+          options={["Transport", "Hostel", "Academic Fees"]}
+        />
+        <CustomSelect
+          placeholder="Payment Mode"
+          value={paymentMode}
+          onChange={onPaymentModeChange}
+          options={["UPI", "Cash", "Card", "Net Banking"]}
+        />
 
         {/* Date Range Popover */}
         <div className="relative" ref={popoverRef}>
@@ -64,20 +82,30 @@ export default function ReportsDetailsFilter({
           {isOpen && (
             <div className="absolute top-full mt-2 left-0 z-50 bg-white border border-gray-200 shadow-xl rounded-xl p-4 min-w-[250px]">
               <div className="flex justify-between items-center mb-2">
-                <span className="text-xs font-bold text-gray-400 uppercase">Range</span>
-                <X size={14} className="cursor-pointer" onClick={() => setIsOpen(false)} />
+                <span className="text-xs font-bold text-gray-400 uppercase">
+                  Range
+                </span>
+                <X
+                  size={14}
+                  className="cursor-pointer"
+                  onClick={() => setIsOpen(false)}
+                />
               </div>
               <div className="space-y-3">
                 <input
                   type="date"
                   value={dateRange?.start || ""}
-                  onChange={(e) => onDateRangeChange({ ...dateRange, start: e.target.value })}
+                  onChange={(e) =>
+                    onDateRangeChange({ ...dateRange, start: e.target.value })
+                  }
                   className="w-full border border-gray-300 rounded p-1.5 text-sm outline-none"
                 />
                 <input
                   type="date"
                   value={dateRange?.end || ""}
-                  onChange={(e) => onDateRangeChange({ ...dateRange, end: e.target.value })}
+                  onChange={(e) =>
+                    onDateRangeChange({ ...dateRange, end: e.target.value })
+                  }
                   className="w-full border border-gray-300 rounded p-1.5 text-sm outline-none"
                 />
               </div>
@@ -93,15 +121,41 @@ export default function ReportsDetailsFilter({
         </button>
       </div>
 
-      <button
-        onClick={onExport}
-        className="bg-[#1F5AA6] text-white px-5 py-2 rounded-lg flex items-center gap-2 cursor-pointer"
-      >
-        <Download size={18} />
-        <span>
-  Export {selectedRows.length > 0 && `(${selectedRows.length})`}
-</span>
-      </button>
+      <div className="relative">
+        <button
+          onClick={() => setOpenExport(!openExport)}
+          className="bg-[#1F5AA6] text-white px-5 py-2 rounded-lg flex items-center gap-2 cursor-pointer"
+        >
+          <Download size={18} />
+          <span>
+            Export {selectedRows.length > 0 && `(${selectedRows.length})`}
+          </span>
+        </button>
+
+        {openExport && (
+          <div className="absolute right-0 mt-2 w-44 bg-white border rounded-lg shadow-lg z-50 border-gray-300">
+            <button
+              onClick={() => {
+                onExport();
+                setOpenExport(false);
+              }}
+              className="w-full text-left px-4 py-2 hover:bg-gray-100"
+            >
+              Export Excel
+            </button>
+
+            <button
+              onClick={() => {
+                onPdfExport();
+                setOpenExport(false);
+              }}
+              className="w-full text-left px-4 py-2 hover:bg-gray-100"
+            >
+              Export PDF
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

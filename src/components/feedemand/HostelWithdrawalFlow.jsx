@@ -36,9 +36,17 @@ const Field = ({ label, required, error, children }) => (
 );
 
 const Tile = ({ label, value, highlight }) => (
-  <div className={`flex flex-col gap-0.5 p-3 rounded-lg ${highlight ? "bg-blue-50 border border-blue-100" : "bg-gray-50"}`}>
-    <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide">{label}</span>
-    <span className={`text-sm font-bold ${highlight ? "text-[#0b56a4]" : "text-gray-800"}`}>{value}</span>
+  <div
+    className={`flex flex-col gap-0.5 p-3 rounded-lg ${highlight ? "bg-blue-50 border border-blue-100" : "bg-gray-50"}`}
+  >
+    <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide">
+      {label}
+    </span>
+    <span
+      className={`text-sm font-bold ${highlight ? "text-[#0b56a4]" : "text-gray-800"}`}
+    >
+      {value}
+    </span>
   </div>
 );
 
@@ -47,16 +55,28 @@ const RadioCard = ({ label, checked, onChange }) => (
     className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all
       ${checked ? "border-[#0b56a4] bg-blue-50" : "border-gray-200 bg-white hover:border-gray-300"}`}
   >
-    <input type="radio" className="accent-[#0b56a4]" checked={checked} onChange={onChange} />
-    <p className={`text-sm font-semibold ${checked ? "text-[#0b56a4]" : "text-gray-700"}`}>{label}</p>
+    <input
+      type="radio"
+      className="accent-[#0b56a4]"
+      checked={checked}
+      onChange={onChange}
+    />
+    <p
+      className={`text-sm font-semibold ${checked ? "text-[#0b56a4]" : "text-gray-700"}`}
+    >
+      {label}
+    </p>
   </label>
 );
 
 const validate = (data) => {
   const errors = {};
-  if (!data.endDate)          errors.endDate          = "End date is required";
-  if (!data.conceptionAmount) errors.conceptionAmount = "Conception amount is required";
-  if (!data.refundMode)       errors.refundMode       = "Please select a refund mode";
+  if (!data.endDate) errors.endDate = "End date is required";
+  if (!data.conceptionAmount)
+    errors.conceptionAmount = "Conception amount is required";
+  if (!data.refundMode) errors.refundMode = "Please select a refund mode";
+  if (data.refundMode === "refund" && !data.refundMethod)
+    errors.refundMethod = "Please select cash or bank";
   return errors;
 };
 
@@ -65,9 +85,14 @@ const HostelWithdrawalFlow = ({ student, onClose }) => {
   // From backend — fallback to static for now
   // TODO: replace field names once backend is ready
   const totalAmount = student?.hostelTotalAmount ?? 25000;
-  const paidAmount  = student?.hostelPaidAmount  ?? 18000;
+  const paidAmount = student?.hostelPaidAmount ?? 18000;
 
-  const [data, setData]     = useState({ endDate: "", conceptionAmount: "", refundMode: "" });
+  const [data, setData] = useState({
+    endDate: "",
+    conceptionAmount: "",
+    refundMode: "",
+    refundMethod: "",
+  });
   const [errors, setErrors] = useState({});
 
   const set = (key, val) => {
@@ -75,11 +100,17 @@ const HostelWithdrawalFlow = ({ student, onClose }) => {
     if (errors[key]) setErrors((p) => ({ ...p, [key]: "" }));
   };
 
-  const balance = Math.max(0, paidAmount - (parseFloat(data.conceptionAmount) || 0));
+  const balance = Math.max(
+    0,
+    paidAmount - (parseFloat(data.conceptionAmount) || 0),
+  );
 
   const handleSubmit = () => {
     const errs = validate(data);
-    if (Object.keys(errs).length > 0) { setErrors(errs); return; }
+    if (Object.keys(errs).length > 0) {
+      setErrors(errs);
+      return;
+    }
     console.log("Hostel Withdrawal submit", {
       student,
       hostel: { totalAmount, paidAmount, balance, ...data },
@@ -92,24 +123,38 @@ const HostelWithdrawalFlow = ({ student, onClose }) => {
       <div className="grid grid-cols-2 gap-3">
         {/* Read-only — from backend */}
         <ReadOnlyField label="Total Hostel Amount" value={fmt(totalAmount)} />
-        <ReadOnlyField label="Paid Amount"         value={fmt(paidAmount)} />
+        <ReadOnlyField label="Paid Amount" value={fmt(paidAmount)} />
 
         {/* Editable */}
         <Field label="Hostel End Date" required error={errors.endDate}>
-          <input className={inputCls(errors.endDate)} type="date"
-            value={data.endDate} onChange={(e) => set("endDate", e.target.value)} />
+          <input
+            className={inputCls(errors.endDate)}
+            type="date"
+            value={data.endDate}
+            onChange={(e) => set("endDate", e.target.value)}
+          />
         </Field>
 
-        <Field label="Conception Amount" required error={errors.conceptionAmount}>
-          <input className={inputCls(errors.conceptionAmount)} type="number" min="0" placeholder="0.00"
-            value={data.conceptionAmount} onChange={(e) => set("conceptionAmount", e.target.value)} />
+        <Field
+          label="Conception Amount"
+          required
+          error={errors.conceptionAmount}
+        >
+          <input
+            className={inputCls(errors.conceptionAmount)}
+            type="number"
+            min="0"
+            placeholder="0.00"
+            value={data.conceptionAmount}
+            onChange={(e) => set("conceptionAmount", e.target.value)}
+          />
         </Field>
       </div>
 
       {/* Balance tiles */}
       <div className="grid grid-cols-3 gap-3">
-        <Tile label="Paid Amount"          value={fmt(paidAmount)} />
-        <Tile label="Conception Amount"    value={fmt(data.conceptionAmount)} />
+        <Tile label="Paid Amount" value={fmt(paidAmount)} />
+        <Tile label="Conception Amount" value={fmt(data.conceptionAmount)} />
         <Tile label="Balance (Refundable)" value={fmt(balance)} highlight />
       </div>
 
@@ -119,10 +164,17 @@ const HostelWithdrawalFlow = ({ student, onClose }) => {
           Refund Mode <span className="text-red-400">*</span>
         </p>
         <div className="grid grid-cols-2 gap-3">
-          <RadioCard label="Refund"
-            checked={data.refundMode === "refund"} onChange={() => set("refundMode", "refund")} />
-          <RadioCard label="Student Wallet"
-            checked={data.refundMode === "wallet"} onChange={() => set("refundMode", "wallet")} />
+          <RadioCard
+            label="Refund"
+            checked={data.refundMode === "refund"}
+            onChange={() => set("refundMode", "refund")}
+          />
+          <RadioCard
+            label="Student Wallet"
+            checked={data.refundMode === "wallet"}
+            // change Student Wallet onChange to:
+            onChange={() => { set("refundMode", "wallet"); set("refundMethod", ""); }}
+          />
         </div>
         {errors.refundMode && (
           <div className="flex items-center gap-1 mt-1.5">
@@ -130,10 +182,40 @@ const HostelWithdrawalFlow = ({ student, onClose }) => {
             <span className="text-xs text-red-400">{errors.refundMode}</span>
           </div>
         )}
+
+        {data.refundMode === "refund" && (
+          <div className="mt-3">
+            <p className="text-sm font-medium text-gray-700 mb-2">
+              Refund Via <span className="text-red-400">*</span>
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+              <RadioCard
+                label="Cash"
+                checked={data.refundMethod === "cash"}
+                onChange={() => set("refundMethod", "cash")}
+              />
+              <RadioCard
+                label="Bank"
+                checked={data.refundMethod === "bank"}
+                onChange={() => set("refundMethod", "bank")}
+              />
+            </div>
+            {errors.refundMethod && (
+              <div className="flex items-center gap-1 mt-1.5">
+                <AlertCircle className="w-3 h-3 text-red-400 shrink-0" />
+                <span className="text-xs text-red-400">
+                  {errors.refundMethod}
+                </span>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
-      <button onClick={handleSubmit}
-        className="w-full py-2.5 rounded-lg text-sm font-semibold bg-[#0b56a4] text-white hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer">
+      <button
+        onClick={handleSubmit}
+        className="w-full py-2.5 rounded-lg text-sm font-semibold bg-[#0b56a4] text-white hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer"
+      >
         Submit
       </button>
     </div>
