@@ -410,7 +410,7 @@ const RequireHostelFlow = ({ student, onClose }) => {
                     onChange={() => setT("refundMethod", "bank")}
                   />
                 </div>
-                {err.refundMethod && (
+                {transportErrors.refundMethod && (
                   <div className="flex items-center gap-1 mt-1.5">
                     <AlertCircle className="w-3 h-3 text-red-400 shrink-0" />
                     <span className="text-xs text-red-400">
