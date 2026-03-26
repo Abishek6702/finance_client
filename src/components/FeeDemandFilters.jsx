@@ -14,7 +14,7 @@ export default function FeeDemandFilters({
   academicYear,
   onAcademicYearChange,
   academicYearOptions,
-
+  onSearchEnter,
   type,
   onTypeChange,
   onExport,
@@ -29,7 +29,14 @@ export default function FeeDemandFilters({
           className="w-full px-4 py-2 pr-10 rounded-lg bg-white outline-none border border-[#d9d9d9] focus:border-[#0B56A4]"
           placeholder="Search Student and Roll number"
           value={search}
-          onChange={(e) => onSearchChange(e.target.value)}
+          onChange={(e) => {
+            onSearchChange(e.target.value); // ✅ only typing
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              onSearchEnter(); // ✅ clean trigger
+            }
+          }}
         />
         <Search
           size={18}

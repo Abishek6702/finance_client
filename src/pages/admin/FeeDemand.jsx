@@ -31,14 +31,16 @@ const FeeDemand = () => {
   const [years, setYears] = useState([]);
   const [department, setDepartment] = useState("");
   const [departments, setDepartments] = useState([]);
-  const [academicYearFilter, setAcademicYearFilter] = useState(getAcademicYear());
+  const [academicYearFilter, setAcademicYearFilter] =
+    useState(getAcademicYear());
   const [academicYear, setAcadamicYear] = useState([]);
   const [status, setStatus] = useState("");
   const [type, setType] = useState([]);
+  const [searchInput, setSearchInput] = useState(""); // typing
 
   const [selectedStudent, setSelectedStudent] = useState(null);
-const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(15);
   const [selectedIds, setSelectedIds] = useState([]);
 
   // ================= API FETCH =================
@@ -48,12 +50,20 @@ const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     try {
       const token = localStorage.getItem("token");
 
+      const params = {
+        academicYear: academicYearFilter || undefined,
+        department: department || undefined,
+        studyingYear: year ? year.replace(" Year", "").trim() : undefined,
+        rollNo: search || undefined,
+      };
+
       const res = await axios.get(
-        `${import.meta.env.VITE_API_BASE_URL}/api/feedetails`,
+        `${import.meta.env.VITE_API_BASE_URL}/api/feedemands`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
+          params: params,
         },
       );
 
@@ -112,18 +122,15 @@ const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   useEffect(() => {
     fetchFees();
-  }, []);
+  }, [search, year, department, academicYearFilter]);
 
-  // ================= FILTER =================
+  useEffect(() => {
+    setVisibleCount(15);
+  }, [search, year, department, academicYearFilter, type]);
+
   const filteredData = useMemo(() => {
     return feeData.filter((s) => {
       return (
-        (!search ||
-          s.name?.toLowerCase().includes(search.toLowerCase()) ||
-          s.rollNo?.includes(search)) &&
-        (!year || s.year === year) &&
-        (!department || s.department === department) &&
-        (!academicYearFilter || s.academicYear === academicYearFilter) &&
         (!status || s.status?.toLowerCase() === status.toLowerCase()) &&
         (type.length === 0 ||
           (type.includes("Hostel") && s.ishostler) ||
@@ -131,23 +138,22 @@ const [isDrawerOpen, setIsDrawerOpen] = useState(false);
           (type.includes("Transport") && s.iscollegetransport))
       );
     });
-  }, [feeData, search, year, department, academicYearFilter, status, type]);
+  }, [feeData, status, type]);
 
   // ================= CLEAR FILTER =================
   const handleClearFilters = () => {
     setSearch("");
+    setSearchInput("");
     setYear("");
     setDepartment("");
     setStatus("");
     setType([]);
     setSelectedIds([]);
-    setAcademicYearFilter("");
+    setAcademicYearFilter(getAcademicYear()); 
   };
 
-  console.log("filteredData", filteredData);
   // ================= EXPORT CSV =================
   const getStudentType = (s) => {
-    
     if (s.ishostler) return "Hostel";
     if (s.iscollegetransport) return "Transport";
     if (s.isdayscholer) return "Dayscholar";
@@ -156,96 +162,98 @@ const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const exportExcel = () => {
     const exportItems =
       selectedIds.length > 0
-        ? filteredData.filter((student) =>
-            selectedIds.includes(student.id)
-          )
+        ? filteredData.filter((student) => selectedIds.includes(student.id))
         : filteredData;
-  
+
     if (!exportItems.length) {
       toast.error("No data available to export");
       return;
     }
-  
+
     const data = exportItems.map((s) => ({
       "Roll No": s.rollNo,
       "Student Name": s.name,
-      "Year": s.year,
-      "Department": s.department,
-      "Section": s.section,
-      "Type": getStudentType(s),
+      Year: s.year,
+      Department: s.department,
+      Section: s.section,
+      Type: getStudentType(s),
     }));
-  
+
     const worksheet = XLSX.utils.json_to_sheet(data);
     const workbook = XLSX.utils.book_new();
-  
+
     XLSX.utils.book_append_sheet(workbook, worksheet, "Fees");
-  
+
     XLSX.writeFile(workbook, "Fee_Report.xlsx");
   };
 
+  const exportPDF = () => {
+    const exportItems =
+      selectedIds.length > 0
+        ? filteredData.filter((student) => selectedIds.includes(student.id))
+        : filteredData;
 
+    if (!exportItems.length) {
+      toast.error("No data available to export");
+      return;
+    }
 
-const exportPDF = () => {
-  const exportItems =
-    selectedIds.length > 0
-      ? filteredData.filter((student) => selectedIds.includes(student.id))
-      : filteredData;
+    const doc = new jsPDF();
 
-  if (!exportItems.length) {
-    toast.error("No data available to export");
-    return;
-  }
+    const tableColumn = [
+      "Roll No",
+      "Name",
+      "Year",
+      "Department",
+      "Section",
+      "Type",
+    ];
 
-  const doc = new jsPDF();
+    const tableRows = exportItems.map((s) => [
+      s.rollNo,
+      s.name,
+      s.year,
+      s.department,
+      s.section,
+      getStudentType(s),
+    ]);
 
-  const tableColumn = [
-    "Roll No",
-    "Name",
-    "Year",
-    "Department",
-    "Section",
-    "Type",
-  ];
+    autoTable(doc, {
+      head: [tableColumn],
+      body: tableRows,
+    });
 
-  const tableRows = exportItems.map((s) => [
-    s.rollNo,
-    s.name,
-    s.year,
-    s.department,
-    s.section,
-    getStudentType(s),
-  ]);
-
-  autoTable(doc, {
-    head: [tableColumn],
-    body: tableRows,
-  });
-
-  doc.save("Fee_Report.pdf");
-};
-const handleExport = (type) => {
-  if (type === "excel") exportExcel();
-  if (type === "pdf") exportPDF();
-};
+    doc.save("Fee_Report.pdf");
+  };
+  const handleExport = (type) => {
+    if (type === "excel") exportExcel();
+    if (type === "pdf") exportPDF();
+  };
 
   const handleRowClick = (student) => {
-  setSelectedStudent(student);
-  setIsDrawerOpen(true);
-};
+    setSelectedStudent(student);
+    setIsDrawerOpen(true);
+  };
+
+  const loadMore = () => {
+    if (visibleCount >= filteredData.length) return; // ✅ STOP
+  
+    setVisibleCount((prev) => prev + 15);
+  };
   return (
     <div className=" h-[calc(100vh-120px)]">
       <div className="header  mb-4">
         <h1 className="font-inter font-semibold text-xl">
           Manage fee demand /
           <span className="text-[#0B56A4] font-bold">
-           
-            {" "}{academicYearFilter }
+            {" "}
+            {academicYearFilter}
           </span>
         </h1>
         <div className="filter mt-4 ">
           <FeeDemandFilters
-            search={search}
-            onSearchChange={setSearch}
+            search={searchInput}
+            onSearchChange={setSearchInput}
             year={year}
             onYearChange={setYear}
             yearOptions={years}
@@ -262,6 +270,7 @@ const handleExport = (type) => {
             onExport={handleExport}
             onClearFilters={handleClearFilters}
             selectedCount={selectedIds.length}
+            onSearchEnter={() => setSearch(searchInput)}
           />
         </div>
 
@@ -271,10 +280,11 @@ const handleExport = (type) => {
           </div>
         ) : (
           <FeeDemandTable
-            data={filteredData}
+          data={filteredData.slice(0, visibleCount)}
             selectedIds={selectedIds}
             setSelectedIds={setSelectedIds}
             onRowClick={handleRowClick}
+            onloadMore={loadMore}
           />
         )}
 
