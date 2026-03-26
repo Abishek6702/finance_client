@@ -24,18 +24,13 @@ const fmt = (n) =>
 
 const StatusBadge = ({ status }) => {
   const map = {
-    Paid:    { bg: "#F3FCF7", color: "#44CF7D" },
-    Unpaid:  { bg: "#FCEAEE", color: "#ED6C83" },
-    Partial: { bg: "#FFF6EA", color: "#FFA02D" },
+    Paid:    "bg-[#F3FCF7] text-[#44CF7D]",
+    Unpaid:  "bg-[#FCEAEE] text-[#ED6C83]",
+    Partial: "bg-[#FFF6EA] text-[#FFA02D]",
   };
-  const s = map[status] || map.Unpaid;
+  const cls = map[status] || map.Unpaid;
   return (
-    <span style={{
-      background: s.bg, color: s.color,
-      padding: "4px 12px", borderRadius: 6,
-      fontSize: 12, fontWeight: 600,
-      whiteSpace: "nowrap", display: "inline-block",
-    }}>
+    <span className={`${cls} px-3 py-1 rounded-md text-xs font-semibold whitespace-nowrap inline-block`}>
       {status || "—"}
     </span>
   );
@@ -51,12 +46,11 @@ const getStudentImages = (record) => {
 
 const StudentTypeIcons = ({ record }) => {
   const images = getStudentImages(record);
-  if (!images.length) return <span style={{ color: "#9ca3af" }}>—</span>;
+  if (!images.length) return <span className="text-gray-400">—</span>;
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+    <div className="flex items-center gap-1.5">
       {images.map((img, i) => (
-        <img key={i} src={img} alt="type"
-          style={{ width: 22, height: 22, objectFit: "contain" }} />
+        <img key={i} src={img} alt="type" className="w-[22px] h-[22px] object-contain" />
       ))}
     </div>
   );
@@ -64,50 +58,103 @@ const StudentTypeIcons = ({ record }) => {
 
 // ─── table primitives ─────────────────────────────────────────────────────────
 
-const TH = ({ children, style = {} }) => (
-  <th style={{
-    padding: "11px 16px", fontSize: 12.5, fontWeight: 600,
-    color: "#6b7280", textAlign: "left", background: "#f8fafc",
-    borderBottom: "1px solid #e5e7eb", whiteSpace: "nowrap",
-    ...style,
-  }}>
+const TH = ({ children, className = "" }) => (
+  <th className={`px-4 py-[11px] text-[12.5px] font-semibold text-[#222222] text-left bg-[#EAEFEF] border-b border-gray-200 whitespace-nowrap ${className}`}>
     {children}
   </th>
 );
 
-const TD = ({ children, style = {} }) => (
-  <td style={{
-    padding: "13px 16px", fontSize: 13, color: "#374151",
-    borderBottom: "1px solid #f1f5f9", whiteSpace: "nowrap",
-    ...style,
-  }}>
+const TD = ({ children, className = "" }) => (
+  <td className={`px-4 py-[13px] text-[13px] text-gray-700 border-b border-slate-100 whitespace-nowrap ${className}`}>
     {children}
   </td>
 );
 
-const YEAR_COLS     = ["Academic Year","Community","Demand","Concession","Paid","Fine","Overdue","Student Type","Status","Total"];
-const SEM_COLS      = ["Semester Type","Academic Year","Demand","Concession","Paid","Fine","Overdue","Student Type","Status","Total"];
+// Fine column removed from all column definitions
+const YEAR_COLS     = ["Academic Year","Community","Demand","Concession","Paid","Overdue","Student Type","Status","Total"];
+const SEM_COLS      = ["Semester Type","Academic Year","Demand","Concession","Paid","Overdue","Student Type","Status","Total"];
 const FEEHEADS_COLS = ["Fees Head","Total","Concession","Paid","Overdue","Status"];
+const OVERALL_COLS  = ["Academic Year","Community","Demand","Concession","Paid","Overdue","Student Type","Status","Total"];
+
+// ─── overall tab content ───────────────────────────────────────────────────────
+
+const OverallContent = ({ feeSummary, overall }) => {
+  if (!feeSummary?.length && !overall)
+    return (
+      <div className="p-8 text-center text-gray-400 bg-white rounded-xl border border-gray-200">
+        No overall fee data available.
+      </div>
+    );
+
+  // Compute totals dynamically from feeSummary rows; fall back to overall object
+  const rows = feeSummary || [];
+  const totals = {
+    demand:     overall?.demand     ?? rows.reduce((s, r) => s + (r.demand     || 0), 0),
+    concession: overall?.concession ?? rows.reduce((s, r) => s + (r.concession || 0), 0),
+    paid:       overall?.paid       ?? rows.reduce((s, r) => s + (r.paid       || 0), 0),
+    overdue:    overall?.overdue    ?? rows.reduce((s, r) => s + (r.overdue    || 0), 0),
+    total:      overall?.total      ?? rows.reduce((s, r) => s + (r.total      || 0), 0),
+    status:     overall?.status,
+  };
+
+  return (
+    <div className="bg-white rounded-[14px] border border-gray-200 overflow-hidden shadow-sm">
+      <table className="w-full border-collapse">
+        <thead>
+          <tr>{OVERALL_COLS.map((h) => <TH key={h}>{h}</TH>)}</tr>
+        </thead>
+        <tbody>
+          {rows.map((s, i) => (
+            <tr key={i} className={i % 2 === 0 ? "bg-white" : "bg-gray-50/50"}>
+              <TD className="font-semibold">{s.academicYear}</TD>
+              <TD>{s.community || "—"}</TD>
+              <TD>{fmt(s.demand)}</TD>
+              <TD>{fmt(s.concession)}</TD>
+              <TD className="text-green-600 font-semibold">{fmt(s.paid)}</TD>
+              <TD className="text-red-600 font-semibold">{fmt(s.overdue)}</TD>
+              <TD><StudentTypeIcons record={s} /></TD>
+              <TD><StatusBadge status={s.status} /></TD>
+              <TD className="font-semibold">{fmt(s.total)}</TD>
+            </tr>
+          ))}
+
+          {/* Totals row — dynamically computed, aligned to each column */}
+          <tr className=" border-t-2 border-[#0B56A4]/20">
+            <TD></TD>
+            <TD></TD>
+            <TD className="font-bold text-[#0B56A4]">{fmt(totals.demand)}</TD>
+            <TD className="font-bold text-[#0B56A4]">{fmt(totals.concession)}</TD>
+            <TD className="font-bold text-green-700">{fmt(totals.paid)}</TD>
+            <TD className="font-bold text-red-600">{fmt(totals.overdue)}</TD>
+            <TD></TD>
+            <TD>{totals.status ? <StatusBadge status={totals.status} /> : null}</TD>
+            <TD className="font-bold text-[#0B56A4]">{fmt(totals.total)}</TD>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  );
+};
 
 // ─── fee-head breakdown ────────────────────────────────────────────────────────
 
 const FeeHeadTable = ({ feeHeads }) => (
-  <table style={{ width: "100%", borderCollapse: "collapse" }}>
+  <table className="w-full border-collapse">
     <thead>
       <tr>
         {FEEHEADS_COLS.map((h) => (
-          <TH key={h} style={{ background: "#f3f4f6", fontSize: 12 }}>{h}</TH>
+          <TH key={h} className="bg-gray-100 text-xs">{h}</TH>
         ))}
       </tr>
     </thead>
     <tbody>
       {(feeHeads || []).map((f, i) => (
-        <tr key={i} style={{ background: i % 2 === 0 ? "#fff" : "#fafafa" }}>
+        <tr key={i} className={i % 2 === 0 ? "bg-white" : "bg-gray-50"}>
           <TD>{f.name}</TD>
           <TD>{fmt(f.total)}</TD>
           <TD>{fmt(f.concession)}</TD>
-          <TD style={{ color: "#16a34a", fontWeight: 600 }}>{fmt(f.paid)}</TD>
-          <TD style={{ color: "#dc2626", fontWeight: 600 }}>{fmt(f.overdue)}</TD>
+          <TD className="text-green-600 font-semibold">{fmt(f.paid)}</TD>
+          <TD className="text-red-600 font-semibold">{fmt(f.overdue)}</TD>
           <TD><StatusBadge status={f.status} /></TD>
         </tr>
       ))}
@@ -123,53 +170,40 @@ const SemesterCard = ({ semData, label, academicYear }) => {
   const ov = semData.overall || {};
 
   return (
-    <div style={{
-      background: "#fff", borderRadius: 12,
-      border: "1px solid #e5e7eb", overflow: "hidden",
-    }}>
-      <table style={{ width: "100%", borderCollapse: "collapse" }}>
+    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <table className="w-full border-collapse">
         <thead>
           <tr>{SEM_COLS.map((h) => <TH key={h}>{h}</TH>)}</tr>
         </thead>
         <tbody>
           <tr
             onClick={() => setOpen((p) => !p)}
-            style={{
-              cursor: "pointer",
-              background: open ? "#f0f5ff" : "#fff",
-              transition: "background 0.15s",
-            }}
+            className="cursor-pointer transition-colors duration-150"
           >
             <TD>
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <button style={{
-                  width: 28, height: 28, borderRadius: "50%",
-                  border: "none", background: "#1d4ed8", color: "#fff",
-                  cursor: "pointer", display: "flex",
-                  alignItems: "center", justifyContent: "center", flexShrink: 0,
-                }}>
-                  <ChevronRight size={14} style={{
-                    transform: open ? "rotate(90deg)" : "rotate(0deg)",
-                    transition: "transform 0.2s",
-                  }} />
+              <div className="flex items-center gap-2.5">
+                <button className="w-7 h-7 rounded-full border-none bg-blue-700 text-white cursor-pointer flex items-center justify-center shrink-0">
+                  <ChevronRight
+                    size={14}
+                    className={`transition-transform duration-200 ${open ? "rotate-90" : "rotate-0"}`}
+                  />
                 </button>
-                <span style={{ fontWeight: 500, color: "#111827" }}>{label}</span>
+                <span className="font-medium text-gray-900">{label}</span>
               </div>
             </TD>
             <TD>{academicYear}</TD>
             <TD>{fmt(ov.demand)}</TD>
             <TD>{fmt(ov.concession)}</TD>
-            <TD style={{ color: "#16a34a", fontWeight: 600 }}>{fmt(ov.paid)}</TD>
-            <TD>0</TD>
-            <TD style={{ color: "#dc2626", fontWeight: 600 }}>{fmt(ov.overdue)}</TD>
+            <TD className="text-green-600 font-semibold">{fmt(ov.paid)}</TD>
+            <TD className="text-red-600 font-semibold">{fmt(ov.overdue)}</TD>
             <TD><StudentTypeIcons record={ov} /></TD>
             <TD><StatusBadge status={ov.status} /></TD>
-            <TD style={{ fontWeight: 600 }}>{fmt(ov.total)}</TD>
+            <TD className="font-semibold">{fmt(ov.total)}</TD>
           </tr>
         </tbody>
       </table>
       {open && (
-        <div style={{ borderTop: "1px solid #e5e7eb" }}>
+        <div className="border-t border-gray-200">
           <FeeHeadTable feeHeads={semData.feeHeads} />
         </div>
       )}
@@ -182,10 +216,7 @@ const SemesterCard = ({ semData, label, academicYear }) => {
 const YearContent = ({ yearData, feeSummary }) => {
   if (!yearData)
     return (
-      <div style={{
-        padding: 32, textAlign: "center", color: "#9ca3af",
-        background: "#fff", borderRadius: 12, border: "1px solid #e5e7eb",
-      }}>
+      <div className="p-8 text-center text-gray-400 bg-white rounded-xl border border-gray-200">
         No fee data available for this year.
       </div>
     );
@@ -194,34 +225,28 @@ const YearContent = ({ yearData, feeSummary }) => {
   const hasSemesters = yearData.odd || yearData.even;
 
   return (
-    <div style={{
-      display: "flex", flexDirection: "column", gap: 0,
-      background: "#ffffff", borderRadius: 14,
-      border: "1px solid #e5e7eb", overflow: "hidden",
-      boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
-    }}>
+    <div className="flex flex-col gap-0 bg-white rounded-[14px] border border-gray-200 overflow-hidden shadow-sm">
       {/* Year summary */}
-      <table style={{ width: "100%", borderCollapse: "collapse" }}>
+      <table className="w-full border-collapse">
         <thead>
           <tr>{YEAR_COLS.map((h) => <TH key={h}>{h}</TH>)}</tr>
         </thead>
         <tbody>
           {summary ? (
             <tr>
-              <TD style={{ fontWeight: 600 }}>{summary.academicYear}</TD>
+              <TD className="font-semibold">{summary.academicYear}</TD>
               <TD>{summary.community || "—"}</TD>
               <TD>{fmt(summary.demand)}</TD>
               <TD>{fmt(summary.concession)}</TD>
-              <TD style={{ color: "#16a34a", fontWeight: 600 }}>{fmt(summary.paid)}</TD>
-              <TD>0</TD>
-              <TD style={{ color: "#dc2626", fontWeight: 600 }}>{fmt(summary.overdue)}</TD>
+              <TD className="text-green-600 font-semibold">{fmt(summary.paid)}</TD>
+              <TD className="text-red-600 font-semibold">{fmt(summary.overdue)}</TD>
               <TD><StudentTypeIcons record={summary} /></TD>
               <TD><StatusBadge status={summary.status} /></TD>
-              <TD style={{ fontWeight: 600 }}>{fmt(summary.total)}</TD>
+              <TD className="font-semibold">{fmt(summary.total)}</TD>
             </tr>
           ) : (
             <tr>
-              <td colSpan={10} style={{ padding: 14, color: "#9ca3af", textAlign: "center", fontSize: 13 }}>
+              <td colSpan={9} className="p-3.5 text-gray-400 text-center text-[13px]">
                 No summary data
               </td>
             </tr>
@@ -229,12 +254,9 @@ const YearContent = ({ yearData, feeSummary }) => {
         </tbody>
       </table>
 
-      {/* Divider */}
-      {hasSemesters && <div style={{ height: 1, background: "#e5e7eb" }} />}
-
       {/* Semester cards */}
       {hasSemesters && (
-        <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 12, background: "#fff" }}>
+        <div className="p-4 flex flex-col gap-3 bg-white">
           {yearData.odd  && <SemesterCard semData={yearData.odd}  label="Odd Semester"  academicYear={yearData.academicYear} />}
           {yearData.even && <SemesterCard semData={yearData.even} label="Even Semester" academicYear={yearData.academicYear} />}
         </div>
@@ -246,22 +268,17 @@ const YearContent = ({ yearData, feeSummary }) => {
 // ─── profile item row ──────────────────────────────────────────────────────────
 
 const Item = ({ icon, label, value }) => (
-  <div style={{ padding: "8px 16px", borderBottom: "1px solid #d9d9d9" }}>
-    <div style={{ display: "flex", alignItems: "flex-start", gap: 16 }}>
-      <div style={{
-        width: 40, height: 40, borderRadius: 8,
-        background: "#f9fafb", border: "1px solid #d9d9d9",
-        display: "flex", alignItems: "center",
-        justifyContent: "center", flexShrink: 0,
-      }}>
-        <img src={icon} alt={label} style={{ width: 20, height: 20, objectFit: "contain" }} />
+  <div className="px-4 py-2 border-b border-[#d9d9d9]">
+    <div className="flex items-start gap-4">
+      <div className="w-10 h-10 rounded-lg bg-gray-50 border border-[#d9d9d9] flex items-center justify-center shrink-0">
+        <img src={icon} alt={label} className="w-5 h-5 object-contain" />
       </div>
-      <div style={{ display: "flex", flexDirection: "column", minWidth: 0, flex: 1 }}>
-        <span style={{ color: "#6b7280", fontSize: 12 }}>{label}</span>
-        <span title={value} style={{
-          fontSize: 14, fontWeight: 600, color: "#374151",
-          overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-        }}>
+      <div className="flex flex-col min-w-0 flex-1">
+        <span className="text-gray-500 text-xs">{label}</span>
+        <span
+          title={value}
+          className="text-sm font-semibold text-gray-700 overflow-hidden text-ellipsis whitespace-nowrap"
+        >
           {value || "Not Provided"}
         </span>
       </div>
@@ -270,49 +287,26 @@ const Item = ({ icon, label, value }) => (
 );
 
 // ─── profile card ──────────────────────────────────────────────────────────────
-// Key fix: explicit maxHeight + overflow hidden on card so flex children
-// can scroll. Photo is flexShrink:0 so it never shrinks. Info div is
-// flex:1 + overflowY:auto so it scrolls within the remaining space.
 
 const ProfileCard = ({ student, contact }) => (
-  <div style={{
-    width: "16%",
-    minWidth: 200,
-    borderRadius: 24,
-    border: "1px solid #d9d9d9",
-    background: "#fff",
-    // ── critical: fixed height so inner scroll works ──
-    height: "calc(100vh - 140px)",
-    maxHeight: "calc(100vh - 140px)",
-    display: "flex",
-    flexDirection: "column",
-    overflow: "hidden",   // clips card to fixed height
-    flexShrink: 0,
-    alignSelf: "flex-start", // don't stretch beyond its own height
-  }}>
-
-    {/* Photo — always visible, never scrolls away */}
-    <div style={{ padding: "16px 16px 0", flexShrink: 0 }}>
-      <div style={{ borderRadius: 20, overflow: "hidden", marginBottom: 4 }}>
+  <div
+    className="rounded-3xl border border-[#d9d9d9] bg-white flex flex-col overflow-hidden"
+    style={{ maxHeight: "calc(100vh - 190px)" }}
+  >
+    {/* Photo */}
+    <div className="p-4 pb-0 shrink-0">
+      <div className="rounded-[20px] overflow-hidden mb-1">
         <img
           src={student.photo || Favlogo}
           alt="student"
-          style={{ width: "100%", height: 144, objectFit: "cover", display: "block" }}
+          className="w-full h-36 object-cover block"
           onError={(e) => { e.target.src = Favlogo; }}
         />
       </div>
     </div>
 
-    {/* Info rows — scroll independently inside the card */}
-    <div style={{
-      flex: 1,
-      overflowY: "auto",
-      overflowX: "hidden",
-      paddingBottom: 12,
-      // custom scrollbar styling
-      scrollbarWidth: "thin",
-      scrollbarColor: "#d1d5db transparent",
-    }}>
+    {/* Info rows */}
+    <div className="flex-1 overflow-y-auto overflow-x-hidden pb-3 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
       <Item icon={UserImg}       label="Student Name"   value={student.name} />
       <Item icon={RollnoImg}     label="Roll Number"    value={student.rollNo} />
       <Item icon={DepartmentImg} label="Department"     value={student.department} />
@@ -329,11 +323,13 @@ const ProfileCard = ({ student, contact }) => (
 
 // ─── main ─────────────────────────────────────────────────────────────────────
 
+const OVERALL_TAB = "__overall__";
+
 const StudentFeeDetails = () => {
   const { rollNo }                = useParams();
   const [data,      setData]      = useState(null);
   const [loading,   setLoading]   = useState(false);
-  const [activeTab, setActiveTab] = useState(null);
+  const [activeTab, setActiveTab] = useState(OVERALL_TAB);
 
   useEffect(() => { if (rollNo) fetchDetails(); }, [rollNo]);
 
@@ -346,7 +342,12 @@ const StudentFeeDetails = () => {
         const matched = arr.find((item) => item.student.rollNo === rollNo);
         if (matched) {
           setData(matched);
-          setActiveTab(matched.student.currentAcademicYear || matched.feeAcademicYears?.[0]);
+          // Default to current academic year tab, fall back to first year, then Overall
+          const defaultTab =
+            matched.student.currentAcademicYear ||
+            matched.feeAcademicYears?.[0] ||
+            OVERALL_TAB;
+          setActiveTab(defaultTab);
         }
       }
     } catch (err) {
@@ -358,102 +359,86 @@ const StudentFeeDetails = () => {
 
   if (loading)
     return (
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: "#6b7280", fontSize: 14 }}>
+      <div className="flex items-center justify-center h-full text-gray-500 text-sm">
         Loading fee details…
       </div>
     );
 
   if (!data)
-    return <div style={{ padding: 32, color: "#6b7280", fontSize: 14 }}>No Data — Check API response</div>;
+    return <div className="p-8 text-gray-500 text-sm">No Data — Check API response</div>;
 
-  const { student, contact, academicYears, feeSummary } = data;
-  const tabs           = data.feeAcademicYears || [];
+  const { student, contact, academicYears, feeSummary, overall } = data;
+  const yearTabs       = data.feeAcademicYears || [];
   const activeYearData = academicYears?.find((y) => y.academicYear === activeTab);
 
   return (
-    <div style={{
-      fontFamily: "'Segoe UI', system-ui, sans-serif",
-      background: "#f8fafc",
-      height: "100%",
-      display: "flex",
-      flexDirection: "column",
-      overflow: "hidden",         // ── no page scroll ──
-    }}>
+    <div className="font-[Segoe_UI,system-ui,sans-serif] bg-slate-50 min-h-full flex flex-col">
 
-      {/* Breadcrumb — never scrolls */}
-      <div style={{
-        display: "flex", alignItems: "center", gap: 6,
-        padding: "14px 24px 12px", fontSize: 14, flexShrink: 0,
-      }}>
+      {/* Breadcrumb */}
+      <div className="flex items-center gap-1.5   pb-2 text-sm shrink-0">
         <Link
           to="/admin/fees_management"
-          style={{ color: "#374151", textDecoration: "none", fontWeight: 500 }}
+          className="text-black no-underline font-medium text-xl"
         >
           Fees Details
         </Link>
-        <ChevronRight size={14} color="#9ca3af" />
-        <span style={{ color: "#1d4ed8", fontWeight: 700 }}>{student.name}</span>
+        <ChevronRight size={24} className="text-black" />
+        <span className="text-[#0b56a4] font-medium text-xl">{student.name}</span>
       </div>
 
       {/* Body row */}
-      <div style={{
-        display: "flex",
-        gap: 18,
-        padding: "0 24px 24px",
-        flex: 1,
-        minHeight: 0,             // ── critical: lets flex children shrink below content size ──
-        alignItems: "flex-start",
-      }}>
+      <div className="flex gap-[14px]  pb-2 items-start">
 
-        {/* LEFT — profile with its own inner scroll */}
-        <ProfileCard student={student} contact={contact} />
+        {/* LEFT — profile card (sticky so it stays visible while fee panel scrolls) */}
+        <div className="sticky top-4 shrink-0" style={{ width: "16%", minWidth: 200 }}>
+          <ProfileCard student={student} contact={contact} />
+        </div>
 
-        {/* RIGHT — fee panel scrolls independently */}
-        <div style={{
-          flex: 1,
-          minWidth: 0,
-          minHeight: 0,
-          height: "calc(100vh - 140px)",
-          overflowY: "auto",      // ── only right panel scrolls ──
-          display: "flex",
-          flexDirection: "column",
-          gap: 0,
-          scrollbarWidth: "thin",
-          scrollbarColor: "#d1d5db transparent",
-        }}>
+        {/* RIGHT — fee panel: grows naturally, no fixed height, no overflow clip */}
+        <div className="flex-1 min-w-0 flex flex-col gap-0">
           {/* Year tabs */}
-          {tabs.length > 0 && (
-            <div style={{
-              display: "flex", gap: 10,
-              marginBottom: 18, flexWrap: "wrap", flexShrink: 0,
-            }}>
-              {tabs.map((yr) => {
-                const isActive  = yr === activeTab;
-                const isCurrent = yr === student.currentAcademicYear;
-                return (
-                  <button
-                    key={yr}
-                    onClick={() => setActiveTab(yr)}
-                    style={{
-                      padding: "9px 22px", borderRadius: 10,
-                      border: isActive ? "none" : "1.5px solid #e5e7eb",
-                      background: isActive ? "#0B56A4" : "#fff",
-                      color: isActive ? "#fff" : "#374151",
-                      fontSize: 13, fontWeight: 600, cursor: "pointer",
-                      display: "flex", alignItems: "center", gap: 8,
-                      boxShadow: isActive ? "0 2px 10px rgba(29,78,216,0.22)" : "none",
-                      transition: "all 0.15s",
-                    }}
-                  >
-                    {yr}
-                  </button>
-                );
-              })}
-            </div>
-          )}
+          <div className="flex gap-2.5 mb-[18px] flex-wrap">
+            <button
+              onClick={() => setActiveTab(OVERALL_TAB)}
+              className={`px-[22px] py-[9px] rounded-[10px] text-[13px] font-semibold cursor-pointer flex items-center gap-2 transition-all duration-150
+                ${activeTab === OVERALL_TAB
+                  ? "border-none bg-[#0B56A4] text-white shadow-[0_2px_10px_rgba(29,78,216,0.22)]"
+                  : "border border-[1.5px] border-gray-200 bg-white text-gray-700 shadow-none"
+                }`}
+            >
+              Overall
+            </button>
+
+            {yearTabs.map((yr) => {
+              const isActive = yr === activeTab;
+              const isCurrent    = yr === student.currentAcademicYear;
+              return (
+                <button
+                  key={yr}
+                  onClick={() => setActiveTab(yr)}
+                  className={`px-[22px] py-[9px] rounded-[10px] text-[13px] font-semibold cursor-pointer flex items-center gap-2 transition-all duration-150
+                    ${isActive
+                      ? "border-none bg-[#0B56A4] text-white shadow-[0_2px_10px_rgba(29,78,216,0.22)]"
+                      : "border border-[1.5px] border-gray-200 bg-white text-gray-700 shadow-none"
+                    }`}
+                >
+                  {yr}
+                  {isCurrent && (
+                    <span className={`text-[11px] font-medium px-1.5 py-0.5 rounded-md ${isActive ? "bg-white/20 text-white" : "bg-[#EBF2FF] text-[#0B56A4]"}`}>
+                      Current Year
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
 
           {/* Fee content */}
-          <YearContent yearData={activeYearData} feeSummary={feeSummary} />
+          {activeTab === OVERALL_TAB ? (
+            <OverallContent feeSummary={feeSummary} overall={overall} />
+          ) : (
+            <YearContent yearData={activeYearData} feeSummary={feeSummary} />
+          )}
         </div>
       </div>
     </div>
