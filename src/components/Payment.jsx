@@ -26,7 +26,7 @@ const Payment = ({ selectedStudent }) => {
     setLoading(true);
     try {
       const res = await ApiRequest(
-        `/api/studentFeeTracking?rollNo=${selectedStudent.id}`,
+        `/api/studentFeeTracking/?rollNo=${selectedStudent.id}`,
       );
       if (!res?.data?.length) return;
 
