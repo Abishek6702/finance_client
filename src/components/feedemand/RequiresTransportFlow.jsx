@@ -1,6 +1,18 @@
 import React, { useState, useRef, useEffect } from "react";
 import { AlertCircle, ChevronDown, Search } from "lucide-react";
+import axios from "axios";
 
+const getAcademicYears = () => {
+  const now = new Date();
+  const year = now.getFullYear();
+
+  const currentStartYear = now.getMonth() >= 5 ? year : year - 1;
+
+  const current = `${currentStartYear}-${currentStartYear + 1}`;
+  const next = `${currentStartYear + 1}-${currentStartYear + 2}`;
+
+  return { current, next, list: [current, next] };
+};
 // ─── Utilities ────────────────────────────────────────────────────────────────
 const fmt = (val) =>
   isNaN(parseFloat(val))
@@ -29,14 +41,21 @@ const Field = ({ label, required, error, children }) => (
 );
 
 // ─── Searchable Select ────────────────────────────────────────────────────────
-const SearchableSelect = ({ value, onChange, options, placeholder, error, disabled }) => {
-  const [open, setOpen]   = useState(false);
+const SearchableSelect = ({
+  value,
+  onChange,
+  options,
+  placeholder,
+  error,
+  disabled,
+}) => {
+  const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const containerRef      = useRef(null);
-  const inputRef          = useRef(null);
+  const containerRef = useRef(null);
+  const inputRef = useRef(null);
 
   const filtered = options.filter((o) =>
-    o.toLowerCase().includes(query.toLowerCase())
+    o.toLowerCase().includes(query.toLowerCase()),
   );
 
   useEffect(() => {
@@ -50,23 +69,38 @@ const SearchableSelect = ({ value, onChange, options, placeholder, error, disabl
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  const handleSelect = (val) => { onChange(val); setOpen(false); setQuery(""); };
+  const handleSelect = (val) => {
+    onChange(val);
+    setOpen(false);
+    setQuery("");
+  };
 
   return (
     <div ref={containerRef} className="relative">
       <button
         type="button"
         disabled={disabled}
-        onClick={() => { if (!disabled) { setOpen(true); setTimeout(() => inputRef.current?.focus(), 0); } }}
+        onClick={() => {
+          if (!disabled) {
+            setOpen(true);
+            setTimeout(() => inputRef.current?.focus(), 0);
+          }
+        }}
         className={`w-full flex items-center justify-between border rounded-lg px-3 py-2 text-sm bg-white transition
           focus:outline-none focus:ring-1 focus:border-transparent
-          ${disabled ? "bg-gray-50 cursor-not-allowed text-gray-400 border-gray-100" :
-            error    ? "border-red-400 focus:ring-red-400" :
-                       "border-gray-200 focus:ring-[#0b56a4]"}
+          ${
+            disabled
+              ? "bg-gray-50 cursor-not-allowed text-gray-400 border-gray-100"
+              : error
+                ? "border-red-400 focus:ring-red-400"
+                : "border-gray-200 focus:ring-[#0b56a4]"
+          }
           ${!value ? "text-gray-400" : "text-gray-800"}`}
       >
         <span>{value || placeholder}</span>
-        <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${open ? "rotate-180" : ""}`} />
+        <ChevronDown
+          className={`w-4 h-4 text-gray-400 transition-transform ${open ? "rotate-180" : ""}`}
+        />
       </button>
 
       {open && (
@@ -95,7 +129,9 @@ const SearchableSelect = ({ value, onChange, options, placeholder, error, disabl
                 </li>
               ))
             ) : (
-              <li className="px-3 py-3 text-sm text-gray-400 text-center">No results found</li>
+              <li className="px-3 py-3 text-sm text-gray-400 text-center">
+                No results found
+              </li>
             )}
           </ul>
         </div>
@@ -105,37 +141,76 @@ const SearchableSelect = ({ value, onChange, options, placeholder, error, disabl
 };
 
 // ─── Constants — replace with API / props when ready ─────────────────────────
-const ROUTES  = ["Route 1 - City Center", "Route 2 - East Campus", "Route 3 - West Zone", "Route 4 - North Hub"];
-const BUS_NOS = ["TN-01-AB-1234", "TN-02-CD-5678", "TN-03-EF-9012", "TN-04-GH-3456"];
+const { current, list: academicYear } = getAcademicYears();
+const ROUTES = [
+  "Route 1 - City Center",
+  "Route 2 - East Campus",
+  "Route 3 - West Zone",
+  "Route 4 - North Hub",
+];
+const BUS_NOS = [
+  "TN-01-AB-1234",
+  "TN-02-CD-5678",
+  "TN-03-EF-9012",
+  "TN-04-GH-3456",
+];
 const STOPS_MAP = {
-  "Route 1 - City Center": ["Stop A - Main Gate", "Stop B - Market",    "Stop C - Hospital",  "Stop D - City Center"],
-  "Route 2 - East Campus": ["Stop A - Main Gate", "Stop E - East Park", "Stop F - Lake View", "Stop G - East Campus"],
-  "Route 3 - West Zone":   ["Stop A - Main Gate", "Stop H - West Mall", "Stop I - Tech Park", "Stop J - West Zone"],
-  "Route 4 - North Hub":   ["Stop A - Main Gate", "Stop K - North Gate","Stop L - Stadium",   "Stop M - North Hub"],
+  "Route 1 - City Center": [
+    "Stop A - Main Gate",
+    "Stop B - Market",
+    "Stop C - Hospital",
+    "Stop D - City Center",
+  ],
+  "Route 2 - East Campus": [
+    "Stop A - Main Gate",
+    "Stop E - East Park",
+    "Stop F - Lake View",
+    "Stop G - East Campus",
+  ],
+  "Route 3 - West Zone": [
+    "Stop A - Main Gate",
+    "Stop H - West Mall",
+    "Stop I - Tech Park",
+    "Stop J - West Zone",
+  ],
+  "Route 4 - North Hub": [
+    "Stop A - Main Gate",
+    "Stop K - North Gate",
+    "Stop L - Stadium",
+    "Stop M - North Hub",
+  ],
 };
 
-// Fee per route — replace with API when ready
-const ROUTE_FEES = {
-  "Route 1 - City Center": 15000,
-  "Route 2 - East Campus": 18000,
-  "Route 3 - West Zone":   12000,
-  "Route 4 - North Hub":   20000,
-};
 
 // ─── Validation ───────────────────────────────────────────────────────────────
 const validate = (data) => {
   const errors = {};
-  if (!data.route)         errors.route         = "Please select a route";
-  if (!data.stop)          errors.stop          = "Please select a stop";
-  if (!data.busNo)         errors.busNo         = "Please select a bus number";
+  if (!data.route) errors.route = "Please select a route";
+  if (!data.academicYear) errors.academicYear = "Academic year is required";
+  if (!data.stop) errors.stop = "Please select a stop";
+  if (!data.busNo) errors.busNo = "Please select a bus number";
   if (!data.effectiveDate) errors.effectiveDate = "Effective date is required";
   return errors;
 };
 
 // ─── RequiresTransportFlow ────────────────────────────────────────────────────
 const RequiresTransportFlow = ({ student, onClose }) => {
-  const [data, setData]     = useState({ route: "", stop: "", busNo: "", effectiveDate: "", reductionAmount: "" });
+  const [data, setData] = useState({
+    academicYear: current,
+    route: "",
+    stop: "",
+    busNo: "",
+    effectiveDate: "",
+    reductionAmount: "",
+  });
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+
+  const [transportData, setTransportData] = useState([]);
+  const [transportInfo, setTransportInfo] = useState({
+    routes: [],
+    busNos: [],
+  });
 
   const set = (key, val) => {
     // reset stop when route changes
@@ -147,36 +222,132 @@ const RequiresTransportFlow = ({ student, onClose }) => {
     if (errors[key]) setErrors((p) => ({ ...p, [key]: "" }));
   };
 
-  const availableStops = STOPS_MAP[data.route] || [];
+  const selectedRoute = transportData.find(
+    (item) =>
+      item.route === data.route &&
+      item.busNo === data.busNo
+  );
+  
+  const availableStops = selectedRoute?.stops.map((s) => s.stop) || [];
+  const selectedStop = selectedRoute?.stops.find(
+    (s) => s.stop === data.stop
+  );
+  
+  const totalAmount = selectedStop?.fee ?? null;
+  const transportId = selectedStop?.id ?? null;
 
   // Show fee only once all 3 selected
-  const allSelected  = data.route && data.stop && data.busNo;
-  const totalAmount  = allSelected ? (ROUTE_FEES[data.route] ?? null) : null;
+  const allSelected = data.route && data.stop && data.busNo;
   const reductionAmt = parseFloat(data.reductionAmount) || 0;
-  const needToPay    = totalAmount !== null ? Math.max(0, totalAmount - reductionAmt) : null;
+  const needToPay =
+    totalAmount !== null ? Math.max(0, totalAmount - reductionAmt) : null;
 
-  const handleSubmit = () => {
+  const fetchTransport = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await axios.get(
+        `${import.meta.env.VITE_API_BASE_URL}/api/transport`,
+
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      const json = res.data;
+      // console.log("Transport data fetched:", json);
+      if (json.success) {
+        setTransportData(json.data.detailed);
+        setTransportInfo(json.data.info);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    fetchTransport();
+  }, []);
+
+  const handleSubmit = async () => {
+    setLoading(true);
     const errs = validate(data);
-    if (Object.keys(errs).length > 0) { setErrors(errs); return; }
-    // TODO: replace with your API call
-    console.log("Requires Transport submit", { student, transport: data,  });
-    onClose();
+    if (Object.keys(errs).length > 0) {
+      setErrors(errs);
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("token");
+
+      const payload = {
+        facilityType: "transport",
+        applyFromAcademicYear: data.academicYear,
+        effectiveDate: data.effectiveDate,
+        transport: {
+          isApplicable: true,
+          id: transportId,
+        },
+        reduction: reductionAmt,
+        // needToPay: needToPay,
+      };
+
+      const res = await axios.put(
+        `${import.meta.env.VITE_API_BASE_URL}/api/studentFacility/assign/${student.rollNo}`, // 👈 adjust endpoint if needed
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      // console.log("SUCCESS:", payload);
+      setLoading(false);
+      onClose(); // close modal after success
+    } catch (err) {
+      console.error("POST ERROR:", err);
+      setLoading(false);
+    }
   };
 
   return (
     <div className="flex flex-col gap-5 mt-4">
-
       <div className="grid grid-cols-2 gap-3">
+        <Field label="Academic Year" required error={errors.academicYear}>
+          <select
+            className={inputCls(errors.academicYear) + " cursor-pointer"}
+            value={data.academicYear}
+            onChange={(e) => set("academicYear", e.target.value)}
+          >
+            <option value="">Select Academic year</option>
+            {academicYear.map((b) => (
+              <option key={b} value={b}>
+                {b}
+              </option>
+            ))}
+          </select>
+        </Field>
         <Field label="Route" required error={errors.route}>
           <SearchableSelect
             value={data.route}
             onChange={(val) => set("route", val)}
-            options={ROUTES}
+            options={transportInfo.routes}
             placeholder="Select route"
             error={errors.route}
           />
         </Field>
-
+        <Field label="Bus No." required error={errors.busNo}>
+          <SearchableSelect
+            value={data.busNo}
+            onChange={(val) => set("busNo", val)}
+            options={transportInfo.busNos}
+            placeholder="Select bus"
+            error={errors.busNo}
+          />
+        </Field>
         <Field label="Stop" required error={errors.stop}>
           <SearchableSelect
             value={data.stop}
@@ -188,15 +359,7 @@ const RequiresTransportFlow = ({ student, onClose }) => {
           />
         </Field>
 
-        <Field label="Bus No." required error={errors.busNo}>
-          <SearchableSelect
-            value={data.busNo}
-            onChange={(val) => set("busNo", val)}
-            options={BUS_NOS}
-            placeholder="Select bus"
-            error={errors.busNo}
-          />
-        </Field>
+        
         <Field label="Effective Date" required error={errors.effectiveDate}>
           <input
             className={inputCls(errors.effectiveDate)}
@@ -213,7 +376,9 @@ const RequiresTransportFlow = ({ student, onClose }) => {
           <div className="grid grid-cols-2 gap-3">
             {/* Total amount read-only */}
             <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium text-gray-700">Total Amount</label>
+              <label className="text-sm font-medium text-gray-700">
+                Total Amount
+              </label>
               <div className="w-full border border-gray-100 rounded-lg px-3 py-2 text-sm font-semibold text-gray-700 bg-gray-50 cursor-not-allowed select-none">
                 {fmt(totalAmount)}
               </div>
@@ -235,8 +400,12 @@ const RequiresTransportFlow = ({ student, onClose }) => {
           {/* Need to pay — shown once reduction entered */}
           {data.reductionAmount !== "" && (
             <div className="flex items-center justify-between px-4 py-3 bg-green-50 border border-green-100 rounded-lg">
-              <span className="text-sm font-medium text-gray-600">Need to be Paid</span>
-              <span className="text-base font-bold text-green-700">{fmt(needToPay)}</span>
+              <span className="text-sm font-medium text-gray-600">
+                Need to be Paid
+              </span>
+              <span className="text-base font-bold text-green-700">
+                {fmt(needToPay)}
+              </span>
             </div>
           )}
         </div>
@@ -244,11 +413,10 @@ const RequiresTransportFlow = ({ student, onClose }) => {
 
       <button
         onClick={handleSubmit}
-        className="w-full py-2.5 rounded-lg text-sm font-semibold bg-[#0b56a4] text-white hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer"
+        className={`w-full py-2.5 rounded-lg text-sm font-semibold bg-[#0b56a4] text-white hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer ${loading ? "opacity-50 cursor-not-allowed" : ""}`}   
       >
-        Submit
+        {loading ? "Submitting..." : "Submit"}
       </button>
-
     </div>
   );
 };

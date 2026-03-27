@@ -1,6 +1,18 @@
 import React, { useState, useRef, useEffect } from "react";
 import { AlertCircle, ChevronDown, Search, CheckCircle2 } from "lucide-react";
+import axios from "axios";
 
+const getAcademicYears = () => {
+  const now = new Date();
+  const year = now.getFullYear();
+
+  const currentStartYear = now.getMonth() >= 5 ? year : year - 1;
+
+  const current = `${currentStartYear}-${currentStartYear + 1}`;
+  const next = `${currentStartYear + 1}-${currentStartYear + 2}`;
+
+  return { current, next, list: [current, next] };
+};
 const fmt = (val) =>
   isNaN(parseFloat(val))
     ? "₹ —"
@@ -226,10 +238,14 @@ const ROUTE_FEES = {
   "Route 4 - North Hub": 20000,
 };
 
+const { current, list: academicYear } = getAcademicYears();
+
 // ─── Validation ───────────────────────────────────────────────────────────────
 const validateTransport = (data) => {
   const errors = {};
   if (!data.route) errors.route = "Please select a route";
+  if (!data.academicYear) errors.academicYear = "Academic year is required";
+
   if (!data.stop) errors.stop = "Please select a stop";
   if (!data.busNo) errors.busNo = "Please select a bus number";
   if (!data.effectiveDate) errors.effectiveDate = "Effective date is required";
@@ -242,16 +258,26 @@ const validateTransport = (data) => {
 const RequireTransportFlow = ({ student, onClose }) => {
   const [step, setStep] = useState(0);
   const [accordionOpen, setAccordionOpen] = useState(true);
+  const academicYearOptions = [
+    current,
+    ...academicYear.filter((y) => y !== current),
+  ];
+  const [data, setData] = useState({
+    academicYear: current,
+    paymentFrom: "",
+    studentAccountNumber: "",
+    StudentbankName: "",
+  });
 
-  // Current hostel details — from backend, fallback to static for now
-  // TODO: replace field names once backend is ready
-  const currentBlock = student?.hostelBlock ?? "Block A";
-  const currentRoom = student?.hostelRoomNo ?? "A-101";
-  const currentSharing = student?.hostelSharing ?? "Double";
+  const [hostelData, setHostelData] = useState([]);
+
+  const currentBlock = hostelData?.block;
+  const currentRoom = hostelData?.roomNo || "-";
+  const currentSharing = hostelData?.sharing;
   const currentBathroom =
-    student?.hostelRoomType === "attached" ? "Attached" : "Not Attached";
-  const hostelPaid = student?.hostelPaidAmount ?? 18000;
-  const hostelTotal = student?.hostelTotalAmount ?? 25000;
+    hostelData?.isAttached === true ? "Attached" : "Not Attached";
+  const hostelPaid = hostelData?.paid;
+  const hostelTotal = hostelData?.fee;
 
   // Step 0 hostel closing state
   const [hostelClose, setHostelClose] = useState({
@@ -261,6 +287,34 @@ const RequireTransportFlow = ({ student, onClose }) => {
     refundMethod: "",
   });
   const [hostelErrors, setHostelErrors] = useState({});
+
+  const fetchHostel = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await axios.get(
+        `${import.meta.env.VITE_API_BASE_URL}/api/feedemands/${student.rollNo}?academicYear=${data.academicYear}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      const json = res.data;
+      console.log("Hostel data fetched:", json);
+      if (json.success) {
+        setHostelData(json.data.studentType.hostelDetails);
+        // setHostelInfo(json.data.info);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    fetchHostel();
+  }, []);
 
   const setH = (key, val) => {
     setHostelClose((p) => ({ ...p, [key]: val }));
@@ -277,7 +331,18 @@ const RequireTransportFlow = ({ student, onClose }) => {
     if (!data.endDate) errors.endDate = "End date is required";
     if (!data.conceptionAmount)
       errors.conceptionAmount = "Conception amount is required";
-    if (!data.refundMode) errors.refundMode = "Please select a refund mode";
+    if (hostelClose.refundMode === "refund" && !hostelClose.refundMethod) {
+      errors.refundMethod = "Select cash or bank";
+    }
+    
+    if (
+      (data.refundMode === "refund" && data.refundMethod === "bank") ||
+      data.refundMode === "bank"
+    ) {
+      if (!data.paymentFrom) errors.paymentFrom = "College account required";
+      if (!data.studentAccountNumber) errors.studentAccountNumber = "Account required";
+      if (!data.StudentbankName) errors.StudentbankName = "Bank name required";
+    }
     return errors;
   };
 
@@ -290,22 +355,67 @@ const RequireTransportFlow = ({ student, onClose }) => {
     reductionAmount: "",
   });
   const [errors, setErrors] = useState({});
+  const [transportData, setTransportData] = useState([]);
+  const [transportInfo, setTransportInfo] = useState({
+    routes: [],
+    busNos: [],
+  });
 
-  const setT = (key, val) => {
-    if (key === "route") setTransport((p) => ({ ...p, route: val, stop: "" }));
-    else setTransport((p) => ({ ...p, [key]: val }));
+  const set = (key, val) => {
+    // reset stop when route changes
+    if (key === "route") {
+      setData((p) => ({ ...p, route: val, stop: "" }));
+    } else {
+      setData((p) => ({ ...p, [key]: val }));
+    }
     if (errors[key]) setErrors((p) => ({ ...p, [key]: "" }));
   };
 
-  const availableStops = STOPS_MAP[transport.route] || [];
-  const allSelected = transport.route && transport.stop && transport.busNo;
-  const totalAmount = allSelected
-    ? (ROUTE_FEES[transport.route] ?? null)
-    : null;
-  const reductionAmt = parseFloat(transport.reductionAmount) || 0;
+  const selectedRoute = transportData.find(
+    (item) => item.route === data.route && item.busNo === data.busNo,
+  );
+
+  const availableStops = selectedRoute?.stops.map((s) => s.stop) || [];
+  const selectedStop = selectedRoute?.stops.find((s) => s.stop === data.stop);
+
+  const totalAmount = selectedStop?.fee ?? null;
+  const transportId = selectedStop?.id ?? null;
+
+  // Show fee only once all 3 selected
+  const allSelected = data.route && data.stop && data.busNo;
+  const [reductionAmount, setReductionAmount] = useState("");
+  const reductionAmt = parseFloat(reductionAmount) || 0;
   const needToPay =
     totalAmount !== null ? Math.max(0, totalAmount - reductionAmt) : null;
 
+  const fetchTransport = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await axios.get(
+        `${import.meta.env.VITE_API_BASE_URL}/api/transport`,
+
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      const json = res.data;
+      // console.log("Transport data fetched:", json);
+      if (json.success) {
+        setTransportData(json.data.detailed);
+        setTransportInfo(json.data.info);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    fetchTransport();
+  }, []);
   const handleContinue = () => {
     const errs = validateHostelClose(hostelClose);
     if (Object.keys(errs).length > 0) {
@@ -315,18 +425,68 @@ const RequireTransportFlow = ({ student, onClose }) => {
     setStep(1);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const errs = validateTransport(transport);
     if (Object.keys(errs).length > 0) {
       setErrors(errs);
       return;
     }
-    console.log("Require Transport submit", { student, transport, needToPay });
-    onClose();
+    try {
+      const token = localStorage.getItem("token");
+
+      const payload = {
+        cancel: {
+          facilityType: "hostel",
+          applyFromAcademicYear: data.academicYear,
+          endDate: hostelClose.endDate,
+          conceptionAmount: parseFloat(hostelClose.conceptionAmount),
+          refundAmount: balance,
+          refundMode:
+            data.refundMode === "wallet" ? "wallet" : data.refundMethod,
+
+          ...(data.refundMethod === "bank" && {
+            collegeAccount: paymentFrom,
+            studentBankName: StudentbankName,
+            studentAccount: studentAccountNumber,
+          }),
+        },
+      };
+
+      const res = await axios.put(
+        `${import.meta.env.VITE_API_BASE_URL}/api/studentFacility/assign/${student.rollNo}`, // 👈 adjust endpoint if needed
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      // console.log("SUCCESS:", payload);
+      setLoading(false);
+      onClose(); // close modal after success
+    } catch (err) {
+      console.error("POST ERROR:", err);
+      setLoading(false);
+    }
   };
 
   return (
     <div className="flex flex-col gap-5 mt-4">
+      <Field label="Academic Year" required error={errors.academicYear}>
+        <select
+          className={inputCls(errors.academicYear) + " cursor-pointer"}
+          value={data.academicYear}
+          onChange={(e) => setData("academicYear", e.target.value)}
+        >
+          <option value="">Select Academic year</option>
+          {academicYear.map((b) => (
+            <option key={b} value={b}>
+              {b}
+            </option>
+          ))}
+        </select>
+      </Field>
       {/* ── Step 0: Hostel closing details ── */}
       {step === 0 && (
         <>
@@ -346,9 +506,8 @@ const RequireTransportFlow = ({ student, onClose }) => {
             </button>
             {accordionOpen && (
               <>
-                <TableRow label="Block" value={currentBlock} />
-                <TableRow label="Room No." value={currentRoom} />
-                <TableRow label="Sharing" value={currentSharing} />
+                <TableRow label="Block" value={`${currentBlock} Block`} />
+                <TableRow label="Sharing" value={`${currentSharing} Sharing`} />
                 <TableRow label="Bathroom" value={currentBathroom} />
               </>
             )}
@@ -416,7 +575,10 @@ const RequireTransportFlow = ({ student, onClose }) => {
                 label="Student Wallet"
                 checked={hostelClose.refundMode === "wallet"}
                 // change Student Wallet onChange to:
-                onChange={() => { setH("refundMode", "wallet"); setH("refundMethod", ""); }}
+                onChange={() => {
+                  setH("refundMode", "wallet");
+                  setH("refundMethod", "");
+                }}
               />
             </div>
             {hostelErrors.refundMode && (
@@ -453,6 +615,52 @@ const RequireTransportFlow = ({ student, onClose }) => {
                     </span>
                   </div>
                 )}
+
+                {hostelClose.refundMethod === "bank" && (
+                  <div className="mt-3 grid grid-cols-2 gap-3">
+                    <Field
+                      label="Payment from"
+                      required
+                      error={hostelErrors.paymentFrom}
+                    >
+                      <input
+                        className={inputCls(hostelErrors.paymentFrom)}
+                        type="text"
+                        placeholder="Enter payment from"
+                        value={data.paymentFrom}
+                        onChange={(e) => set("paymentFrom", e.target.value)}
+                      />
+                    </Field>
+                    <Field
+                      label="Student Account Number"
+                      required
+                      error={hostelErrors.studentAccountNumber}
+                    >
+                      <input
+                        className={inputCls(hostelErrors.studentAccountNumber)}
+                        type="text"
+                        placeholder="Enter student account number"
+                        value={data.studentAccountNumber}
+                        onChange={(e) =>
+                          set("studentAccountNumber", e.target.value)
+                        }
+                      />
+                    </Field>
+                    <Field
+                      label="Student Bank name"
+                      required
+                      error={hostelErrors.StudentbankName}
+                    >
+                      <input
+                        className={inputCls(hostelErrors.StudentbankName)}
+                        type="text"
+                        placeholder="Enter student bank name"
+                        value={data.StudentbankName}
+                        onChange={(e) => set("StudentbankName", e.target.value)}
+                      />
+                    </Field>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -472,34 +680,32 @@ const RequireTransportFlow = ({ student, onClose }) => {
           <div className="grid grid-cols-2 gap-3">
             <Field label="Route" required error={errors.route}>
               <SearchableSelect
-                value={transport.route}
-                onChange={(val) => setT("route", val)}
-                options={ROUTES}
+                value={data.route}
+                onChange={(val) => set("route", val)}
+                options={transportInfo.routes}
                 placeholder="Select route"
                 error={errors.route}
               />
             </Field>
 
-            <Field label="Stop" required error={errors.stop}>
+            <Field label="Bus No." required error={errors.busNo}>
               <SearchableSelect
-                value={transport.stop}
-                onChange={(val) => setT("stop", val)}
-                options={availableStops}
-                placeholder={
-                  transport.route ? "Select stop" : "Select route first"
-                }
-                error={errors.stop}
-                disabled={!transport.route}
+                value={data.busNo}
+                onChange={(val) => set("busNo", val)}
+                options={transportInfo.busNos}
+                placeholder="Select bus"
+                error={errors.busNo}
               />
             </Field>
 
-            <Field label="Bus No." required error={errors.busNo}>
+            <Field label="Stop" required error={errors.stop}>
               <SearchableSelect
-                value={transport.busNo}
-                onChange={(val) => setT("busNo", val)}
-                options={BUS_NOS}
-                placeholder="Select bus"
-                error={errors.busNo}
+                value={data.stop}
+                onChange={(val) => set("stop", val)}
+                options={availableStops}
+                placeholder={data.route ? "Select stop" : "Select route first"}
+                error={errors.stop}
+                disabled={!data.route}
               />
             </Field>
 
@@ -524,12 +730,12 @@ const RequireTransportFlow = ({ student, onClose }) => {
                     type="number"
                     min="0"
                     placeholder="0.00"
-                    value={transport.reductionAmount}
-                    onChange={(e) => setT("reductionAmount", e.target.value)}
+                    value={reductionAmount}
+                    onChange={(e) => setReductionAmount(e.target.value)}
                   />
                 </Field>
               </div>
-              {transport.reductionAmount !== "" && (
+              {reductionAmount !== "" && (
                 <div className="flex items-center justify-between px-4 py-3 bg-green-50 border border-green-100 rounded-lg">
                   <span className="text-sm font-medium text-gray-600">
                     Need to be Paid
