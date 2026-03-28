@@ -90,7 +90,7 @@ const validate = (data) => {
     errors.conceptionAmount = "Conception amount is required";
   if (data.refundMode === "refund" && !data.refundMethod)
     errors.refundMethod = "Please select cash or bank";
-  
+
   if (data.refundMethod === "bank") {
     if (!data.paymentFrom)
       errors.paymentFrom = "Payment from is required for bank refunds";
@@ -188,13 +188,17 @@ const HostelWithdrawalFlow = ({ student, onClose }) => {
         applyFromAcademicYear: data.academicYear,
         endDate: data.endDate,
         conceptionAmount: parseFloat(data.conceptionAmount) || 0,
-        refundAmount: balance,
-        refundMode: data.refundMode === "wallet" ? "wallet" : data.refundMethod, // cash OR bank
 
-        ...(data.refundMethod === "bank" && {
-          collegeAccount: data.paymentFrom,
-          studentBankName: data.StudentbankName,
-          studentAccount: data.studentAccountNumber,
+        ...(balance > 0 && {
+          refundAmount: balance,
+          refundMode:
+            data.refundMode === "wallet" ? "wallet" : data.refundMethod, // cash OR bank
+
+          ...(data.refundMethod === "bank" && {
+            collegeAccount: data.paymentFrom,
+            studentBankName: data.StudentbankName,
+            studentAccount: data.studentAccountNumber,
+          }),
         }),
       };
       const res = await axios.put(

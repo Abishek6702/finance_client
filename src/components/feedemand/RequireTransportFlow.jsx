@@ -407,14 +407,19 @@ const RequireTransportFlow = ({ student, onClose }) => {
           applyFromAcademicYear: data.academicYear,
           endDate: hostelClose.endDate,
           conceptionAmount: parseFloat(hostelClose.conceptionAmount),
-          refundAmount: balance,
-          refundMode:
-            hostelClose.refundMode === "wallet" ? "wallet" : hostelClose.refundMethod,
 
-          ...(hostelClose.refundMethod === "bank" && {
-            collegeAccount: hostelClose.paymentFrom,
-            studentBankName: hostelClose.StudentbankName,
-            studentAccount: hostelClose.studentAccountNumber,
+          ...(balance > 0 && {
+            refundAmount: balance,
+            refundMode:
+              hostelClose.refundMode === "wallet"
+                ? "wallet"
+                : hostelClose.refundMethod,
+
+            ...(hostelClose.refundMethod === "bank" && {
+              collegeAccount: hostelClose.paymentFrom,
+              studentBankName: hostelClose.StudentbankName,
+              studentAccount: hostelClose.studentAccountNumber,
+            }),
           }),
         },
         assign: {
@@ -424,7 +429,9 @@ const RequireTransportFlow = ({ student, onClose }) => {
           },
           applyFromAcademicYear: data.academicYear,
           effectiveDate: transport.effectiveDate,
-          reduction: parseFloat(reductionAmount),
+          ...(reductionAmount > 0 && {
+            reduction: parseFloat(reductionAmount) ,
+          }),
         },
       };
 
@@ -434,7 +441,7 @@ const RequireTransportFlow = ({ student, onClose }) => {
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            "x-idempotency-key":uuidv4(),
+            "x-idempotency-key": uuidv4(),
           },
         },
       );
@@ -549,111 +556,115 @@ const RequireTransportFlow = ({ student, onClose }) => {
           </div>
 
           {/* Refund mode */}
-          <div>
-            <p className="text-sm font-medium text-gray-700 mb-2">
-              Refund Mode <span className="text-red-400">*</span>
-            </p>
-            <div className="grid grid-cols-2 gap-3">
-              <RadioCard
-                label="Refund"
-                checked={hostelClose.refundMode === "refund"}
-                onChange={() => setH("refundMode", "refund")}
-              />
-              <RadioCard
-                label="Student Wallet"
-                checked={hostelClose.refundMode === "wallet"}
-                // change Student Wallet onChange to:
-                onChange={() => {
-                  setH("refundMode", "wallet");
-                  setH("refundMethod", "");
-                }}
-              />
-            </div>
-            {hostelErrors.refundMode && (
-              <div className="flex items-center gap-1 mt-1.5">
-                <AlertCircle className="w-3 h-3 text-red-400 shrink-0" />
-                <span className="text-xs text-red-400">
-                  {hostelErrors.refundMode}
-                </span>
+          {balance > 0 && (
+            <div>
+              <p className="text-sm font-medium text-gray-700 mb-2">
+                Refund Mode <span className="text-red-400">*</span>
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                <RadioCard
+                  label="Refund"
+                  checked={hostelClose.refundMode === "refund"}
+                  onChange={() => setH("refundMode", "refund")}
+                />
+                <RadioCard
+                  label="Student Wallet"
+                  checked={hostelClose.refundMode === "wallet"}
+                  // change Student Wallet onChange to:
+                  onChange={() => {
+                    setH("refundMode", "wallet");
+                    setH("refundMethod", "");
+                  }}
+                />
               </div>
-            )}
-
-            {hostelClose.refundMode === "refund" && (
-              <div className="mt-3">
-                <p className="text-sm font-medium text-gray-700 mb-2">
-                  Refund Via <span className="text-red-400">*</span>
-                </p>
-                <div className="grid grid-cols-2 gap-3">
-                  <RadioCard
-                    label="Cash"
-                    checked={hostelClose.refundMethod === "cash"}
-                    onChange={() => setH("refundMethod", "cash")}
-                  />
-                  <RadioCard
-                    label="Bank"
-                    checked={hostelClose.refundMethod === "bank"}
-                    onChange={() => setH("refundMethod", "bank")}
-                  />
+              {hostelErrors.refundMode && (
+                <div className="flex items-center gap-1 mt-1.5">
+                  <AlertCircle className="w-3 h-3 text-red-400 shrink-0" />
+                  <span className="text-xs text-red-400">
+                    {hostelErrors.refundMode}
+                  </span>
                 </div>
-                {hostelErrors.refundMethod && (
-                  <div className="flex items-center gap-1 mt-1.5">
-                    <AlertCircle className="w-3 h-3 text-red-400 shrink-0" />
-                    <span className="text-xs text-red-400">
-                      {hostelErrors.refundMethod}
-                    </span>
-                  </div>
-                )}
+              )}
 
-                {hostelClose.refundMethod === "bank" && (
-                  <div className="mt-3 grid grid-cols-2 gap-3">
-                    <Field
-                      label="Payment from"
-                      required
-                      error={hostelErrors.paymentFrom}
-                    >
-                      <input
-                        className={inputCls(hostelErrors.paymentFrom)}
-                        type="text"
-                        placeholder="Enter payment from"
-                        value={hostelClose.paymentFrom}
-                        onChange={(e) => setH("paymentFrom", e.target.value)}
-                      />
-                    </Field>
-                    <Field
-                      label="Student Account Number"
-                      required
-                      error={hostelErrors.studentAccountNumber}
-                    >
-                      <input
-                        className={inputCls(hostelErrors.studentAccountNumber)}
-                        type="text"
-                        placeholder="Enter student account number"
-                        value={hostelClose.studentAccountNumber}
-                        onChange={(e) =>
-                          setH("studentAccountNumber", e.target.value)
-                        }
-                      />
-                    </Field>
-                    <Field
-                      label="Student Bank name"
-                      required
-                      error={hostelErrors.StudentbankName}
-                    >
-                      <input
-                        className={inputCls(hostelErrors.StudentbankName)}
-                        type="text"
-                        placeholder="Enter student bank name"
-                        value={hostelClose.StudentbankName}
-                        onChange={(e) =>
-                          setH("StudentbankName", e.target.value)
-                        }
-                      />
-                    </Field>
+              {hostelClose.refundMode === "refund" && (
+                <div className="mt-3">
+                  <p className="text-sm font-medium text-gray-700 mb-2">
+                    Refund Via <span className="text-red-400">*</span>
+                  </p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <RadioCard
+                      label="Cash"
+                      checked={hostelClose.refundMethod === "cash"}
+                      onChange={() => setH("refundMethod", "cash")}
+                    />
+                    <RadioCard
+                      label="Bank"
+                      checked={hostelClose.refundMethod === "bank"}
+                      onChange={() => setH("refundMethod", "bank")}
+                    />
                   </div>
-                )}
-              </div>
-            )}
-          </div>
+                  {hostelErrors.refundMethod && (
+                    <div className="flex items-center gap-1 mt-1.5">
+                      <AlertCircle className="w-3 h-3 text-red-400 shrink-0" />
+                      <span className="text-xs text-red-400">
+                        {hostelErrors.refundMethod}
+                      </span>
+                    </div>
+                  )}
+
+                  {hostelClose.refundMethod === "bank" && (
+                    <div className="mt-3 grid grid-cols-2 gap-3">
+                      <Field
+                        label="Payment from"
+                        required
+                        error={hostelErrors.paymentFrom}
+                      >
+                        <input
+                          className={inputCls(hostelErrors.paymentFrom)}
+                          type="text"
+                          placeholder="Enter payment from"
+                          value={hostelClose.paymentFrom}
+                          onChange={(e) => setH("paymentFrom", e.target.value)}
+                        />
+                      </Field>
+                      <Field
+                        label="Student Account Number"
+                        required
+                        error={hostelErrors.studentAccountNumber}
+                      >
+                        <input
+                          className={inputCls(
+                            hostelErrors.studentAccountNumber,
+                          )}
+                          type="text"
+                          placeholder="Enter student account number"
+                          value={hostelClose.studentAccountNumber}
+                          onChange={(e) =>
+                            setH("studentAccountNumber", e.target.value)
+                          }
+                        />
+                      </Field>
+                      <Field
+                        label="Student Bank name"
+                        required
+                        error={hostelErrors.StudentbankName}
+                      >
+                        <input
+                          className={inputCls(hostelErrors.StudentbankName)}
+                          type="text"
+                          placeholder="Enter student bank name"
+                          value={hostelClose.StudentbankName}
+                          onChange={(e) =>
+                            setH("StudentbankName", e.target.value)
+                          }
+                        />
+                      </Field>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
 
           <button
             onClick={handleContinue}

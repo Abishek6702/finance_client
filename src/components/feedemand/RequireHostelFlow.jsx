@@ -365,6 +365,8 @@ const RequireHostelFlow = ({ student, onClose }) => {
           </div>
 
           {/* Refund mode */}
+      {balance > 0 && (
+
           <div>
             <p className="text-sm font-medium text-gray-700 mb-2">
               Refund Mode <span className="text-red-400">*</span>
@@ -421,6 +423,7 @@ const RequireHostelFlow = ({ student, onClose }) => {
               </div>
             )}
           </div>
+      )}
 
           <button
             onClick={handleContinue}

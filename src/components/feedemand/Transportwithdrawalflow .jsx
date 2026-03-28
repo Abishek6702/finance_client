@@ -207,6 +207,8 @@ const TransportWithdrawalFlow = ({ student, onClose }) => {
         applyFromAcademicYear: data.academicYear,
         endDate: data.endDate,
         conceptionAmount: parseFloat(data.conceptionAmount) || 0,
+
+        ...(balance > 0 && {
         refundAmount: balance,
       
         refundMode:
@@ -218,6 +220,7 @@ const TransportWithdrawalFlow = ({ student, onClose }) => {
           collegeAccount: data.paymentFrom,
           studentBankName: data.StudentbankName,
           studentAccount: data.studentAccountNumber,
+        }),
         }),
       };
   
