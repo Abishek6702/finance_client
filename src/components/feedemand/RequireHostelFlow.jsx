@@ -1,6 +1,20 @@
 import React, { useState, useRef, useEffect } from "react";
 import { CheckCircle2, AlertCircle, ChevronDown, Search } from "lucide-react";
+import axios from "axios";
+import { v4 as uuidv4 } from "uuid";
+import { toast } from "react-hot-toast";
 
+const getAcademicYears = () => {
+  const now = new Date();
+  const year = now.getFullYear();
+
+  const currentStartYear = now.getMonth() >= 5 ? year : year - 1;
+
+  const current = `${currentStartYear}-${currentStartYear + 1}`;
+  const next = `${currentStartYear + 1}-${currentStartYear + 2}`;
+
+  return { current, next, list: [current, next] };
+};
 // ─── Utilities ────────────────────────────────────────────────────────────────
 const fmt = (val) =>
   isNaN(parseFloat(val))
@@ -82,6 +96,8 @@ const RadioCard = ({ label, description, checked, onChange }) => (
 // ─── Constants ────────────────────────────────────────────────────────────────
 const BLOCKS = ["Block A", "Block B", "Block C", "Block D"];
 const SHARING_TYPES = ["Single", "Double", "Triple", "4-Sharing"];
+
+const { current, list: academicYear } = getAcademicYears();
 
 // Replace with API fetch or pass as prop when ready
 const ROOM_NOS = [
@@ -204,12 +220,24 @@ const SearchableRoomSelect = ({ value, onChange, error }) => {
 };
 
 // ─── Validation ───────────────────────────────────────────────────────────────
-const validateTransport = (data) => {
+const validateTransport = (data, balance) => {
   const errors = {};
   if (!data.endDate) errors.endDate = "End date is required";
   if (!data.conceptionAmount)
     errors.conceptionAmount = "Conception amount is required";
-  if (!data.refundMode) errors.refundMode = "Please select a refund mode";
+  if (balance > 0 && !data.refundMode)
+    errors.refundMode = "Please select a refund mode";
+
+  if (data.refundMode === "refund" && !data.refundMethod)
+    errors.refundMethod = "Please select cash or bank";
+
+  if (data.refundMethod == "bank") {
+    if (!data.paymentFrom) errors.paymentFrom = "Payment from is required";
+    if (!data.studentAccountNumber)
+      errors.studentAccountNumber = "Student account number is required";
+    if (!data.StudentbankName)
+      errors.StudentbankName = "Student bank name is required";
+  }
   return errors;
 };
 
@@ -217,7 +245,6 @@ const validateHostel = (data) => {
   const errors = {};
   if (!data.block) errors.block = "Block is required";
   if (!data.sharing) errors.sharing = "Sharing type is required";
-  if (!data.roomNo) errors.roomNo = "Room number is required";
   if (!data.roomType) errors.roomType = "Please select bathroom type";
   if (!data.effectiveDate) errors.effectiveDate = "Effective date is required";
   if (data.refundMode === "refund" && !data.refundMethod)
@@ -238,17 +265,29 @@ const HOSTEL_FEES = {
 // ─── RequireHostelFlow ────────────────────────────────────────────────────────
 const RequireHostelFlow = ({ student, onClose }) => {
   const [step, setStep] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [transportData, setTransportData] = useState(null);
+  const [roomData, setRoomData] = useState([]);
+  const [roomInfo, setRoomInfo] = useState({
+    blocks: [],
+    sharing: [],
+    isAttached: [],
+  });
 
   // These come from the student/backend — fallback to static values for now
   // TODO: replace with actual API field names once backend is ready
-  const totalAmount = student?.transportTotalAmount ?? 18000;
-  const paidAmount = student?.transportPaidAmount ?? 12000;
+  const totalAmount = transportData?.fee;
+  const paidAmount = transportData?.paid;
 
   const [transport, setTransport] = useState({
+    academicYear: current,
     endDate: "",
     conceptionAmount: "",
     refundMode: "",
     refundMethod: "",
+    paymentFrom: "",
+    studentAccountNumber: "",
+    StudentbankName: "",
   });
 
   const [hostel, setHostel] = useState({
@@ -258,6 +297,7 @@ const RequireHostelFlow = ({ student, onClose }) => {
     floor: "",
     roomType: "",
     effectiveDate: "",
+    reductionAmount: "",
   });
 
   const [transportErrors, setTransportErrors] = useState({});
@@ -278,41 +318,180 @@ const RequireHostelFlow = ({ student, onClose }) => {
     paidAmount - (parseFloat(transport.conceptionAmount) || 0),
   );
 
-  const feeKey =
-    hostel.sharing && hostel.roomType
-      ? `${hostel.sharing}|${hostel.roomType}`
-      : null;
-  const hostelTotal = feeKey ? (HOSTEL_FEES[feeKey] ?? null) : null;
+  const hostelTotal = (() => {
+    if (!hostel.block || !hostel.sharing || !hostel.roomType) return null;
+
+    const match = roomData.find(
+      (r) =>
+        r.block === hostel.block &&
+        r.sharing === Number(hostel.sharing) &&
+        r.isAttached === (hostel.roomType === "attached"),
+    );
+
+    return match?.fee ?? null;
+  })();
   const reductionAmt = parseFloat(hostel.reductionAmount) || 0;
   const payable =
     hostelTotal !== null ? Math.max(0, hostelTotal - reductionAmt) : null;
 
+  const fetchtransport = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await axios.get(
+        `${import.meta.env.VITE_API_BASE_URL}/api/feedemands/${student.rollNo}?academicYear=${transport.academicYear}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      const json = res.data;
+      console.log("Transport data fetched:", json);
+      if (json.success) {
+        setTransportData(json.data.studentType.transportDetails);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    fetchtransport();
+  }, []);
+
+  const fetchRoom = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await axios.get(
+        `${import.meta.env.VITE_API_BASE_URL}/api/hostel`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      const json = res.data;
+      // console.log("Hostel data fetched:", json);
+      if (json.success) {
+        setRoomData(json.data.detailed);
+        setRoomInfo(json.data.info);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    fetchRoom();
+  }, []);
+
   const handleContinue = () => {
-    const errors = validateTransport(transport);
+    const errors = validateTransport(transport, balance);
     if (Object.keys(errors).length > 0) {
       setTransportErrors(errors);
       return;
     }
     setStep(1);
   };
+  const roomId = roomData.find(
+    (r) =>
+      r.block === hostel.block &&
+      r.sharing === Number(hostel.sharing) &&
+      r.isAttached === (hostel.roomType === "attached")
+  )?.id;
+  const handleSubmit = async () => {
+    setLoading(true);
 
-  const handleSubmit = () => {
     const errors = validateHostel(hostel);
     if (Object.keys(errors).length > 0) {
       setHostelErrors(errors);
+      setLoading(false);
+
       return;
     }
-    // TODO: replace with your API call
-    console.log("Require Hostel submit", {
-      student,
-      transport: { totalAmount, paidAmount, ...transport },
-      hostel,
-    });
-    onClose();
+    try {
+      const token = localStorage.getItem("token");
+
+      const payload = {
+        cancel: {
+          facilityType: "transport",
+          applyFromAcademicYear: transport.academicYear,
+          endDate: transport.endDate,
+          conceptionAmount: parseFloat(transport.conceptionAmount),
+
+          ...(balance > 0 && {
+            refundAmount: balance,
+            refundMode:
+              transport.refundMode === "wallet" ? "wallet" : transport.refundMethod,
+
+            ...(transport.refundMethod === "bank" && {
+              collegeAccount: transport.paymentFrom,
+              studentBankName: transport.StudentbankName,
+              studentAccount: transport.studentAccountNumber,
+            }),
+          }),
+        },
+        assign: {
+          hostel: {
+            isApplicable: true,
+            id: roomId,
+          },
+          applyFromAcademicYear: transport.academicYear,
+          effectiveDate: hostel.effectiveDate,
+          ...(hostel.reductionAmount > 0 && {
+            reduction: parseFloat(hostel.reductionAmount),
+          }),
+        },
+      };
+
+      const res = await axios.put(
+        `${import.meta.env.VITE_API_BASE_URL}/api/studentFacility/cancel-assign/${student.rollNo}`, // 👈 adjust endpoint if needed
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "x-idempotency-key": uuidv4(),
+          },
+        },
+      );
+
+      if (res.data.success) {
+        toast.success("Room updated successfully!");
+        onClose();
+      }
+    } catch (err) {
+      console.error("POST ERROR:", err);
+      setLoading(false);
+    }finally{
+      setLoading(false);
+    }
   };
 
   return (
     <div className="flex flex-col gap-6 mt-4">
+      <Field
+        label="Academic Year"
+        required
+        error={transportErrors.academicYear}
+      >
+        <select
+          className={inputCls(transportErrors.academicYear) + " cursor-pointer"}
+          value={transport.academicYear}
+          onChange={(e) => setT("academicYear", e.target.value)}
+        >
+          <option value="">Select Academic year</option>
+          {academicYear.map((b) => (
+            <option key={b} value={b}>
+              {b}
+            </option>
+          ))}
+        </select>
+      </Field>
+
       {/* ─── Step 0: Transport Details ─── */}
       {step === 0 && (
         <>
@@ -365,65 +544,109 @@ const RequireHostelFlow = ({ student, onClose }) => {
           </div>
 
           {/* Refund mode */}
-      {balance > 0 && (
-
-          <div>
-            <p className="text-sm font-medium text-gray-700 mb-2">
-              Refund Mode <span className="text-red-400">*</span>
-            </p>
-            <div className="grid grid-cols-2 gap-3">
-              <RadioCard
-                label="Refund"
-                checked={transport.refundMode === "refund"}
-                onChange={() => setT("refundMode", "refund")}
-              />
-              <RadioCard
-                label="Student Wallet"
-                checked={transport.refundMode === "wallet"}
-                // change Student Wallet onChange to:
-                onChange={() => {
-                  setT("refundMode", "wallet");
-                  setT("refundMethod", "");
-                }}
-              />
-            </div>
-            {transportErrors.refundMode && (
-              <div className="flex items-center gap-1 mt-1.5">
-                <AlertCircle className="w-3 h-3 text-red-400 shrink-0" />
-                <span className="text-xs text-red-400">
-                  {transportErrors.refundMode}
-                </span>
+          {balance > 0 && (
+            <div>
+              <p className="text-sm font-medium text-gray-700 mb-2">
+                Refund Mode <span className="text-red-400">*</span>
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                <RadioCard
+                  label="Refund"
+                  checked={transport.refundMode === "refund"}
+                  onChange={() => setT("refundMode", "refund")}
+                />
+                <RadioCard
+                  label="Student Wallet"
+                  checked={transport.refundMode === "wallet"}
+                  // change Student Wallet onChange to:
+                  onChange={() => {
+                    setT("refundMode", "wallet");
+                    setT("refundMethod", "");
+                  }}
+                />
               </div>
-            )}
-            {transport.refundMode === "refund" && (
-              <div className="mt-3">
-                <p className="text-sm font-medium text-gray-700 mb-2">
-                  Refund Via <span className="text-red-400">*</span>
-                </p>
-                <div className="grid grid-cols-2 gap-3">
-                  <RadioCard
-                    label="Cash"
-                    checked={transport.refundMethod === "cash"}
-                    onChange={() => setT("refundMethod", "cash")}
-                  />
-                  <RadioCard
-                    label="Bank"
-                    checked={transport.refundMethod === "bank"}
-                    onChange={() => setT("refundMethod", "bank")}
-                  />
+              {transportErrors.refundMode && (
+                <div className="flex items-center gap-1 mt-1.5">
+                  <AlertCircle className="w-3 h-3 text-red-400 shrink-0" />
+                  <span className="text-xs text-red-400">
+                    {transportErrors.refundMode}
+                  </span>
                 </div>
-                {transportErrors.refundMethod && (
-                  <div className="flex items-center gap-1 mt-1.5">
-                    <AlertCircle className="w-3 h-3 text-red-400 shrink-0" />
-                    <span className="text-xs text-red-400">
-                      {transportErrors.refundMethod}
-                    </span>
+              )}
+              {transport.refundMode === "refund" && (
+                <div className="mt-3">
+                  <p className="text-sm font-medium text-gray-700 mb-2">
+                    Refund Via <span className="text-red-400">*</span>
+                  </p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <RadioCard
+                      label="Cash"
+                      checked={transport.refundMethod === "cash"}
+                      onChange={() => setT("refundMethod", "cash")}
+                    />
+                    <RadioCard
+                      label="Bank"
+                      checked={transport.refundMethod === "bank"}
+                      onChange={() => setT("refundMethod", "bank")}
+                    />
                   </div>
-                )}
-              </div>
-            )}
-          </div>
-      )}
+                  {transportErrors.refundMethod && (
+                    <div className="flex items-center gap-1 mt-1.5">
+                      <AlertCircle className="w-3 h-3 text-red-400 shrink-0" />
+                      <span className="text-xs text-red-400">
+                        {transportErrors.refundMethod}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
+              {transport.refundMethod === "bank" && (
+                <div className="mt-3 grid grid-cols-2 gap-3">
+                  <Field
+                    label="Payment from"
+                    required
+                    error={transportErrors.paymentFrom}
+                  >
+                    <input
+                      className={inputCls(transportErrors.paymentFrom)}
+                      type="text"
+                      placeholder="Enter payment from"
+                      value={transport.paymentFrom}
+                      onChange={(e) => setT("paymentFrom", e.target.value)}
+                    />
+                  </Field>
+                  <Field
+                    label="Student Account Number"
+                    required
+                    error={transportErrors.studentAccountNumber}
+                  >
+                    <input
+                      className={inputCls(transportErrors.studentAccountNumber)}
+                      type="text"
+                      placeholder="Enter student account number"
+                      value={transport.studentAccountNumber}
+                      onChange={(e) =>
+                        setT("studentAccountNumber", e.target.value)
+                      }
+                    />
+                  </Field>
+                  <Field
+                    label="Student Bank name"
+                    required
+                    error={transportErrors.StudentbankName}
+                  >
+                    <input
+                      className={inputCls(transportErrors.StudentbankName)}
+                      type="text"
+                      placeholder="Enter student bank name"
+                      value={transport.StudentbankName}
+                      onChange={(e) => setT("StudentbankName", e.target.value)}
+                    />
+                  </Field>
+                </div>
+              )}
+            </div>
+          )}
 
           <button
             onClick={handleContinue}
@@ -445,7 +668,7 @@ const RequireHostelFlow = ({ student, onClose }) => {
                 onChange={(e) => setH("block", e.target.value)}
               >
                 <option value="">Select block</option>
-                {BLOCKS.map((b) => (
+                {roomInfo.blocks.map((b) => (
                   <option key={b} value={b}>
                     {b}
                   </option>
@@ -460,7 +683,7 @@ const RequireHostelFlow = ({ student, onClose }) => {
                 onChange={(e) => setH("sharing", e.target.value)}
               >
                 <option value="">Select sharing</option>
-                {SHARING_TYPES.map((s) => (
+                {roomInfo.sharing.map((s) => (
                   <option key={s} value={s}>
                     {s}
                   </option>
@@ -468,23 +691,6 @@ const RequireHostelFlow = ({ student, onClose }) => {
               </select>
             </Field>
 
-            <Field label="Room No." required error={hostelErrors.roomNo}>
-              <SearchableRoomSelect
-                value={hostel.roomNo}
-                onChange={(val) => setH("roomNo", val)}
-                error={hostelErrors.roomNo}
-              />
-            </Field>
-
-            <Field label="Floor">
-              <input
-                className={inputCls(false)}
-                type="text"
-                placeholder="e.g. 2nd Floor"
-                value={hostel.floor}
-                onChange={(e) => setH("floor", e.target.value)}
-              />
-            </Field>
             <Field
               label="Effective Date"
               required

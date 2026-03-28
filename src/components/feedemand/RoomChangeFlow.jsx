@@ -207,53 +207,7 @@ const TableRow = ({ label, value }) => (
   </div>
 );
 
-// ─── Constants ───────────────────────────────────────────────────────────────
-const BLOCKS = ["Block A", "Block B", "Block C", "Block D"];
-const SHARING_TYPES = ["Single", "Double", "Triple", "4-Sharing"];
-const ROOM_NOS = [
-  "A-101",
-  "A-102",
-  "A-103",
-  "A-104",
-  "A-201",
-  "A-202",
-  "A-203",
-  "A-204",
-  "B-101",
-  "B-102",
-  "B-103",
-  "B-104",
-  "B-201",
-  "B-202",
-  "B-203",
-  "B-204",
-  "C-101",
-  "C-102",
-  "C-103",
-  "C-104",
-  "C-201",
-  "C-202",
-  "C-203",
-  "C-204",
-  "D-101",
-  "D-102",
-  "D-103",
-  "D-104",
-  "D-201",
-  "D-202",
-  "D-203",
-  "D-204",
-];
-const HOSTEL_FEES = {
-  "Single|attached": 25000,
-  "Single|not_attached": 20000,
-  "Double|attached": 18000,
-  "Double|not_attached": 15000,
-  "Triple|attached": 14000,
-  "Triple|not_attached": 12000,
-  "4-Sharing|attached": 12000,
-  "4-Sharing|not_attached": 10000,
-};
+
 
 const { current, list: academicYear } = getAcademicYears();
 
