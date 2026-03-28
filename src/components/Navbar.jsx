@@ -31,6 +31,11 @@ import recallfill from "../assets/icons/recallw.svg";
 import report from "../assets/icons/reportb.svg";
 import reportfill from "../assets/icons/reportw.svg";
 
+import refund from "../assets/refundb.svg";
+import refundfill from "../assets/refundw.svg";
+
+
+
 
 import { useState } from "react";
 
@@ -47,7 +52,9 @@ const Navbar = () => {
     { id: "fees_management", label: "Fees Details", icon: fees, iconFill :feesfill},
     { id: "fee_demand", label: "Manage Fee Demands", icon: demand, iconFill :demandfill},
     { id: "reports", label: "Reports", icon: report, iconFill :reportfill},
-    {id:"recall_receipts", label:"Recall Receipts", icon: recall, iconFill :recallfill}
+    {id:"recall_receipts", label:"Recall Receipts", icon: recall, iconFill :recallfill},
+    {id:"refund", label:"Refund", icon: refund, iconFill :refundfill}
+
   ];
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -67,7 +74,7 @@ const Navbar = () => {
         </div>
 
         {/* 🟦 Navigation */}
-        <div className="lg:flex gap-2 hidden ">
+        <div className="lg:flex  hidden ">
           {menuItems.map(({ id, label, icon, iconFill }) => {
             const isActive = activeTab === id;
 
@@ -75,10 +82,10 @@ const Navbar = () => {
               <button
                 key={id}
                 onClick={() => navigate(`/admin/${id}`)}
-                className={`flex items-center gap-2 px-5 py-2 rounded-full font-medium transition cursor-pointer
+                className={`flex items-center gap-2 px-5 py-2 rounded-full font-sm transition cursor-pointer
                   ${
                     isActive
-                      ? "bg-white text-[#25343F]"
+                      ? "bg-white text-[#25343F] font-semibold"
                       : "text-white hover:bg-white/10"
                   }`}
               >

@@ -12,6 +12,7 @@ import Reports from '../pages/admin/Reports.jsx';
 import ReportsStudentDetails from '../pages/admin/ReportsStudentDetails.jsx';
 import Recall_Receipts from "./admin/Recall_Receipts.jsx";
 import StudentFeeDetails from "./admin/StudentFeeDetails.jsx";
+import Refund from "./admin/Refund.jsx";
 
 const AdminDashboard = () => {
   return (
@@ -35,6 +36,8 @@ const AdminDashboard = () => {
             <Route path="reports" element={<Reports/>}/>
             <Route path="/reports/:id" element={<ReportsStudentDetails/>}/>
             <Route path="recall_receipts" element={<Recall_Receipts/>}/>
+            <Route path="refund" element={<Refund/>}/>
+
 
             <Route path="*" element={<Navigate to="dashboard" replace />} />
           </Routes>
