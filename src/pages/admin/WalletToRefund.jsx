@@ -91,10 +91,10 @@ const WalletToRefund = () => {
     return () => clearTimeout(delay);
   }, [searchTerm]);
 
-  return (
-    <main className="relative">
+  return ( 
+    <main className="relative ">
       {/* 🔹 Header */}
-      <div className="mb-4 flex justify-end items-end absolute -top-17 right-0 w-400">
+      <div className="mb-4 flex  justify-end items-end absolute -top-16 right-0 w-[400px]">
         <FeeSearchFilterRefund
           filters={filters}
           setFilters={setFilters}

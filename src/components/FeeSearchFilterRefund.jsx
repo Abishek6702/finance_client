@@ -52,7 +52,7 @@ const FeeSearchFilterRefund = ({
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-4 w-[30%]">
+    <div className="flex flex-wrap items-center gap-4 w-[100%]">
       
       {/* 🔍 Search Input */}
       <div className="relative w-full bg-white">
