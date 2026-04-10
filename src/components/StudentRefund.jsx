@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import RefundFilter from './RefundFilter'
 
-const BASE_URL = 'https://quantum-pulse-finance-backend-api.onrender.com/api'
+const BASE_URL = import.meta.env.VITE_API_BASE_URL
 
 function getRefundMode(reason) {
   if (!reason) return 'Unknown'
@@ -137,7 +137,7 @@ export default function StudentRefund() {
     try {
         const token = localStorage.getItem("token") // 👈 get token
 
-        const res = await fetch(`${BASE_URL}/refund/report?page=${page}&limit=20`, {
+        const res = await fetch(`${BASE_URL}/api/refund/report?page=${page}&limit=20`, {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
