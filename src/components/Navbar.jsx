@@ -53,7 +53,7 @@ const Navbar = () => {
     { id: "fee_demand", label: "Manage Fee Demands", icon: demand, iconFill :demandfill},
     { id: "reports", label: "Reports", icon: report, iconFill :reportfill},
     {id:"recall_receipts", label:"Recall Receipts", icon: recall, iconFill :recallfill},
-    {id:"refund", label:"Refund", icon: refund, iconFill :refundfill}
+    // {id:"refund", label:"Refund", icon: refund, iconFill :refundfill}
 
   ];
   const handleLogout = () => {

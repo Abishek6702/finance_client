@@ -3,6 +3,8 @@ import RefundFilter from './RefundFilter'
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL
 
+const YEAR_MAP = { 1: '1st Year', 2: '2nd Year', 3: '3rd Year', 4: '4th Year' }
+
 function getRefundMode(reason) {
   if (!reason) return 'Unknown'
   const lower = reason.toLowerCase()
@@ -10,17 +12,6 @@ function getRefundMode(reason) {
   if (lower.includes('cash')) return 'Cash'
   if (lower.includes('wallet')) return 'Wallet'
   return reason
-}
-
-function getYearLabel(rollNo) {
-  if (!rollNo) return '-'
-  const prefix = rollNo.slice(0, 2)
-  const yr = parseInt(prefix, 10)
-  if (isNaN(yr)) return '-'
-  const currentYear = 26
-  const diff = currentYear - yr
-  const yearMap = { 1: '1st Year', 2: '2nd Year', 3: '3rd Year', 4: '4th Year' }
-  return yearMap[diff] || `${diff}th Year`
 }
 
 function getDeptFromRollNo(rollNo) {
@@ -35,8 +26,37 @@ function formatDate(dateStr) {
   return d.toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' })
 }
 
+function Avatar({ src, name, size = 36 }) {
+  const [imgFailed, setImgFailed] = useState(false)
+  if (src && !imgFailed) {
+    return (
+      <img
+        src={src}
+        alt={name}
+        onError={() => setImgFailed(true)}
+        style={{
+          width: size, height: size, borderRadius: '50%',
+          objectFit: 'cover', flexShrink: 0, border: '1px solid #e5e7eb',
+        }}
+      />
+    )
+  }
+  return (
+    <div style={{
+      width: size, height: size, borderRadius: '50%',
+      background: '#e0e7ff', display: 'flex', alignItems: 'center',
+      justifyContent: 'center', fontSize: size === 44 ? '16px' : '13px',
+      fontWeight: '600', color: '#4f46e5', flexShrink: 0,
+    }}>
+      {name?.[0]?.toUpperCase() || 'S'}
+    </div>
+  )
+}
+
 function RefundDetailModal({ refund, onClose }) {
   const mode = getRefundMode(refund.reason)
+  const year = YEAR_MAP[refund.yearOfStudying] || `${refund.yearOfStudying}th Year`
+
   return (
     <div
       onClick={onClose}
@@ -68,19 +88,13 @@ function RefundDetailModal({ refund, onClose }) {
         </h3>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
-          <div style={{
-            width: '44px', height: '44px', borderRadius: '50%',
-            background: '#e0e7ff', display: 'flex', alignItems: 'center',
-            justifyContent: 'center', fontSize: '16px', fontWeight: '600', color: '#4f46e5',
-          }}>
-            {refund.rollNo?.[0] || 'S'}
-          </div>
+          <Avatar src={refund.profileUrl} name={refund.name} size={44} />
           <div>
             <p style={{ margin: 0, fontWeight: '600', fontSize: '14px', color: '#111827' }}>
-              {refund.rollNo}
+              {refund.name || refund.rollNo}
             </p>
             <p style={{ margin: 0, fontSize: '12px', color: '#6b7280' }}>
-              {getYearLabel(refund.rollNo)} / {getDeptFromRollNo(refund.rollNo)}
+              {year} / {refund.department}
             </p>
           </div>
         </div>
@@ -106,8 +120,7 @@ function RefundDetailModal({ refund, onClose }) {
               <span style={{ fontSize: '13px', color: '#6b7280', flexShrink: 0 }}>{label}</span>
               <span style={{
                 fontSize: '13px', color: '#111827', fontWeight: '500',
-                textAlign: 'right', marginLeft: '12px',
-                wordBreak: 'break-all',
+                textAlign: 'right', marginLeft: '12px', wordBreak: 'break-all',
               }}>{value || '-'}</span>
             </div>
           ))}
@@ -133,78 +146,68 @@ export default function StudentRefund() {
   const fetchRefunds = async () => {
     setLoading(true)
     setError(null)
-
     try {
-        const token = localStorage.getItem("token") // 👈 get token
-
-        const res = await fetch(`${BASE_URL}/api/refund/report?page=${page}&limit=20`, {
-        method: "GET",
+      const token = localStorage.getItem('token')
+      const res = await fetch(`${BASE_URL}/api/refund`, {
+        method: 'GET',
         headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}` // 👈 IMPORTANT
-        }
-        })
-
-        const json = await res.json()
-        console.log("API RESPONSE:", json)
-
-        if (json?.data?.refunds) {
-        setRefunds(json.data.refunds)
-        setPagination(json.data.pagination || { total: 0, totalPages: 1 })
-        } else {
-        setError(json?.message || 'Failed to fetch refunds.')
-        }
-
-    } catch (err) {
-        console.error(err)
-        setError('Network error. Please try again.')
-    } finally {
-        setLoading(false)
-    }
-    }
-
-    const handleClearFilters = () => {
-      setFilters({
-        search: '',
-        year: '',
-        department: '',
-        mode: '',
-        date: ''
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
       })
+      const json = await res.json()
+      console.log('API RESPONSE:', json)
+
+      if (json?.data?.rows) {
+        const normalized = json.data.rows.map(r => ({
+          _id: r.receiptNumber,
+          name: r.name,
+          profileUrl: r.profileUrl,
+          rollNo: r.rollNumber,
+          refundReceiptNo: r.receiptNumber,
+          feeHead: r.feesHead,
+          refundAmount: r.amount,
+          createdAt: r.raisedOn,
+          updatedAt: r.approvedOn,
+          reason: r.paymentMode,
+          studentBankName: r.bankName,
+          studentAccount: r.accountNo,
+          semesterNumber: r.semPeriod,
+          yearOfStudying: r.yearOfStudying,
+          department: r.department,
+        }))
+        setRefunds(normalized)
+        setPagination(json.data.pagination || { total: 0, totalPages: 1 })
+      } else {
+        setError(json?.message || 'Failed to fetch refunds.')
+      }
+    } catch (err) {
+      console.error(err)
+      setError('Network error. Please try again.')
+    } finally {
+      setLoading(false)
     }
+  }
+
+  const handleClearFilters = () => {
+    setFilters({ search: '', year: '', department: '', mode: '', date: '' })
+  }
 
   const filteredRefunds = useMemo(() => {
     return refunds.filter((r) => {
       const search = filters.search.toLowerCase()
-
-      const matchSearch =
-        !search || r.rollNo?.toLowerCase().includes(search)
-
-      const matchYear =
-        !filters.year || r.academicYear === filters.year
-
-      const dept = getDeptFromRollNo(r.rollNo)
-      const matchDept =
-        !filters.department || dept === filters.department
-
+      const matchSearch = !search || r.rollNo?.toLowerCase().includes(search)
+      const matchYear = !filters.year || r.academicYear === filters.year
+      const matchDept = !filters.department || r.department === filters.department
       const mode = getRefundMode(r.reason).toLowerCase()
       const matchMode =
         !filters.mode ||
         (filters.mode === 'cash' && mode === 'cash') ||
         (filters.mode === 'bank' && mode === 'online payment') ||
         (filters.mode === 'wallet' && mode === 'wallet')
-
       const itemDate = new Date(r.createdAt).toISOString().slice(0, 10)
-      const matchDate =
-        !filters.date || itemDate === filters.date
-
-      return (
-        matchSearch &&
-        matchYear &&
-        matchDept &&
-        matchMode &&
-        matchDate
-      )
+      const matchDate = !filters.date || itemDate === filters.date
+      return matchSearch && matchYear && matchDept && matchMode && matchDate
     })
   }, [refunds, filters])
 
@@ -221,7 +224,7 @@ export default function StudentRefund() {
 
   return (
     <div style={{ fontFamily: 'Inter, sans-serif' }}>
-      <RefundFilter filters={filters} onFilterChange={setFilters} onClearFilters={handleClearFilters}/>
+      <RefundFilter filters={filters} onFilterChange={setFilters} onClearFilters={handleClearFilters} />
 
       <div style={{
         border: '1px solid #e5e7eb', borderRadius: '12px',
@@ -263,8 +266,7 @@ export default function StudentRefund() {
                 </tr>
               )}
               {!loading && !error && filteredRefunds.map((refund) => {
-                const year = getYearLabel(refund.rollNo)
-                const dept = getDeptFromRollNo(refund.rollNo)
+                const year = YEAR_MAP[refund.yearOfStudying] || `${refund.yearOfStudying}th Year`
                 const mode = getRefundMode(refund.reason)
                 const feesHead = refund.feeHead?.charAt(0).toUpperCase() + refund.feeHead?.slice(1)
 
@@ -275,17 +277,10 @@ export default function StudentRefund() {
                   >
                     <td style={tdStyle}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <div style={{
-                          width: '36px', height: '36px', borderRadius: '50%',
-                          background: '#e0e7ff', display: 'flex', alignItems: 'center',
-                          justifyContent: 'center', fontSize: '13px', fontWeight: '600',
-                          color: '#4f46e5', flexShrink: 0,
-                        }}>
-                          {refund.rollNo?.[2] || 'S'}
-                        </div>
+                        <Avatar src={refund.profileUrl} name={refund.name} size={36} />
                         <div>
                           <p style={{ margin: 0, fontWeight: '500', fontSize: '13px', color: '#111827' }}>
-                            {refund.rollNo}
+                            {refund.name || refund.rollNo}
                           </p>
                           <p style={{ margin: 0, fontSize: '11px', color: '#6b7280' }}>{feesHead}</p>
                         </div>
@@ -302,7 +297,7 @@ export default function StudentRefund() {
                         padding: '3px 8px', borderRadius: '20px', fontWeight: '500',
                         whiteSpace: 'nowrap',
                       }}>
-                        {year} / {dept}
+                        {year} / {refund.department}
                       </span>
                     </td>
 
