@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Users,
   BookOpen,
@@ -10,43 +10,9 @@ import userr from "../../assets/userr.svg";
 import hostel from "../../assets/hostell.svg";
 import bus from "../../assets/buss.svg";
 import home from "../../assets/home.svg";
+import axios from "axios";
 
-
-const stats = [
-  {
-    icon: userr,
-    bg: "bg-[#FFE2E5]",
-    iconbg: "bg-[#FA5A7D]",
-    value: "1,240",
-    label: "Total Students",
-  },
-  {
-    icon: hostel,
-    bg: "bg-[#FFF4DE]",
-    iconbg: "bg-[#FF947A]",
-
-    value: "38",
-    label: "Total Hostelers",
-  },
-  {
-    icon:home ,
-    bg: "bg-[#DCFCE7]",
-    iconbg: "bg-[#3CD856]",
-
-    value: "94",
-    label: "Total Dayschoolers",
-  },
-  {
-    icon: bus,
-    bg: "bg-[#F3E8FF]",
-    iconbg: "bg-[#BF83FF]",
-
-    value: "12",
-    label: "Total Transporters",
-  },
-];
-
-const years = ["2024–2025", "2023–2024", "2022–2023", "2021–2022"];
+const years = ["2024–2025", "2023–2024", "2022–2023", "2021–2022", "2025-2026"];
 const getCurrentAcademicYear = () => {
   const now = new Date();
   const year = now.getFullYear();
@@ -62,7 +28,71 @@ const getCurrentAcademicYear = () => {
 const CardComponent = () => {
   const [selectedYear, setSelectedYear] = useState(getCurrentAcademicYear());
   const [open, setOpen] = useState(false);
+  console.log(selectedYear);
 
+  const [statsData, setStatsData] = useState(null);
+
+  const formatYearForAPI = (year) => year.replace("–", "-");
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const token = localStorage.getItem("token");
+
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_BASE_URL}/api/dashboard/students-count?year=${formatYearForAPI(selectedYear)}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+
+        setStatsData(res.data.data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchStats();
+  }, [selectedYear]);
+
+  const stats = statsData
+    ? [
+        {
+          icon: userr,
+          bg: "bg-[#FFE2E5]",
+          iconbg: "bg-[#FA5A7D]",
+          value: statsData.totalStudents,
+          label: "Total Students",
+        },
+        {
+          icon: hostel,
+          bg: "bg-[#FFF4DE]",
+          iconbg: "bg-[#FF947A]",
+          value: statsData.totalHostelers,
+          label: "Total Hostelers",
+        },
+        {
+          icon: home,
+          bg: "bg-[#DCFCE7]",
+          iconbg: "bg-[#3CD856]",
+          value: statsData.totalDayscholars,
+          label: "Total Dayschoolers",
+        },
+        {
+          icon: bus,
+          bg: "bg-[#F3E8FF]",
+          iconbg: "bg-[#BF83FF]",
+          value: statsData.totalTransporters,
+          label: "Total Transporters",
+        },
+      ]
+    : [];
+  if (!statsData) {
+    return (
+      <div className="p-4 flex items-center justify-center">Loading...</div>
+    );
+  }
   return (
     <div className="p-4 h-full flex flex-col gap-4">
       {/* Header */}

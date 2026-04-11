@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   BarChart,
   Bar,
@@ -10,6 +10,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { ChevronDown } from "lucide-react";
+import axios from "axios";
 
 // 🔹 Sample Data (replace with API later)
 const allData = [
@@ -26,7 +27,7 @@ const allData = [
   { department: "Cyber Security", year: "2024-2025", paid: 80, unpaid: 50 },
   { department: "CSBS", year: "2024-2025", paid: 80, unpaid: 50 },
 ];
-const years = ["2024-2025", "2023-2024", "2022-2023", "2021-2022"];
+const years = ["2024-2025", "2023-2024", "2022-2023", "2021-2022" ,"2025-2026"];
 const getCurrentAcademicYear = () => {
   const now = new Date();
   const year = now.getFullYear();
@@ -42,8 +43,41 @@ const getCurrentAcademicYear = () => {
 const DepartmentPaid = () => {
   const [selectedYear, setSelectedYear] = useState(getCurrentAcademicYear());
   const [open, setOpen] = useState(false);
+  const [statsData, setStatsData] = useState([]);
+  const formatYearForAPI = (year) => year.replace("–", "-");
 
-  // 🔹 Filter data based on selected academic year
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const token = localStorage.getItem("token");
+  
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_BASE_URL}/api/dashboard/fees-status?year=${formatYearForAPI(selectedYear)}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+  
+        setStatsData(res.data.data.departments);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+  
+    fetchData();
+  }, [selectedYear]);
+
+  const chartData = statsData.map((item) => ({
+    department: item.dept,
+    paid: item.paid,
+    unpaid: item.unpaid,
+  }));
+
+  if (!statsData.length) {
+    return <div className="p-4 text-center">Loading...</div>;
+  }
 
   return (
     <div style={{ width: "100%", padding: "20px" }}>
@@ -89,7 +123,7 @@ const DepartmentPaid = () => {
       {/* 🔹 Chart */}
       <ResponsiveContainer width="100%" height={240}>
         <BarChart
-          data={allData}
+          data={chartData}
           barCategoryGap="30%" // space between groups
           barGap={1}
         >
