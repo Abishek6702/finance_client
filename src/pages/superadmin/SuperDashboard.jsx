@@ -5,6 +5,7 @@ const SuperDashboard = () => {
   return (
     <div className="flex items-center justify-center h-[calc(100vh-120px)]">
       <Underdevelopment head={"Admin Dashboard"} />
+      Welcoe to Super Admin Dashboard
     </div>
   );
 };

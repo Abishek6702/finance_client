@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useMemo } from 'react'
 import RefundFilter from './RefundFilter'
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL
@@ -163,27 +163,50 @@ export default function StudentRefund() {
     }
     }
 
-  const filteredRefunds = refunds.filter(r => {
-    const search = filters.search.toLowerCase()
-    const matchSearch = !search ||
-      r.rollNo?.toLowerCase().includes(search)
+    const handleClearFilters = () => {
+      setFilters({
+        search: '',
+        year: '',
+        department: '',
+        mode: '',
+        date: ''
+      })
+    }
 
-    const matchYear = !filters.year || r.academicYear === filters.year
+  const filteredRefunds = useMemo(() => {
+    return refunds.filter((r) => {
+      const search = filters.search.toLowerCase()
 
-    const dept = getDeptFromRollNo(r.rollNo)
-    const matchDept = !filters.department || dept === filters.department
+      const matchSearch =
+        !search || r.rollNo?.toLowerCase().includes(search)
 
-    const mode = getRefundMode(r.reason).toLowerCase()
-    const matchMode = !filters.mode ||
-      (filters.mode === 'cash' && mode === 'cash') ||
-      (filters.mode === 'bank' && mode === 'online payment') ||
-      (filters.mode === 'wallet' && mode === 'wallet')
+      const matchYear =
+        !filters.year || r.academicYear === filters.year
 
-    const matchDate = !filters.date ||
-      new Date(r.createdAt).toISOString().slice(0, 10) === filters.date
+      const dept = getDeptFromRollNo(r.rollNo)
+      const matchDept =
+        !filters.department || dept === filters.department
 
-    return matchSearch && matchYear && matchDept && matchMode && matchDate
-  })
+      const mode = getRefundMode(r.reason).toLowerCase()
+      const matchMode =
+        !filters.mode ||
+        (filters.mode === 'cash' && mode === 'cash') ||
+        (filters.mode === 'bank' && mode === 'online payment') ||
+        (filters.mode === 'wallet' && mode === 'wallet')
+
+      const itemDate = new Date(r.createdAt).toISOString().slice(0, 10)
+      const matchDate =
+        !filters.date || itemDate === filters.date
+
+      return (
+        matchSearch &&
+        matchYear &&
+        matchDept &&
+        matchMode &&
+        matchDate
+      )
+    })
+  }, [refunds, filters])
 
   const thStyle = {
     padding: '12px 16px', textAlign: 'left', fontSize: '13px',
@@ -198,7 +221,7 @@ export default function StudentRefund() {
 
   return (
     <div style={{ fontFamily: 'Inter, sans-serif' }}>
-      <RefundFilter filters={filters} onFilterChange={setFilters} />
+      <RefundFilter filters={filters} onFilterChange={setFilters} onClearFilters={handleClearFilters}/>
 
       <div style={{
         border: '1px solid #e5e7eb', borderRadius: '12px',

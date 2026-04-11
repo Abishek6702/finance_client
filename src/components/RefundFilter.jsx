@@ -1,5 +1,6 @@
 import React from 'react'
 import CustomSelect from './CustomSelect'
+import { ListFilter } from "lucide-react"
 
 const yearOptions = [
   'All Years',
@@ -24,7 +25,7 @@ const modeOptions = [
   'Wallet'
 ]
 
-export default function RefundFilter({ filters, onFilterChange }) {
+export default function RefundFilter({ filters, onFilterChange, onClearFilters, }) {
 
   const handleChange = (key, value) => {
     // convert "All ..." back to empty string for filtering
@@ -106,6 +107,13 @@ export default function RefundFilter({ filters, onFilterChange }) {
           fontSize: '14px',
         }}
       />
+      <button
+          onClick={onClearFilters}
+          className="px-4 h-[42px] flex items-center gap-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-100 text-gray-700 transition-colors cursor-pointer"
+        >
+          <span className="text-sm font-medium">Clear</span>
+          <ListFilter size={16} />
+        </button>
     </div>
   )
 }
