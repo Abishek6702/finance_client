@@ -26,7 +26,7 @@ const Refund = () => {
     }`;
 
   return (
-    <div className="">
+    <div className="overflow-hidden">
     
 
 

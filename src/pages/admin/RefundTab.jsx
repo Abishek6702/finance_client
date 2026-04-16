@@ -4,7 +4,7 @@ import StudentRefund from "../../components/StudentRefund";
 
 const RefundTab = () => {
   return (
-    <div className="border h-[calc(100vh-180px)] overflow-auto">
+    <div className=" h-[calc(100vh-180px)]">
       {/* <RefundFilter/> */}
       <StudentRefund />
     </div>

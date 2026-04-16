@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react'
+import React, { useEffect, useState, useMemo,useRef  } from 'react'
 import RefundFilter from './RefundFilter'
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL
@@ -137,26 +137,54 @@ export default function StudentRefund() {
   const [selectedRefund, setSelectedRefund] = useState(null)
   const [filters, setFilters] = useState({ search: '', year: '', department: '', mode: '', date: '' })
   const [page, setPage] = useState(1)
-  const [pagination, setPagination] = useState({ total: 0, totalPages: 1 })
+  const [hasMore, setHasMore] = useState(true)
+  const [loadingMore, setLoadingMore] = useState(false)
+
+  const tableRef = useRef(null)
 
   useEffect(() => {
-    fetchRefunds()
-  }, [page])
+    fetchRefunds(1)
+  }, [])
 
-  const fetchRefunds = async () => {
-    setLoading(true)
-    setError(null)
+  useEffect(() => {
+    const container = tableRef.current
+    if (!container) return
+
+    const handleScroll = () => {
+      if (
+        container.scrollTop + container.clientHeight >=
+        container.scrollHeight - 50
+      ) {
+        if (!loadingMore && hasMore) {
+          const nextPage = page + 1
+          setPage(nextPage)
+          fetchRefunds(nextPage)
+        }
+      }
+    }
+
+    container.addEventListener('scroll', handleScroll)
+    return () => container.removeEventListener('scroll', handleScroll)
+  }, [page, loadingMore, hasMore])
+
+  const fetchRefunds = async (pageNumber = 1) => {
+    if (pageNumber === 1) setLoading(true)
+    else setLoadingMore(true)
+
     try {
       const token = localStorage.getItem('token')
-      const res = await fetch(`${BASE_URL}/api/refund`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-      })
+
+      const res = await fetch(
+        `${BASE_URL}/api/refund?page=${pageNumber}&limit=30`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+        }
+      )
+
       const json = await res.json()
-      console.log('API RESPONSE:', json)
 
       if (json?.data?.rows) {
         const normalized = json.data.rows.map(r => ({
@@ -169,23 +197,30 @@ export default function StudentRefund() {
           refundAmount: r.amount,
           createdAt: r.raisedOn,
           updatedAt: r.approvedOn,
-          reason: r.paymentMode,
+          reason: r.RefundMode,
           studentBankName: r.bankName,
           studentAccount: r.accountNo,
           semesterNumber: r.semPeriod,
           yearOfStudying: r.yearOfStudying,
           department: r.department,
         }))
-        setRefunds(normalized)
-        setPagination(json.data.pagination || { total: 0, totalPages: 1 })
-      } else {
-        setError(json?.message || 'Failed to fetch refunds.')
+
+        // 🔥 append data instead of replace
+        setRefunds(prev =>
+          pageNumber === 1 ? normalized : [...prev, ...normalized]
+        )
+
+        // 🔥 stop when no more data
+        if (normalized.length < 30) {
+          setHasMore(false)
+        }
       }
     } catch (err) {
       console.error(err)
       setError('Network error. Please try again.')
     } finally {
       setLoading(false)
+      setLoadingMore(false)
     }
   }
 
@@ -214,7 +249,7 @@ export default function StudentRefund() {
   const thStyle = {
     padding: '12px 16px', textAlign: 'left', fontSize: '13px',
     fontWeight: '600', color: '#374151', borderBottom: '2px solid #e5e7eb',
-    whiteSpace: 'nowrap', background: '#f9fafb',
+    whiteSpace: 'nowrap', background: '#f9fafb',position: 'sticky',top: 0, zIndex: 10
   }
 
   const tdStyle = {
@@ -230,8 +265,8 @@ export default function StudentRefund() {
         border: '1px solid #e5e7eb', borderRadius: '12px',
         overflow: 'hidden', background: '#fff',
       }}>
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '700px' }}>
+        <div ref={tableRef} style={{maxHeight: '500px', overflow: 'auto'}}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '700px', }}>
             <thead>
               <tr>
                 <th style={thStyle}>Student Details</th>
@@ -243,7 +278,7 @@ export default function StudentRefund() {
                 <th style={{ ...thStyle, textAlign: 'center' }}>Details</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className='overflow-auto'>
               {loading && (
                 <tr>
                   <td colSpan={7} style={{ ...tdStyle, textAlign: 'center', padding: '40px', color: '#9ca3af' }}>
@@ -316,7 +351,7 @@ export default function StudentRefund() {
                         background: mode === 'Cash' ? '#f0fdf4' : '#f0f9ff',
                         color: mode === 'Cash' ? '#15803d' : '#0369a1',
                       }}>
-                        {mode === 'Cash' ? '💵' : '🏦'} {mode}
+                        {mode === 'Cash' ? '' : ''} {mode}
                       </span>
                     </td>
 
@@ -346,35 +381,14 @@ export default function StudentRefund() {
           </table>
         </div>
 
-        {!loading && pagination.totalPages > 1 && (
+        {loadingMore && (
           <div style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            padding: '12px 16px', borderTop: '1px solid #f3f4f6',
+            textAlign: 'center',
+            padding: '16px',
+            fontSize: '13px',
+            color: '#6b7280'
           }}>
-            <span style={{ fontSize: '13px', color: '#6b7280' }}>
-              Showing page {pagination.page} of {pagination.totalPages} ({pagination.total} total)
-            </span>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <button
-                onClick={() => setPage(p => Math.max(1, p - 1))}
-                disabled={page === 1}
-                style={{
-                  padding: '6px 14px', borderRadius: '6px', border: '1px solid #d1d5db',
-                  background: page === 1 ? '#f9fafb' : '#fff', cursor: page === 1 ? 'not-allowed' : 'pointer',
-                  fontSize: '13px', color: page === 1 ? '#9ca3af' : '#374151',
-                }}
-              >Previous</button>
-              <button
-                onClick={() => setPage(p => Math.min(pagination.totalPages, p + 1))}
-                disabled={page === pagination.totalPages}
-                style={{
-                  padding: '6px 14px', borderRadius: '6px', border: '1px solid #d1d5db',
-                  background: page === pagination.totalPages ? '#f9fafb' : '#fff',
-                  cursor: page === pagination.totalPages ? 'not-allowed' : 'pointer',
-                  fontSize: '13px', color: page === pagination.totalPages ? '#9ca3af' : '#374151',
-                }}
-              >Next</button>
-            </div>
+            Loading more refunds...
           </div>
         )}
       </div>
