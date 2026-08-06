@@ -9,7 +9,7 @@ import {
   Power,
   Menu,
 } from "lucide-react";
-import logo from "../assets/favlogo.svg";
+import logo from "../assets/finance-logo1.svg";
 import NotificationBell from "./Notification";
 
 //  nav icon imports
